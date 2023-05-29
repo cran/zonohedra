@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Glenn Davis" />
+
+<meta name="date" content="2023-05-27" />
+
+<title>Ray Tracing the Zonohedron Boundary and the 2-Transition Surface</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Ray Tracing the Zonohedron Boundary and the 2-Transition Surface</h1>
+<h4 class="author">Glenn Davis</h4>
+<h4 class="date">2023-05-27</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#a-ray-tracing-example">A Ray Tracing Example</a></li>
+<li><a href="#inside-or-outside">Inside or Outside ?</a></li>
+<li><a href="#references">References</a></li>
+<li><a href="#session-information">Session Information</a></li>
+</ul>
+</div>
+
+<style type="text/css">
+body {
+  max-width: 870px;     /* make wider, default is 700px */
+}
+</style>
+<p><br><br></p>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The focus of this vignette are the two functions <code>raytrace()</code> and <code>raytrace2trans()</code>. The former is for the boundary of the zonohedron and the latter is for the associated 2-transition surface. We revisit the example at the end of section 6 in Scott Burns’ paper <span class="citation">[1]</span>, which is also illustrated in the 1nm plot from Figure 8. His example is from colorimetry, where the boundary of the zonohedron is the set of optimal colors and the 2-transition surface is the set of Schrödinger colors (both for Illuminant E). The correspondence for the optimal colors was discovered by Paul Centore, see <span class="citation">[2]</span>.</p>
+<p>Other featured functions are <code>invertboundary()</code>, <code>inside()</code> and <code>inside2trans()</code>.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(zonohedra)</span></code></pre></div>
+<p><br><br></p>
+</div>
+<div id="a-ray-tracing-example" class="section level1">
+<h1>A Ray Tracing Example</h1>
+<p>In Burns’ example, the base of the ray is the center of the zonohedron <span class="math inline">\(Z\)</span>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>matgen <span class="ot">=</span> colorimetry.genlist[[<span class="dv">2</span>]]   <span class="co"># the CIE 1931 CMFs at 1nm step</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>matgen <span class="ot">=</span> <span class="dv">100</span> <span class="sc">*</span> matgen <span class="sc">/</span> <span class="fu">sum</span>( matgen[<span class="dv">2</span>, ] )   <span class="co"># it is traditional to scale so the center has Y=50, recall we use Illuminant E</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>zono <span class="ot">=</span>  <span class="fu">zonohedron</span>( matgen )</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>base <span class="ot">=</span> <span class="fu">getcenter</span>(zono) ; base</span></code></pre></div>
+<pre><code>##        x        y        z 
+## 50.00400 50.00000 50.01653</code></pre>
+<p>The vector <code>base</code> corresponds to Burns’ vector <span class="math inline">\(XYZ_{\text{50%}}\)</span>.</p>
+<p>The direction of the ray is given by spherical angles, which define a unit vector <code>u</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>theta <span class="ot">=</span> <span class="fl">1.478858</span> ; phi <span class="ot">=</span> <span class="fl">0.371322</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>u <span class="ot">=</span> <span class="fu">c</span>( <span class="fu">sin</span>(phi)<span class="sc">*</span><span class="fu">cos</span>(theta), <span class="fu">sin</span>(phi)<span class="sc">*</span><span class="fu">sin</span>(theta), <span class="fu">cos</span>(phi) ) ; u</span></code></pre></div>
+<pre><code>## [1] 0.03331263 0.36131522 0.93184848</code></pre>
+<p>Calculate the intersection of the ray with the boundary of <span class="math inline">\(Z\)</span>.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df_opt <span class="ot">=</span> <span class="fu">raytrace</span>( zono, base, u ) ; df_opt</span></code></pre></div>
+<pre><code>##     base.1   base.2   base.3 direction.1 direction.2 direction.3 facetidx sign     tmax  point.1  point.2  point.3 timetrace
+## 1 50.00400 50.00000 50.01653  0.03331263  0.36131522  0.93184848    49283   -1 53.63393 51.79069 69.37875 99.99523 0.0030668</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>xyz_opt <span class="ot">=</span> df_opt<span class="sc">$</span>point[<span class="dv">1</span>, ] ; xyz_opt</span></code></pre></div>
+<pre><code>## [1] 51.79069 69.37875 99.99523</code></pre>
+<p>This matches Burns’ value of <span class="math inline">\(XYZ_{\text{LPsoln}}\)</span>. From Figure 8 of <span class="citation">[1]</span> we see that this point (and every point in the same parallelogram) comes from a reflectance spectrum with 4 transitions. This can be verified by inverting:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">invertboundary</span>( zono, xyz_opt )<span class="sc">$</span>transitions</span></code></pre></div>
+<pre><code>## [1] 4</code></pre>
+<p>Now calculate the intersection of the ray with the 2-transition surface associated with <span class="math inline">\(Z\)</span>.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df_2trans <span class="ot">=</span> <span class="fu">raytrace2trans</span>( zono, base, u ) ; df_2trans</span></code></pre></div>
+<pre><code>##     base.1   base.2   base.3 direction.1 direction.2 direction.3 gndpair.1 gndpair.2   alpha.1   alpha.2     tmax  point.1  point.2  point.3
+## 1 50.00400 50.00000 50.01653  0.03331263  0.36131522  0.93184848       629       575 0.2246808 0.4459951 53.63263 51.79065 69.37829 99.99402
+##    iters timetrace
+## 1 107564 0.0072617</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>xyz_2trans <span class="ot">=</span> df_2trans<span class="sc">$</span>point[<span class="dv">1</span>, ] ; xyz_2trans</span></code></pre></div>
+<pre><code>## [1] 51.79065 69.37829 99.99402</code></pre>
+<p>This matches Burns’ value of <span class="math inline">\(XYZ_{\text{two-trans}}\)</span> to 4 decimal places. The transition wavelengths 629 and 575nm, and the parallelogram coordinates 0.2246808 and 0.4459951 (these are the corresponding reflectances), are clearly visible in Figure 8.</p>
+<p>Now consider the distance between these 2 points <span class="math inline">\(XYZ_{\text{LPsoln}}\)</span> and <span class="math inline">\(XYZ_{\text{two-trans}}\)</span>. The parameter <code>tmax</code> in both data frames is the parameter on the ray where it intersects the boundary or the surface. Since <code>u</code> is a unit vector, the difference between the parameters is this distance.</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>df_opt<span class="sc">$</span>tmax <span class="sc">-</span> df_2trans<span class="sc">$</span>tmax</span></code></pre></div>
+<pre><code>## [1] 0.001292229</code></pre>
+<p>This matches Burns’ value of <span class="math inline">\(1.29 \times 10^{-3}\)</span>, which is very tiny especially compared to the two <span class="math inline">\(XYZ\)</span>s.</p>
+<p>What is the maximum that this distance can be over the entire <span class="math inline">\(\partial Z\)</span> ? To get a rough estimate, a search was made over the rays passing though the centers of all the 21900 deficient parallelograms, and with the same basepoint as before. The largest distance over these rays was <span class="math inline">\(2.47 \times 10^{-3}\)</span>. This distance is for the parallelogram with generators corresponding to 592 and 608 nm; the generating ‘spectrum’ has 8 transitions. The actual maximum distance between the boundary of the color solid and the 2-transition surface is not much larger than this sampling. This confirms Burns’ statement from <span class="citation">[1]</span> that the distance between these surfaces has “… no practical impact on typical colorimetric calculations”.</p>
+<p>If the zonohedron <span class="math inline">\(Z\)</span> is called the <em>Optimal Color Solid</em> (OCS), and the inside of the 2-transition surface is called the <em>Schrödinger Color Solid</em> (SCS), we see that the OCS is obtained by adding a very thin “skin” on some regions of the SCS.</p>
+<p><br><br></p>
+</div>
+<div id="inside-or-outside" class="section level1">
+<h1>Inside or Outside ?</h1>
+<p>Consider the midpoint of <span class="math inline">\(XYZ_{\text{LPsoln}}\)</span> and <span class="math inline">\(XYZ_{\text{two-trans}}\)</span>. It lies on the same ray as these 2 points, so it must be <em>inside</em> the zonohedron, but <em>outside</em> the 2-transition surface. We can verify this easily:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>xyz_mid <span class="ot">=</span> (xyz_opt <span class="sc">+</span> xyz_2trans) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">inside</span>( zono, xyz_mid )</span></code></pre></div>
+<pre><code>##        p.1      p.2      p.3 inside      distance idxhyper
+## 1 51.79067 69.37852 99.99462   TRUE -0.0006013682    49283</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">inside2trans</span>( zono, xyz_mid )</span></code></pre></div>
+<pre><code>##        p.1      p.2      p.3     distance linkingnumber inside  timecalc
+## 1 51.79067 69.37852 99.99462 0.0006013897             0  FALSE 0.0524293</code></pre>
+<p><br><br></p>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<div id="refs" class="references csl-bib-body">
+<div id="ref-Burns2021" class="csl-entry">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">BURNS, Scott A. The location of optimal object colors with more than two transitions. <em>Color Research &amp; Application</em> [online]. 2021, <strong>46</strong>(6), 1180–1193. Available at: doi:<a href="https://doi.org/10.1002/col.22693">https://doi.org/10.1002/col.22693</a></div>
+</div>
+<div id="ref-Centore2013" class="csl-entry">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">CENTORE, Paul. A zonohedral approach to optimal colours. <em>Color Research &amp; Application</em> [online]. 2013, <strong>38</strong>(2), 110–119. Available at: doi:<a href="https://doi.org/10.1002/col.20713">10.1002/col.20713</a></div>
+</div>
+</div>
+<p><br><br></p>
+</div>
+<div id="session-information" class="section level1">
+<h1>Session Information</h1>
+This document was prepared Sat May 27, 2023 with the following configuration:
+<pre>
+R version 4.3.0 (2023-04-21 ucrt)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 19045)
+
+Matrix products: default
+
+
+locale:
+[1] LC_COLLATE=C                          
+[2] LC_CTYPE=English_United States.utf8   
+[3] LC_MONETARY=English_United States.utf8
+[4] LC_NUMERIC=C                          
+[5] LC_TIME=English_United States.utf8    
+
+time zone: America/Los_Angeles
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] zonohedra_0.2-1
+
+loaded via a namespace (and not attached):
+ [1] digest_0.6.31         R6_2.5.1              microbenchmark_1.4.10
+ [4] fastmap_1.1.1         xfun_0.39             glue_1.6.2           
+ [7] cachem_1.0.8          knitr_1.42            htmltools_0.5.5      
+[10] logger_0.2.2          rmarkdown_2.21        cli_3.6.1            
+[13] sass_0.4.6            jquerylib_0.1.4       compiler_4.3.0       
+[16] tools_4.3.0           evaluate_0.21         bslib_0.4.2          
+[19] yaml_2.3.7            rlang_1.1.1           jsonlite_1.8.4       
+</pre>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Glenn Davis" />
+
+<meta name="date" content="2023-05-27" />
+
+<title>Zonotopes</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Zonotopes</h1>
+<h4 class="author">Glenn Davis</h4>
+<h4 class="date">2023-05-27</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#basic-concepts"><span class="toc-section-number">1</span> Basic Concepts</a>
+<ul>
+<li><a href="#supporting-hyperplanes"><span class="toc-section-number">1.1</span> supporting hyperplanes</a></li>
+<li><a href="#faces"><span class="toc-section-number">1.2</span> faces</a></li>
+<li><a href="#a-zonotope-and-its-generators"><span class="toc-section-number">1.3</span> a zonotope and its generators</a></li>
+<li><a href="#convex-cones-and-zonotopes"><span class="toc-section-number">1.4</span> convex cones and zonotopes</a></li>
+<li><a href="#matroids-and-zonotopes"><span class="toc-section-number">1.5</span> matroids and zonotopes</a></li>
+</ul></li>
+<li><a href="#inversion"><span class="toc-section-number">2</span> Inversion</a>
+<ul>
+<li><a href="#a-uniqueness-theorem"><span class="toc-section-number">2.1</span> a uniqueness theorem</a></li>
+<li><a href="#a-right-inverse-on-the-boundary-of-a-zonogon"><span class="toc-section-number">2.2</span> a right inverse on the boundary of a zonogon</a></li>
+<li><a href="#extending-the-right-inverse-using-parallelogram-tilings"><span class="toc-section-number">2.3</span> extending the right inverse, using parallelogram tilings</a></li>
+<li><a href="#a-right-inverse-on-the-boundary-of-a-zonohedron"><span class="toc-section-number">2.4</span> a right inverse on the boundary of a zonohedron</a></li>
+</ul></li>
+<li><a href="#software"><span class="toc-section-number">3</span> Software</a></li>
+<li><a href="#references"><span class="toc-section-number">4</span> References</a></li>
+<li><a href="#session-information"><span class="toc-section-number">5</span> Session Information</a></li>
+</ul>
+</div>
+
+<p>This vignette is a long-winded mathematical exposition on zonotopes that concentrates on inversion. Discussion of software is delayed until the end. Featured functions are: <code>zonoseg()</code>, <code>zonogon()</code>, <code>zonohedron()</code>, <code>invert()</code>, and <code>invertboundary()</code>.</p>
+<div id="basic-concepts" class="section level1" number="1">
+<h1><span class="header-section-number">1</span> Basic Concepts</h1>
+<p>The emphasis in this vignette are the concepts needed to understand the inversion functions in the <strong>zonohedra</strong> package. Much of this is based on <span class="citation">[5]</span>.</p>
+<div id="supporting-hyperplanes" class="section level2" number="1.1">
+<h2><span class="header-section-number">1.1</span> supporting hyperplanes</h2>
+A <em>supporting hyperplane</em> of a compact set <span class="math inline">\(C\)</span> in Euclidean space <span class="math inline">\(\mathbb{R}^n\)</span> is a hyperplane <span class="math inline">\(P\)</span> that has these properties:
+<ol>
+<li>
+<span class="math inline">\(P\)</span> intersects <span class="math inline">\(C\)</span>
+</li>
+<li>
+<span class="math inline">\(C\)</span> is entirely contained in one of the two closed half-spaces defined by <span class="math inline">\(P\)</span>
+</li>
+</ol>
+<p>Note that the 2 properties imply that the intersection <span class="math inline">\(P \cap C\)</span> is a subset of the boundary of <span class="math inline">\(C\)</span>.</p>
+<p><br> If the compact set is a <em>convex body</em>, i.e. is convex with interior, then 2 equivalent properties are given by this:</p>
+<strong>Theorem:</strong> If <span class="math inline">\(B\)</span> is a closed convex body with interior, then <span class="math inline">\(P\)</span> is a supporting hyperplane of <span class="math inline">\(B\)</span> iff <span class="math inline">\(P\)</span> has these properties:
+<ol type="i">
+<li>
+<span class="math inline">\(P\)</span> intersects <span class="math inline">\(B\)</span>
+</li>
+<li>
+<span class="math inline">\(P\)</span> does <strong>not</strong> intersect the interior of <span class="math inline">\(B\)</span>
+</li>
+</ol>
+<p><strong>Proof:</strong><br />
+not ii. <span class="math inline">\(\implies\)</span> not 2.<br />
+Let ii. be false, so hyperplane <span class="math inline">\(P\)</span> <em>does</em> intersect <span class="math inline">\(int(B)\)</span>, at a point <span class="math inline">\(p\)</span>. Then there is an open ball centered at <span class="math inline">\(p\)</span>, and the ball is inside <span class="math inline">\(B\)</span>. There are clearly points in the ball in <em>both</em> halfspaces, and so 2. is false.</p>
+<p>not 2. <span class="math inline">\(\implies\)</span> not ii.<br />
+Let 2. be false, so there are points <span class="math inline">\(b^-, b^+ \in B\)</span> that are in <em>different</em> open halfspaces. Let <span class="math inline">\(b_i\)</span> be a point in <span class="math inline">\(int(B)\)</span>. If <span class="math inline">\(b_i \in P\)</span> then ii. is false and we are done. Otherwise, either <span class="math inline">\(b^-\)</span> or <span class="math inline">\(b^+\)</span> are in a different halfspace than <span class="math inline">\(b_i\)</span>. Take it to be <span class="math inline">\(b^+\)</span>, w.l.o.g. Since <span class="math inline">\(b_i\)</span> and <span class="math inline">\(b^+\)</span> are in opposite halfspaces, the segment <span class="math inline">\([b_i,b^+]\)</span> intersects <span class="math inline">\(P\)</span>; let <span class="math inline">\(c_i\)</span> be this point of intersection. There is an open ball in <span class="math inline">\(B\)</span> centered at <span class="math inline">\(b_i\)</span>. Let <span class="math inline">\(C\)</span> denote the convex hull of <span class="math inline">\(b^+\)</span> and this ball - a partial open cone. By convexity of <span class="math inline">\(B\)</span>, <span class="math inline">\(C\)</span> is in <span class="math inline">\(B\)</span>. There is a scaled down open ball centered at <span class="math inline">\(c_i\)</span> and contained in <span class="math inline">\(C\)</span>. Thus <span class="math inline">\(c_i \in P \cap int(B)\)</span> and ii. is false. <span class="math inline">\(\square\)</span></p>
+</div>
+<div id="faces" class="section level2" number="1.2">
+<h2><span class="header-section-number">1.2</span> faces</h2>
+<strong>Definition:</strong><br />
+A (proper) <em>face</em> <span class="math inline">\(F\)</span> of a compact set <span class="math inline">\(C \subset \mathbb{R}^n\)</span> is a subset of <span class="math inline">\(C\)</span> that has these 3 equivalent properties:
+<ol>
+<li>
+<span class="math inline">\(F = C \cap P\)</span> for some supporting hyperplane <span class="math inline">\(P\)</span>
+</li>
+<li>
+<span class="math inline">\(F = \mathop{\mathrm{argmax}}\limits_{x \in C} \langle x,w \rangle\)</span> for some non-zero normal vector <span class="math inline">\(w\)</span>
+</li>
+<li>
+<span class="math inline">\(F = \mathop{\mathrm{argmax}}\limits_{x \in C} \lambda(x)\)</span> for some non-zero linear functional <span class="math inline">\(\lambda : \mathbb{R}^n \to \mathbb{R}\)</span>
+</li>
+</ol>
+<p>The equivalence 1 and 2 is straightforward, and the equivalence of 2 and 3 is trivial.</p>
+<p>The entire set <span class="math inline">\(C\)</span> is considered to be an (improper) face.</p>
+<p>The <em>dimension of a face</em> is the dimension of the affine subspace spanned by the face. From now on, We always assume that the dimension of <span class="math inline">\(C\)</span> is <span class="math inline">\(n\)</span>, which is equivalent to <span class="math inline">\(C\)</span> having an interior.</p>
+<p>A <em>d-face</em> is a face of dimension <em>d</em>. So a <em>0-face</em> is a <em>vertex</em>, and a <em>1-face</em> is an <em>edge</em>. A <em>facet</em> is an (<span class="math inline">\(n{-}1\)</span>)-face, and a maximal proper face.</p>
+<p>Note that every face of the cube <span class="math inline">\([0,1]^n \subset \mathbb{R}^n\)</span> is a cube of smaller dimension; in fact the dimension is the number of 0s in the normal vector <span class="math inline">\(w\)</span> from part 2 of the above definition.</p>
+<p>Let <span class="math inline">\(A : \mathbb{R}^n \twoheadrightarrow \mathbb{R}^m\)</span> be a surjective affine map (so <span class="math inline">\(m \le n\)</span>), and let <span class="math inline">\(C&#39;:= A(C)\)</span>.</p>
+<p><strong>Theorem:</strong> If <span class="math inline">\(F&#39;\)</span> is a face of <span class="math inline">\(C&#39;\)</span>, then <span class="math inline">\(A^{-1}(F&#39;)\)</span> is a face of <span class="math inline">\(C\)</span>.</p>
+<p>Stated in words, the affine preimage of a face is a face.</p>
+<p><strong>Proof:</strong> Use part 3 of the above definition so <span class="math inline">\(F&#39; = \mathop{\mathrm{argmax}}\limits_{y \in C&#39;} \lambda(y)\)</span>, where <span class="math inline">\(\lambda\)</span> is a non-zero linear functional on <span class="math inline">\(\mathbb{R}^m\)</span>. Let <span class="math inline">\(\mu := \mathop{\mathrm{max}}\limits_{y \in C&#39;} \lambda(y)\)</span>. Now <span class="math inline">\(A^{-1}(F&#39;) = A^{-1}( \lambda^{-1}(\mu) ) = (\lambda \circ A)^{-1}(\mu)\)</span>. But <span class="math inline">\(\lambda \circ A\)</span> is a non-zero linear functional on <span class="math inline">\(\mathbb{R}^n\)</span>, plus a constant. <span class="math inline">\(\square\)</span></p>
+<p>See also <span class="citation">[5]</span>, Lemma 7.10.</p>
+</div>
+<div id="a-zonotope-and-its-generators" class="section level2" number="1.3">
+<h2><span class="header-section-number">1.3</span> a zonotope and its generators</h2>
+<p><strong>Definition:</strong> A <em>zonotope</em> <span class="math inline">\(Z\)</span> is a set of the form <span class="math inline">\(L([0,1]^n) + z_0\)</span> where <span class="math inline">\(L : \mathbb{R}^n \twoheadrightarrow \mathbb{R}^m\)</span> is a surjective linear map.</p>
+<p>Simply stated, a zonotope is an linear image of a cube plus a translation (an affine image of a cube).</p>
+<p>Since the cube is convex, the zonotope is also convex.</p>
+<p>The <span class="math inline">\(n\)</span> <em>generators</em> of <span class="math inline">\(Z\)</span> are the images of the <span class="math inline">\(n\)</span> elementary vectors <span class="math inline">\(L(e_1), ... , L(e_n)\)</span>. A point <span class="math inline">\(z \in Z\)</span> iff <span class="math inline">\(z = \alpha_1 L(e_1) ~+~ ... ~+~ \alpha_n L(e_n) + z_0\)</span> with all <span class="math inline">\(\alpha_i \in [0,1]\)</span>.</p>
+<p>A zonotope is centrally symmetric about the point <span class="math inline">\(L(1/2,...,1/2) + z_0\)</span>. By reflecting through the center of symmetry, each facet of <span class="math inline">\(Z\)</span> has a corresponding <em>antipodal</em> facet. The facets come in antipodal pairs.</p>
+<p>Given a face <span class="math inline">\(F\)</span> of zonotope <span class="math inline">\(Z\)</span>, the preimage of <span class="math inline">\(F\)</span> is a face <span class="math inline">\(F&#39;\)</span> of the cube. But every face of a cube is also a cube, and so <span class="math inline">\(F\)</span> is also a zonotope. Let the normal vector of the supporting hyperplane of <span class="math inline">\(F&#39;\)</span> be <span class="math inline">\(w\)</span>. Then the vectors <span class="math inline">\(\{ \ L(e_i) | w_i=0 \ \}\)</span> are all parallel to the face <span class="math inline">\(F\)</span>, and in fact they generate the linear subspace parallel to <span class="math inline">\(F\)</span>. We call <span class="math inline">\(\{ \ L(e_i) | w_i=0 \ \}\)</span> the <em>generators</em> of <span class="math inline">\(F\)</span>. And important fact: the number of generators of <span class="math inline">\(F\)</span> is the dimension of the preimage <span class="math inline">\(F&#39;\)</span>. Note that a face of dimension <span class="math inline">\(d\)</span> may have <em>more</em> than <span class="math inline">\(d\)</span> generators, because they may be linearly dependent. For a parallelogram face, even if no generators are 0, the face may have more than 2 generators because some may be multiples of others.</p>
+<p>If the dimension of <span class="math inline">\(Z\)</span> is <span class="math inline">\(m\)</span>, we call it an <em>m-zonotope</em>.</p>
+<p><strong>Theorem:</strong> If <span class="math inline">\(K\)</span> is the convex hull of a finite set of points in <span class="math inline">\(\mathbb{R}^n\)</span>, with <span class="math inline">\(n \ge 3\)</span>. Then <span class="math inline">\(K\)</span> is an <span class="math inline">\(n\)</span>-zonotope iff all facets of <span class="math inline">\(K\)</span> are (<span class="math inline">\(n{-}1\)</span>)-zonotopes.</p>
+<p>For a proof of this hard result, plus much more, see <span class="citation">[1]</span>.</p>
+<p>A zonotope of dimensions 1, 2, and 3 is called a <em>zonoseg</em> , <em>zonogon</em>, and <em>zonohedron</em>, respectively. The term “zonoseg” is mine, since I could not find a term for it in the literature. Geometrically a zonoseg is just a line segment.</p>
+<p>A zonoseg has only two faces - the endpoints of the segment.</p>
+<p>A zonogon is a convex polygon with 0-faces (vertices) and 1-faces (edges). Since the dimension of an edge is 1 less than the dimension of the zonogon, an edge of a zonogon is also a facet. It can be shown that a convex polygon is a zonogon iff it is centrally symmetric.</p>
+<p>A zonohedron has 0-faces (vertices), 1-faces (edges), and 2-faces (facets). All the facets are zonogons. A parallelogram facet is called <em>trivial</em>, and facets with more than 4 edges are <em>non-trivial</em>.</p>
+</div>
+<div id="convex-cones-and-zonotopes" class="section level2" number="1.4">
+<h2><span class="header-section-number">1.4</span> convex cones and zonotopes</h2>
+<p>Let <span class="math inline">\(\mathbb{R}^n_{\ge 0} := \{ \ (x_1,x_2,...x_n) \ | \ x_i \ge 0 \ \}\)</span> denote the non-negative orthant in <span class="math inline">\(\mathbb{R}^n\)</span>.</p>
+<p>A <em>convex cone</em> <span class="math inline">\(K\)</span> is a set of the form <span class="math inline">\(K = L(\mathbb{R}^n_{\ge 0})\)</span>, where <span class="math inline">\(L : \mathbb{R}^n \twoheadrightarrow \mathbb{R}^m\)</span> is a surjective linear map. The <span class="math inline">\(n\)</span> <em>generators</em> of <span class="math inline">\(K\)</span> are the images of the <span class="math inline">\(n\)</span> elementary vectors <span class="math inline">\(L(e_1), ... , L(e_n)\)</span>. <span class="math inline">\(K\)</span> is the set of all non-negative linear combinations of the generators.</p>
+<p>If <span class="math inline">\(K\)</span> is a subset of a closed linear halfspace, it is called <em>salient</em>. If <span class="math inline">\(K\)</span> is a subset of an open linear halfspace (except for the vertex 0), it is called <em>pointed</em>. These properties are equivalent to 0 being in the boundary of <span class="math inline">\(K\)</span>, and being a vertex of <span class="math inline">\(K\)</span>, respectively. Obviously, pointed implies salient, but salient does not imply pointed.</p>
+<p>Given a zonotope <span class="math inline">\(Z = L([0,1]^n) + z_0\)</span> the map <span class="math inline">\(L\)</span> also defines a convex cone <span class="math inline">\(K\)</span>. <span class="math inline">\(Z\)</span> is a subset of <span class="math inline">\(K\)</span>, after translating <span class="math inline">\(Z\)</span> by <span class="math inline">\(-z_0\)</span>. We carry the two above properties of <span class="math inline">\(K\)</span> over to <span class="math inline">\(Z\)</span>. It is straightforward to show that <span class="math inline">\(Z\)</span> is <em>salient</em> iff <span class="math inline">\(z_0\)</span> is in the boundary of <span class="math inline">\(Z\)</span>, and <span class="math inline">\(Z\)</span> is <em>pointed</em> iff <span class="math inline">\(z_0\)</span> is a vertex of <span class="math inline">\(Z\)</span>.</p>
+<p>If <span class="math inline">\(Z\)</span> is pointed then there is a “cutting plane” that has <span class="math inline">\(z_0\)</span> on one side, and all the other vertices on the other side. The intersection of this cutting plane and <span class="math inline">\(Z\)</span> is called the <em>vertex figure</em> of <span class="math inline">\(Z\)</span> at <span class="math inline">\(z_0\)</span>. The vertex figure is actually more general, and is defined for any vertex of a convex polyhedron, see <span class="citation">[5]</span>, p. 54. In the case that <span class="math inline">\(Z\)</span> is a zonohedron, the vertex figure at <span class="math inline">\(z_0\)</span> is a a convex polygon that we call the <em>generator polygon</em>. The polygon is only unique up to a 2D projective transformation.</p>
+</div>
+<div id="matroids-and-zonotopes" class="section level2" number="1.5">
+<h2><span class="header-section-number">1.5</span> matroids and zonotopes</h2>
+<p>This section assumes some knowledge of <em>matroids</em>; for background on them see the matroids vignette.</p>
+<p>Given a zonotope <span class="math inline">\(Z = L([0,1]^n) + z_0\)</span> as above, the generators define a matroid <span class="math inline">\(M\)</span>. Since <span class="math inline">\(L\)</span> is surjective, <span class="math inline">\(\mathrm{rank}(M) = m\)</span>. A hyperplane of <span class="math inline">\(M\)</span> corresponds to a pair of antipodal facets of <span class="math inline">\(Z\)</span> (the concept of <em>hyperplane</em> here is the the one used in matroid theory).</p>
+<p>Assume now that <span class="math inline">\(m=3\)</span>, so <span class="math inline">\(Z\)</span> is a zonohedron and all its facets are zonogons. If <span class="math inline">\(M\)</span> is simple, then the number of sides of a zonogon facet is twice the number of points in the corresponding hyperplane. So a parallelogram corresponds to a hyperplane with 2 points, which is called a <em>trivial</em> hyperplane.</p>
+</div>
+</div>
+<div id="inversion" class="section level1" number="2">
+<h1><span class="header-section-number">2</span> Inversion</h1>
+<p>As before, let <span class="math inline">\(L : \mathbb{R}^n \twoheadrightarrow \mathbb{R}^m\)</span> be a surjective linear map, and let <span class="math inline">\(Z := L([0,1]^n) + z_0\)</span> for some <span class="math inline">\(z_0 \in \mathbb{R}^m\)</span>.</p>
+<p>From this setup, given a point <span class="math inline">\(z \in Z\)</span>, we know that the equation <span class="math display">\[\begin{equation}\tag{$\star$}
+L(x) + z_0 = z  ~~~~ \textrm{for} ~ x \in [0,1]^n
+\end{equation}\]</span> has a solution <span class="math inline">\(x\)</span>. The rest of this section looks at the solutions of (<span class="math inline">\(\star\)</span>) in more depth.</p>
+<div id="a-uniqueness-theorem" class="section level2" number="2.1">
+<h2><span class="header-section-number">2.1</span> a uniqueness theorem</h2>
+<p>In this section we consider the question: When is the solution of <span class="math inline">\((\star)\)</span> unique ?</p>
+<p>In the interior case, the answer is straightforward.</p>
+<p><strong>Lemma:</strong> If <span class="math inline">\(z\)</span> is in the interior of <span class="math inline">\(Z\)</span>, then the solution of <span class="math inline">\((\star)\)</span> is unique iff <span class="math inline">\(n=m\)</span>.</p>
+<p><strong>Proof:</strong> If <span class="math inline">\(n=m\)</span> then <span class="math inline">\(L\)</span> is invertible so we are done. If <span class="math inline">\(n&gt;m\)</span> the nullspace of <span class="math inline">\(L\)</span> has positive dimension <span class="math inline">\(n-m\)</span>. By Theorem 4.2 of <span class="citation">[2]</span>, we can pick an <span class="math inline">\(x \in \operatorname{int}([0,1]^n)\)</span> that satisfies <span class="math inline">\((\star)\)</span>. Let <span class="math inline">\(U \subset [0,1]^n\)</span> be an open ball around <span class="math inline">\(x\)</span>; the intersection of the nullspace with <span class="math inline">\(U\)</span> is an infinite set. <span class="math inline">\(\square\)</span></p>
+<p>For <span class="math inline">\(z \in Z\)</span>, let <span class="math inline">\(F_z\)</span> be the smallest face that contains <span class="math inline">\(z\)</span>, i.e. the intersection of all faces that contain <span class="math inline">\(z\)</span>. It is clear that <span class="math inline">\(z\)</span> is in the <em>relative interior</em> of <span class="math inline">\(F_z\)</span>, i.e. <span class="math inline">\(z \in \operatorname{relint}(F_z)\)</span>. At the extremes, if <span class="math inline">\(z\)</span> is a vertex then <span class="math inline">\(F_z\)</span> is <span class="math inline">\(\{ z \}\)</span>, and if <span class="math inline">\(z\)</span> is in the interior of <span class="math inline">\(Z\)</span>, then <span class="math inline">\(F_z\)</span> is <span class="math inline">\(Z\)</span> (here we allow <span class="math inline">\(Z\)</span> itself as an improper face). The relative interiors of the faces form a partition of <span class="math inline">\(Z\)</span>, see <span class="citation">[5]</span>, p. 61.</p>
+<p><strong>Theorem:</strong> Let <span class="math inline">\(z\)</span> and <span class="math inline">\(Z\)</span> and <span class="math inline">\(F_z\)</span> be as above. Then the solution of <span class="math inline">\((\star)\)</span> is unique iff the number of generators of <span class="math inline">\(F_z\)</span> is equal to the dimension of <span class="math inline">\(F_z\)</span>.</p>
+<p><strong>Proof:</strong> The condition says that the dimension of the preimage of <span class="math inline">\(F_z\)</span> is the dimension of <span class="math inline">\(F_z\)</span>. Now apply the Lemma, with <span class="math inline">\(Z\)</span> replaced by the preimage of <span class="math inline">\(F_z\)</span>. <span class="math inline">\(\square\)</span></p>
+<p>It is useful to reformulate the uniqueness theorem for the specific case when <span class="math inline">\(Z\)</span> is a zonohedron (<span class="math inline">\(m=3\)</span>).</p>
+<p><strong>Theorem:</strong> Let <span class="math inline">\(z\)</span> be in a zonohedron <span class="math inline">\(Z\)</span>. If <span class="math inline">\(n&gt;3\)</span>, then the solution of <span class="math inline">\((\star)\)</span> is unique iff none of the generators of <span class="math inline">\(Z\)</span> are 0 and:</p>
+<p><span class="math inline">\(z\)</span> is a vertex of <span class="math inline">\(Z\)</span><br />
+or <span class="math inline">\(z\)</span> is in an edge of <span class="math inline">\(Z\)</span>, and the edge has one generator<br />
+or <span class="math inline">\(z\)</span> is in a parallelogram facet of <span class="math inline">\(Z\)</span>, and the parallelogram has two generators</p>
+<p>If the matroid of <span class="math inline">\(Z\)</span> is simple, i.e. no generators of <span class="math inline">\(Z\)</span> are 0 or multiples of each other, then this simplifies to:</p>
+<p><strong>Theorem:</strong> Let <span class="math inline">\(z\)</span> be in a zonohedron <span class="math inline">\(Z\)</span> whose matroid is simple. If <span class="math inline">\(n&gt;3\)</span>, then the solution of <span class="math inline">\((\star)\)</span> is unique iff <span class="math inline">\(z\)</span> is in an edge or a parallelogram facet.</p>
+<p>And for a zonogon we have:</p>
+<p><strong>Theorem:</strong> Let <span class="math inline">\(z\)</span> be in a zonogon <span class="math inline">\(Z\)</span> whose matroid is simple. If <span class="math inline">\(n&gt;2\)</span>, then the solution of <span class="math inline">\((\star)\)</span> is unique iff <span class="math inline">\(z\)</span> is in the boundary of <span class="math inline">\(Z\)</span> (denoted by <span class="math inline">\(\partial Z\)</span>).</p>
+</div>
+<div id="a-right-inverse-on-the-boundary-of-a-zonogon" class="section level2" number="2.2">
+<h2><span class="header-section-number">2.2</span> a right inverse on the boundary of a zonogon</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(zonohedra)</span></code></pre></div>
+<p>Let <span class="math inline">\(Z\)</span> be a zonogon whose matroid is simple. By the previous theorem there is a unique function <span class="math inline">\(\sigma : \partial Z \to [0,1]^n\)</span> that is a <em>right inverse</em> for <span class="math inline">\(x \mapsto L(x)+z_0\)</span>. We have <span class="math inline">\(L( \sigma(z) ) + z_0 = z\)</span> for all <span class="math inline">\(z \in \partial Z\)</span>.</p>
+<p>Question: Is <span class="math inline">\(\sigma()\)</span> continuous ?</p>
+<p>Well, on each edge it is linear, and so certainly continuous. Moreover, on each vertex is is uniquely defined, and so the separate linear maps on each edge must match up on the vertices. So yes, <span class="math inline">\(\sigma()\)</span> is continuous; in fact it is <em>piecewise-linear</em>.</p>
+<p>It is instructive to consider a very specific case. Consider the figure:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>zono <span class="ot">=</span>  <span class="fu">polarzonogon</span>( <span class="dv">14</span>, <span class="dv">4</span> )</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>oldpar <span class="ot">=</span> <span class="fu">par</span>( <span class="at">omi=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">mai=</span><span class="fu">c</span>(<span class="fl">0.8</span>,<span class="fl">0.7</span>,<span class="fl">0.7</span>,<span class="fl">0.2</span>) )</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( zono, <span class="at">elabels=</span>T )</span></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAkAAAAGACAMAAAByRC0tAAAA6lBMVEUAAAAAADoAAFUAAGYAMHcAOjoAOmYAOpAAVZYAZrYwd7U6AAA6ADo6AGY6OgA6Ojo6OpA6ZpA6ZrY6kJA6kLY6kNtVAFVmAABmADpmAGZmOgBmOjpmOmZmZjpmZmZmkLZmkNtmtttmtv93MFWQOgCQOjqQOmaQZgCQZjqQkGaQkLaQtpCQttuQ27aQ29uQ2/+WVQC1dzC2ZgC2Zjq2kDq2kGa2tpC227a22/+2/7a2/9u2///T09PbkDrbkGbbtmbbtpDb25Db29vb2//b/7bb/9vb////tmb/25D/27b/29v//7b//9v///+YaHpTAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAY8UlEQVR4nO2dD2PjtnnG4d1ynuc2aW713CTbuvPUJeuyuVOT9rKEd+26mkolfv+vU4LEXxIkQYGQ3pd8nqY+iX71ECJ+BkHwJSAqCEqQuHYBIN4CQFCSABCUJAAEJQkAQUkCQFCSABCUJAAEJQkAQUkCQFCSABCUJAAEJQkAQUkCQFCSABCUJAAEJQkAQUkCQFCSNgrQ4f7V99VffvtUHR/Fk/+r4+PNc4KzND1PpajLJHX69l7c/Kva+uPnQrzJsr9ltGGATjsRAmgvUgBqTM+TAagQUg+6OOblwvtbRhsFSCoMUCmuDVBdpIcaIkXTfgwfADSt+nBKyUo91K3566+bTW+/EuLTl8puq6r39+LNh+awh+JUTTT1cri/+c/7V/+7q21ffVfH/NbENBViAbKW79uTiutoNt38x/2rd6fapN5+aky/d4rQ/PbHL2rXt3oXbWjX7PW3BqC6AM05ti1OXR79kar6cO/tXu3P87+sGAFUNi/EW71J3FV2m2r3ZR2E4ioZetvU75N89UcHICdG2vyD6QNZy706qTiO3qbbl/btnapQvwi3/99+TDUVKtQ1s3uqGmhkC3T7UhmA9n5g/Su1+5P7Ja7SFJEHSKpUx/vu5fRNfZTrV7fvTvv2ld129/LjrrtNxUmT42Ozpa6cvbhz+0C376pv9AnjcF/XtgLIWtbR75o2wTq6m+5e/lSbv6veC2vqFutPdZP3rJGoTGj3a+x0IWS/WbxuXzcNp/uRB9mAPpvdN/vz/C8sDgAd7uWxaRt12Wdp+y1lW41qW3MMO9tsXGOzF0+l+EgSIsO9TnRp//ifzFWYtVQNiuvY2VR/9Hf/LISpUL8I9c+bT7821atCu1/DFLS8l82Oaa8e7EfUic20vOJJfwnX/6JiAJD8S33Rx1e272416m3tK3mAQ3GNTyHu9uLnu1e/u29rIgBQ2bR0CiBrWfQBcjbJ8KaTYgByi9CYyS6Rvpgyod2voemQfaPqg9uJNh/pXKhpgDz/C4s+QPXxbI5acgt0uP/oY9md+KSmZACgvXB6RNbSnB1cgMymNurml/+nell+C6Ro/EvdhLQvTaj7NfSe2oD6X3N1KAEyHzEtkNm9vgqz/hcWeYDqI9QeGK9joY78ZB/IBUh2OG9fyqa3qQB6GAPI7QOpNsGtc7NJFq+o+yynL1uAHryiKjSeFY9OaOdr/Kj7QMpa4bBvetT2Iz9/qbtID2b3zf48/wuLPEClqVP1yms1zLa2Uf/E29YBSIbcqQat+VOucbn5r06MOxJtLZ1LLh1tN7WI6MsoafrsFKE5we30xVPlhDpm3aswA7FugfSvC2c37UlL7u+/Xf8LixFA1R/s+I6p9D9440D+ti5A9Z/tk6yeO3U+rHsOr34/ApC1PH1jxoF0tN3UhMuBnN83Azi16TunCM1vT18JO9akQ93iueNAdZentn6joptOtHFvx4HeVWb37f48/8uKPECRas4Cy17KZrBcodYCkO6+LHklksFyfVoNQLLdF+YeNlXL9Wk1AEHXEQCCkgSAoCQBIChJmwVoPBW0aMeCbDZXMzbz1rmLabZI2Rtir53RYCcX7IOKNSHtaKEcTzI27+su+xt505jVZd9WARrP5Ds+NoM/H+w1/F5hYwHSW9rf1gC1TNj7Cc6nSw2dCWmTgcyQ8pNNEzrt7KAmAwGgkApZ9c09cIXA8QvxVuYRte/28raUs6VUCW83z6dvzF1O59MmRcyGHO5VdpC2aVJ9mjtgE0msxLRugDoJoDaLVKeeenmp3+rWpaGr/vHRx25dnvYmt1Hfc2i3qDTYZsxapq1V7Tb76eY+Z5sXokMKkwOpbA4f63vwJaux71UD1E0AtVmkCiA/L/WDBqjp0px+9cs/7xyADvfqbtNJb9VbVBqsoqM9h3mfbu68yd/YkL34qOnxuMYOaRc7RMlaM0D9BFCbRarzdty8VPNBXYWnDkCvVUKPSTBqtug02Pr89LVkVp8a7adNho8Jce/PG2N1ozfxwbQLa80A9RNA7Q1wlTnY2a7e6pOIB5B6pMPbWCintsna6f51qwBAJuT4RU3SBx2rnuFRWdH9R9Uoa80A9RNAOwB18lKnAGqj3MQtucWmwcp+86efm9+e+qcwP8QEmKyhG3WFD4BIqJ8A2gPIy0s1cnLsdRvyiUZA93HNFi+L0XSiKx8gt2sjQw7y07IM1li2P+9sIblozQD1E0A9gB6qTl6qUb8PVEfqp0X3OmNabTEAHT5vetLm6sp+2lzGmxBz0W6NzSPV6AORUS8B1E9J1a3HQ7fOzKVUg4B66kqlBhks3CfYnT7QjclOdj7dH0hsP/3G2hzudQ8KV2F01E0AdQBqU0H9vFQt3QtxEGhGjN5Wbg/lfe9WxldCvH5XBQCytzJUiBmZMjamP4ZxoBWoSBsMPv4i5RyUuPMLCwCFpG80nKki5dO4F7YG7VP6scd/SmmADvd300F0BICgJAEgKEkACEoSAIKSBICgJAEgKEkACEoSAIKSBICgJAEgKEkACEoSAIKSBICgJAEgKElLACQG9MPQLxaInqmZ5llLztg8F0AD20P7G9a86JkFn2meteTrMgdA6eGbNgdA6eGbNgdA6eGbNgdA6eGbNgdA6eGbNgdA6eGbNgdA6eGLmB8/Cz8NRr3kACg9fAlzd72gxc0XigZAmcIXMD/9+vTvAChmf8PaNEA1QgAoan/DAkDB7SLnF80MUDObzUPoTZwHAJoRPtwCyduYmcqSF6DTzplxy3sT6QGAZoSPn8KiIaIE0OFezqRU6KWEnTeRHgBoUfMoiCgB1Kp0Jzopg7OeAKCQBqs7xVxDlMX8rPDJeti7jY77xskzuoaus9d45TsyVzzsZwBUuh3nMtyLRgsU0Lxcv3OUq+TzwifqoXS7zWW4Dw2A/LdTdZwqTgDFtD8AyESbiq1/5OFHuw6a0wLImy90ePJQAFR5bYJ8kRGeaoQfWgAV7pT7xfD8+1sHyK/OBp+l+RHdfXAAyFu8c2wlz60D5Ea3Z7B5e5tQ/2QohgmlBJCaO/3m+bS7s29meGwPINVBmbezcYVQYQJQtABQK1Wr2R/2Fc3/xssSJwCUyfyckutGIf/D4gBogWhqANkLpHl7OkOiAkDp0aQAcnq5F5isAgAtEX0FgGRGVGgVFbdDeyl+AFBq9BUAKu+qat8bDPPwuQA/nADykxDLgYv4zQAkVXQA8of35u3kPAnn/wFRAshPQpSpQOF0oA0BVPp3k/0W5yL8cALIS0I87WRTtN92Sqv/9TsnrMvxwwWgVqrVQUpr/Tfknr/6txcuIsMOG4BUEuLhJ5KjcssANUs8qy7hRbrLAQn/R1/kANJJQG1D5HaCbNrUFXIrr5vSei18NDtX+/5DJRpW6fahkVTf7vlq+FTOzTYeLZBNQsQpTO32ivh46LAAyElCRCe62ek16fHR4QCQm4SIy/ir46PFBiA/CXHzA4lE8GEEkJeR2Lzd8K0MMvjoL84AoGitHyA6+Ex9cQCUutNFzP1wSvgAoEFRBYgWPgBoUDQBooYPABoURYDo4TP1vQFQ6k4XMW/CrzvoPCQANCRiAJGkp2IH0OGn5t6FHBYKPx6/QoCo4sMNoOOjuflVyJHoMEGrA4guPpNfmxZApTAT8Lej0Zu4F0YYH2YAleKh3BxApPFhBlDlJgD1TmGrzEgkjo/KRryaQgUaL6+TQbaB58LI4zP9rem2QDK5fmCWKf4AiSzTimUQX4BWnZGYcUrVhcUXoFUn1bPhhzFAbQu00qR6AHR+OPpAq+KHJkBqDEisdL2wkSkrqYkfQFFiDZBgxA8AGtN1ABJNCzRv19eTLmgxOGk3AErd6Txzof9jIV3OwVVLAFD6TueYq2nlufCjC3r42QcAlBq9BEBC/WAG0PGz70sAlBq9AEDs+FElLcTg9TA9gJyMxMO9WNOCc3ZZCzYA2YKyaYGcjMTy9qV+u5p8IGF+suGHIUBeRqIs82pupgr7D0eAhkUKIDcjsZ1gKix2AHnrogCgpPDou/Gvvntcy60M4f7Lhx/eABXyZNbeFNOf5J7SartBPHTdbNZGoVKNF9oCdLO6ORLX2AARboGaF21WUKwHbYC4NUDMAWpfhLvSLAES3j8cxBug4+O6MhJXyg9dgKri9kUNBkV7EAZIdP5lIMYAtRdf5ZoyEvk1QEwBihI/gBg2QABoSpcciZ63KxKKLDMASt1phDlHfgDQpC4GEEt+ANCkANCoANCULgUQT34A0KQuBNC6+SEHkJPSWmt/+xIK4gQQU364AuSktFZyKJEjQHs5uSwAWiA6KaW1kjRxBKi8k8/BaHOu/PAEyE1preTdsC8ZAlRVDkCr54cWQJV3+/3wk2evD8QmI/E34u/1Z+YdL0IikI0oFSrZeMEtQPJOPNdOdPHww9yPENMKWiCZzsERIPkIFQBaJDoJoCYXkSNA8irsrjHfAj90AVIr8AYXy6ANkDZnzM8aAGrEsgVS5pz5AUAxAkDDYg6QeZ6QMUCs+WEMUJQYALQVfgBQ8k7Tg+kJAMUoI0DM+QFAUQJAgwJAMcoH0Ib4AUDJO02JJCrOANmMxNOO6ZOp7PnhDJDNSDztbp6rIjxNKwDKK74AORmJbFcsZM/PvKWoSAHUyUisOK5YuAZ+5hBECqCqNyHQnlsLxJ6fdQHkrRLDIaWVPz/V9Y5wQKHyjRe/9B/r4bbUAX+A5i7HSbkFGlyliixAK+Bn7nKKhAEqBleIoQoQe37OWI6TLkBFMJt11OPKAPHnp2mB5n2GLEADK36PelwXoHXwswqAZEaiSqpnNA7EHCCh+FmgjpeK3tbN1Lz8zLs0OmcH6gd9gIZXT4wWRYAy85N7D4afJep4qeiBFqhIZoggQPn5ybkPdzlO+gC1Dw0G71FECgDlsheL1PFS0WGAyuZx09Mu/MROlOgBdIkOSradOO4cAFKTRoWXUYkTOYCyX4Bl7AN1l+MkD9A8i6CoAXSBC/hsV2HC/Vf+YA6QM8lmOTAKRA4g5gNAjexpjDdA7rrxNT3hfDIAtLicbhBrgHrrxu8Z5ESvgJ+1AOStG88lJ3o9/PAHqOrOUMZgycu18bMagNruj9sJIpjSOjN7j6jEyDe8skKlHf8yIwBNe1y6BZqb/klTwv93LS0Qh1MYAKIMEINO9CoA6n6BtQDE4jJ+hfysBiAOA4lr5GcVALWTbBbkb2XwByhQfuYARYkIQPOfgSEnADS5v2EBoOCBBECxSgVIVLMfoiKmYOkBUKwSARIVd4DChQdAsdo6QANlB0CxSgOoTTIFQADozJ0K/R9XLXMQiQHkZbEWA6uFkQBIZbnzBWiw5JwB8gafC/kmTBAAStZwwRkD5N3+akejqd4L088wcAVopNyMAfJuwJMGyKQQAyBSAHkpQL1TGKGMxOa1GP82lEUw9zCsUNmHv1YnCZHuc2H2GQaeAKlS74MXKYxbIB8gOUX0wDRlAChJqtDlXXX8rJ+vxxgg7xRGOCPReYiBM0C11gaQywzhpHrbALEEyJZ5H5qniTFA3mV8SxPFpHqnAeIIkFfkok8QY4D8gUTCfSD7nh9AtsTlw+oA0lmsagyI9oJzPAFyC1wf4MAwG2uAIkUBIBHaSF/TBQZAsVoCIG6KKDUAitUGAYopNACK1fYAiiozAIrV5gCKKzIAilVyPhA3bQAg7/7p4T54mTniAYDGFFlkzgB5A4nl7Ut1fKSZD8QRoNgSMwaok5Eo35C8mTpWBLKKLjBjgLybqe2t+bCuD9B6+WENkJvOUb767pHurQwAdF74BRPKCjljdHtTTH+STkoru/Xh2eSwdhT6KsPf0gfohvIcicwAmlNcxi2Qdwpru0JttyjW48JPZbDRrOJyBsjLSGwBCnalAdAszSstY4C8y/jjI9WMxJEC0NRmAOo82nz7opCK9gBAIc1ch5kzQH5GYkktI9Hmf3ICaO4yuqwBitR1ACoNzrz4AUDRHnkB+tkHAJQavmGAjuL7kiFAsqgAKNYj55eR013pcxgfgJqSAqBYj8yd6JInPwAo2gMA+VIFBUCxHhcaB+IBkF2KakMAdacE2t++hMIA0LTEFgHqrvBUCooAseBnkwB115g7PgKgc2QTp9r3mwGoO6dUcfslAJonhY0QThdoQwD56+zWb70+EJWMRKoAGWTqA3SlY7S4Ql9z+Aj4k5LJExrJTjRBgNzVf5sWyPvtZlogHyCZzkERIHL8eAtvNq87RdwMQP4km/INAJqnFqVuCbcDkNuJLlR/h1xONF2AdBeou30zAPWXikcLFC/Tg+79ZjMA9ZeKJwgQUX7ESPG2A5Cf0loBoFiJ0eZxQwBFCgB5smetcOEAUKzHJgFyOj0DZQNAsR4XAIgaPy4+VzksAGjeTmkB5A0hDkYBoFiPjQHkNTkjBQNAsR6bAsg/Y42Va0MAuRmJpx21J1PHdn1pDXZ4AtoOQO5A4mlXvyjC07ReDyAi/MzBZ0MABdYLozbJJgmA5uGzIYACzFBbsfD6AMnkDep1nNU8PiNRao8WyC9EUwDqdZzVPDqhrNni9qIJpLRemZ+1JKrGK3QQho9PD6CS2lIHVwXIdn2oNxJZzWecwsqBq/hNAuT2nKnXcVbz+E50McTPBgHyL7yo13FW8+iMxCKYzTrqkRuga/Hj4iPHV/82mCU1qM0A5A0kDqz4PeqxToD81qes/75+M/inFdR2AHIzElVSPalxoGsAFBo1/B8AlKbtABQcdC7/bp4JAIr1WBtA4XsW+zvqdZzVnDFAF+YnjM9p90S+jrOaA6DI3Q3sbS8Gs1yGBIBiPdYD0PgNd+p1nNV84wBFpWJMBVGv46zmfAFaqAESU0bTO6Jex1nNo1NaezNuTnuwAKiq3NnDztoN9TrOah47Et1/UH7agwtArV3IL24n1Os4q3nsvbD+VB3THpwAqgIMxe6Ceh1nNY+9G08tJ3qy63KW1MlMz4wZKep1nNU8Nh8okN866ZHxy4ixfkua/Dl5Y0S9jrOax2Yk9vNbBbQ5LQrQtAehFijefORYpZufEU7dnOkpbG4fKM5cg5PF/Mxw6uZcO9EzR0Cnzb1WZ111nNWc72X8gua9U9a66jirOd+BxIXMg/2dddVxVvPYlFbzZoYHHYCO/xg69VaDgz3rquOs5nxvps6ILcXfDAC0SFmo13FW8y0AdPr16d8AUCbzLQBUIwSAcpkDoJDWVcdZzQFQSOuq46zmACikddVxVvNtAES+GviaA6D08E2bA6D08E2bA6D08E2bA6D08E2bL/N0Xlg/zMp2mxc9UzPNs5acsXkmgAbByhgNcyLmAAjmSeEACOZJ4QAI5knhAAjmSeEACOZJ4QAI5knhAAjmSeEACOZJ4TkBgjYgAAQlCQBBSQJAUJIAEJQkAAQlCQBBSQJAUJIAEJQkAAQlCQBBSQJAUJIAEJSkTAAdfmpmMxhe5ScQcHyUj48Ep/IMuC1rPbfcbvS0uVxg3i5tOGXuRUeUvJh1WIq5h6Xa374MmOcB6Pho5gMemZwzENBORx0ZvKz13HJ70ZPmp13tVeiKmjL3o6dLLqdfjj8sXnTMYamp0QD1zLMAVFOqD+3Y9MCBgPBM5uHgZa3nltuLnjb35tmeNPdn5Z40Pz4+6KlQI8y96JjDIlspBVDfPAdApXgwxRqboDwQUIy3pdFzn8+3nltuLzrCvP1M+7c7be5GR5prJOLMDUAx5sXtlwqgvnmmPpCtiJElEgIB+0/E2CLI0asvzLeeW24vOs68DossuRcdaV4o3OLMdXSMee2o+0B989wAjS3S0g84PsqC7ge/T/T6L/Ot55bbi44zl41WvLmJjjIvDQUx5jY6wlyetjRAgUWbRot1ts4EqPPh8eBlreeWO+A2ae72oafN/UujyfbqtGsrOY5OHR1hXtSR1wNo5nmm3dScaCeDl7WeW+6q/+sJ89KcKWLMy855ZarktoMVd370CBszb/wudQor9Pk0qjPaRAcChq8sUzrRE9atZnSiqz5Ao+aFJSLCvOj2S6YvtxUFkT10j5kx80LN7TJgnrsFmnet3ZZv+K8n4TJ+ynpuub3oCPNC2AqbNnejp829iMgxgtL9K5zuz1/0Mt4r0bzRvqZoI126hIHEKeu55faiJ80P9+4vp8z96OmSy/pt6zam5F501GGxI9GXGUhUh3ZqlR8lb02gvW4sY4KXtZ5bbi86otxSN89R5p3o6ZKriMiSe9Exh0UxFzLHzVQoSQAIShIAgpIEgKAkASAoSQAIShIAgpIEgKAkASAoSQAIShIAgpIEgKAkASAoSQAIShIAgpIEgKAkASAoSQAIShIAgpIEgKAkASAoSQAIShIAgpIEgKAkASAoSQAIShIAgpIEgKAkASAoSQAIShIAmi85QVcz2TIEgM6RnJypcOeo3LIA0BkqX333i4gFAjYhAHSO9pOrk2xGAOgcldOTwm1FAOgMnXb/ErFEyTYEgM5QcfvnHS7CWgGg+To+PkWtkrQJAaD5snPeQgAIShMAgpIEgKAk/RWc4jeVjt9X0AAAAABJRU5ErkJggg==" width="80%" /></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>( oldpar )</span></code></pre></div>
+<p>Denote the 4 generators by <span class="math inline">\(z_1, z_2, z_3, z_4\)</span>; these are labeled in the figure by just the indexes. Along the bottom edge, <span class="math inline">\(x_1\)</span> increases from 0 to 1, while the other <span class="math inline">\(x\)</span>’s are 0. When the first vertex <span class="math inline">\(z_1=(1,0)\)</span> is reached, <span class="math inline">\(x_1\)</span> remains at 1, and on the 2nd edge <span class="math inline">\(x_2\)</span> increases from 0 to 1, until the next vertex <span class="math inline">\(z_1+z_2\)</span>, etc. At any point on the lower boundary <span class="math inline">\(x = (1,...,1,\alpha,0, ... ,0)\)</span>; i.e. a run of 1s, then an arbitrary <span class="math inline">\(\alpha \in [0,1]\)</span>, and then a run of 0s. Both runs are allowed to be empty. Similarly, along the upper boundary <span class="math inline">\(x = (0,...,0,\alpha,1, ... ,1)\)</span>. These two “low-pass” and “high-pass” filters are analogous to Goethe’s <em>edge colors</em> (Kantenfarben), see <span class="citation">[4]</span> p. 17.</p>
+</div>
+<div id="extending-the-right-inverse-using-parallelogram-tilings" class="section level2" number="2.3">
+<h2><span class="header-section-number">2.3</span> extending the right inverse, using parallelogram tilings</h2>
+<p>In the previous section, the right inverse <span class="math inline">\(\sigma()\)</span> was only defined on <span class="math inline">\(\partial Z\)</span>.</p>
+<p>Question: Is there a way to extend <span class="math inline">\(\sigma()\)</span> across the interior ?</p>
+<p>The answer lies in parallelogram tilings. Consider the figure:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>oldpar <span class="ot">=</span> <span class="fu">par</span>( <span class="at">omi=</span><span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">0</span>), <span class="at">mai=</span><span class="fu">c</span>(<span class="fl">0.8</span>,<span class="fl">0.7</span>,<span class="fl">0.7</span>,<span class="fl">0.2</span>) )</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>( zono, <span class="at">tiling=</span>T, <span class="at">elabels=</span>T, <span class="at">tlabels=</span>T )</span></code></pre></div>
+<p><img src="data:image/png;base64,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" width="80%" /></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>( oldpar )</span></code></pre></div>
+<p>The labels inside the parallelogram tiles are the generators of the tiles. For points inside the 3 tiles that meet 0, the values of <span class="math inline">\(x_i\)</span> are obvious. For a point inside tile <span style="color: red;">1,3</span>, <span class="math inline">\(x_2=1\)</span> and <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_3\)</span> vary in [0,1].</p>
+<p>The rule for a point <span class="math inline">\(z\)</span> is to locate the tile containing <span class="math inline">\(z\)</span> and then the <em>origin</em> of the tile. Next, locate a path of tile edges from 0 to the origin, and that determines the <span class="math inline">\(x\)</span> coordinate alues that are 1. The <span class="math inline">\(x\)</span> coordinate values for the tile generators are the 2 coordinates of <span class="math inline">\(z\)</span> in the tile relative to the origin, and all other <span class="math inline">\(x\)</span> values are 0. For tile <span style="color: red;">1,4</span> there are 2 different paths to the origin of the tile, but it doesn’t matter since the <span class="math inline">\(x\)</span> indexes on the different paths are the same: 2 and 3. In general, two different paths are connected by a homotopy that “crosses” one parallelogram at a time, and each time, the 2 associated <span class="math inline">\(x\)</span> indexes are the same.</p>
+<p>It is straightforward to verify that the right inverse <span class="math inline">\(\sigma()\)</span> defined by this rule is continuous.</p>
+<p>The above tiling is just one of many, and each different tiling generates a different right inverse. For the 4-generator zonogon above, the number of different tilings is 8. This sequence increases very rapidly with <span class="math inline">\(n\)</span>; for <span class="math inline">\(n{=}8\)</span> generators (16 sides) the number of tilings is already more than <span class="math inline">\(10^6\)</span>, see <span class="citation">[6]</span>.</p>
+<p>The above tiling is an example of the <em>standard tiling</em> in the <strong>zonohedra</strong> package, which is generated by the following recipe. Each generator is “lifted” to <span class="math inline">\(\mathbb{R}^3\)</span> by the mapping <span class="math inline">\((x,y) \mapsto (x,y,\sqrt{x^2+y^2})\)</span>. The mapping “lifts” each generator to the cone <span class="math inline">\(x^2 + y^2 = z^2\)</span>. The lifted generators generate a zonohedron, which has an upper half and a lower half. The faces in the lower half are the ones that can be <em>seen</em> from a a viewpoint far below the <span class="math inline">\(xy\)</span>-plane, see <span class="citation">[5]</span>, p. 130. The parallelogram facets in the <em>lower</em> half are projected down to <span class="math inline">\(\mathbb{R}^2\)</span> and these form the <em>standard tiling</em>.</p>
+<p>The standard tiling has the following nice property: if the zonogon is pointed, and the generators are in order by angle (clockwise or counterclockwise), then every point <span class="math inline">\(\sigma(z)\)</span> has 2 <em>transitions</em>, and the run of 1s does not wrap around. For the definition of a 2-transition point of the cube, see the <a href="transitions.html">The 2-Transition Subcomplex and the 2-Transition Surface</a> vignette. The 2-transition concept is important for zonohedra coming from colorimetry. The standard tiling is denoted by <span class="math inline">\(T_{min}\)</span> in <span class="citation">[3]</span> p. 13, where the 2-transition property is also noted in equation (12).</p>
+</div>
+<div id="a-right-inverse-on-the-boundary-of-a-zonohedron" class="section level2" number="2.4">
+<h2><span class="header-section-number">2.4</span> a right inverse on the boundary of a zonohedron</h2>
+<p>In this section, let <span class="math inline">\(Z\)</span> be a zonohedron whose matroid is simple, with <span class="math inline">\(n{&gt;}3\)</span>.</p>
+<p>Assume for simplicity that all facets are parallelograms. Then by a previous theorem there is a unique function <span class="math inline">\(\sigma : \partial Z \to [0,1]^n\)</span> that is a <em>right inverse</em> for <span class="math inline">\(x \mapsto L(x)+z_0\)</span>. This right inverse is unique on the edges, which implies that <span class="math inline">\(\sigma()\)</span> is continuous.</p>
+<p>Each parallelogram is the image of a square in <span class="math inline">\([0,1]^n\)</span>, and the squares are “glued” together on the edges to form a “surface” (in fact a topological sphere) embedded in <span class="math inline">\([0,1]^n\)</span>. We see another example of this in the <a href="transitions.html">The 2-Transition Subcomplex and the 2-Transition Surface</a> vignette.</p>
+<p>Now suppose that a facet of <span class="math inline">\(Z\)</span> is an arbitrary zonogon, with a high number of generators. Then by rotating this non-trivial facet to the plane, and choosing the standard tiling, we can use the construction in the previous section to extend the right inverse across this facet. Once again, the right inverse is unique on the edges, which implies that the extended <span class="math inline">\(\sigma()\)</span> is continuous.</p>
+<p>To summarize this section, a right inverse <span class="math inline">\(\sigma()\)</span> defined on <span class="math inline">\(\partial Z\)</span> always exists and is continuous, but is only unique up to the selected tiling of the non-trivial facets of <span class="math inline">\(Z\)</span>.</p>
+<p><br></p>
+</div>
+</div>
+<div id="software" class="section level1" number="3">
+<h1><span class="header-section-number">3</span> Software</h1>
+<p>The above sections are mathematical in nature. This sections is about the implementation of the above in the software package <strong>zonohedra</strong>.</p>
+<p>The package only supports zonotopes of dimensions 1, 2, and 3, which are called <em>zonosegs</em>, <em>zonogons</em>, and <em>zonohedra</em>, respectively.</p>
+<p>The extra generality of the translation <span class="math inline">\(z_0\)</span> turned out to be an unnecessary complication. Thus, in the package, the constructors <code>zonoseg()</code>, <code>zonogon()</code>, and <code>zonohedron()</code> only take a matrix argument, and not <span class="math inline">\(z_0\)</span>.</p>
+<p>Many of the above theorems require that the matroid associated with <span class="math inline">\(Z\)</span> is simple. In the non-simple matroid case, the package ignores all generators that are 0. And for a multiple group, when all the generators are positive multiples of each other, it replaces these generators by their sum. When some generators are negative multiples of each other, the situation is more complicated and not yet documented. The zonohedron is then computed from these “simplified” generators, which has a simple matroid.</p>
+<p>In many calculations, the central symmetry is used to reduce storage. For example, only one facet in a pair of antipodal facets needs to be stored, and the other can easily be derived by reflection. In some cases, the symmetry is also used to reduce computation time.</p>
+<p>The section <strong>extending the right inverse, using parallelogram tilings</strong> is implemented in the function <code>invert()</code>, which takes the zonogon as argument. The section <strong>a right inverse on the boundary of a zonohedron</strong> is implemented in the function <code>invertboundary()</code>, which takes the zonohedron as argument.</p>
+<p>For a pointed zonohedron <span class="math inline">\(Z\)</span>, the function <code>plotpolygon()</code> plots the generator polygon for <span class="math inline">\(Z\)</span> at 0.</p>
+<p><br></p>
+</div>
+<div id="references" class="section level1" number="4">
+<h1><span class="header-section-number">4</span> References</h1>
+<div id="refs" class="references csl-bib-body">
+<div id="ref-Bolker1969" class="csl-entry">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">BOLKER, Ethan D. A class of convex bodies. <em>Transactions of the American Mathematical Society</em> [online]. 1969, <strong>145</strong>, 323–345 [accessed. 2023-02-25]. ISSN 00029947. Available at: <a href="https://www.jstor.org/stable/1995073">https://www.jstor.org/stable/1995073</a></div>
+</div>
+<div id="ref-Davis2018" class="csl-entry">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">DAVIS, Glenn. <em>A centroid for sections of a cube in a function space, with application to colorimetry</em> [online]. B.m.: arXiv. 2018. Available at: doi:<a href="https://doi.org/10.48550/ARXIV.1811.00990">10.48550/ARXIV.1811.00990</a></div>
+</div>
+<div id="ref-Henriques2007" class="csl-entry">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">HENRIQUES, Andre and SPEYER, David E. <em>The multidimensional cube recurrence</em> [online]. B.m.: arXiv. 2007. Available at: doi:<a href="https://doi.org/10.48550/ARXIV.0708.2478">10.48550/ARXIV.0708.2478</a></div>
+</div>
+<div id="ref-Koenderink" class="csl-entry">
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">KOENDERINK, J. J. <em><span class="nocase">Color for the Sciences</span></em>. B.m.: MIT Press, 2010. ISBN 9780262014281. </div>
+</div>
+<div id="ref-Ziegler2012" class="csl-entry">
+<div class="csl-left-margin">[5] </div><div class="csl-right-inline">ZIEGLER, G. M. <em>Lectures on polytopes</em>. B.m.: Springer New York, 2012. Graduate texts in mathematics. ISBN 9780387943657. </div>
+</div>
+<div id="ref-A006245" class="csl-entry">
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline"><em>Number of primitive sorting networks on n elements; also number of rhombic tilings of a 2n-gon</em>. B.m.: <a href="https://oeis.org/A006245" class="uri">https://oeis.org/A006245</a>. Sequence <span>A</span>006245 in the <span>O</span>n-line <span>E</span>ncyclopedia of <span>I</span>nteger <span>S</span>equences (n.d.). Accessed on Mar 5 2023</div>
+</div>
+</div>
+<p><br></p>
+</div>
+<div id="session-information" class="section level1" number="5">
+<h1><span class="header-section-number">5</span> Session Information</h1>
+This document was prepared Sat May 27, 2023 with the following configuration:
+<pre>
+R version 4.3.0 (2023-04-21 ucrt)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 19045)
+
+Matrix products: default
+
+
+locale:
+[1] LC_COLLATE=C                          
+[2] LC_CTYPE=English_United States.utf8   
+[3] LC_MONETARY=English_United States.utf8
+[4] LC_NUMERIC=C                          
+[5] LC_TIME=English_United States.utf8    
+
+time zone: America/Los_Angeles
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+other attached packages:
+[1] gifski_1.12.0    orientlib_0.10.5 rgl_1.1.3        zonohedra_0.2-1 
+
+loaded via a namespace (and not attached):
+ [1] microbenchmark_1.4.10 cli_3.6.1             knitr_1.42           
+ [4] rlang_1.1.1           xfun_0.39             highr_0.10           
+ [7] jsonlite_1.8.4        glue_1.6.2            htmltools_0.5.5      
+[10] sass_0.4.6            rmarkdown_2.21        evaluate_0.21        
+[13] jquerylib_0.1.4       ellipsis_0.3.2        fastmap_1.1.1        
+[16] base64enc_0.1-3       yaml_2.3.7            compiler_4.3.0       
+[19] htmlwidgets_1.6.2     digest_0.6.31         R6_2.5.1             
+[22] magrittr_2.0.3        bslib_0.4.2           logger_0.2.2         
+[25] tools_4.3.0           cachem_1.0.8         
+</pre>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

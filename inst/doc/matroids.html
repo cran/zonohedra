@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Glenn Davis" />
+
+<meta name="date" content="2023-05-27" />
+
+<title>Matroids</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+
+
+
+<style type="text/css">
+/* for pandoc --citeproc since 2.11 */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Matroids</h1>
+<h4 class="author">Glenn Davis</h4>
+<h4 class="date">2023-05-27</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#rank-functions">Rank Functions</a></li>
+<li><a href="#matroid-hyperplanes">Matroid Hyperplanes</a></li>
+<li><a href="#matroid-circuits">Matroid Circuits</a></li>
+<li><a href="#efficient-checking-of-hyperplane-axioms">Efficient Checking of Hyperplane Axioms</a></li>
+<li><a href="#conclusion-and-conjecture">Conclusion and Conjecture</a></li>
+<li><a href="#references">References</a></li>
+<li><a href="#session-information">Session Information</a></li>
+</ul>
+</div>
+
+<style type="text/css">
+body {
+  max-width: 750px;     /* make a little wider, default is 700px */
+}
+</style>
+<p><br><br></p>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The focus of this vignette is the <code>zonohedron()</code> constructor and specifically its tolerance argument <code>e2</code>, whose default value is <code>1.e-10</code>.</p>
+<p>One goal of the <strong>zonohedra</strong> package is to handle all possible zonogon facets, not just the parallelograms in the generic case. The input to the constructor is matrix whose columns are the generators of the zonohedron. The generators of a specific facet span a plane, and adding another generator increases the span to all of <span class="math inline">\(\mathbb{R}^3\)</span>. Stated another way, the set of generators of a specific facet has rank 2, and is maximal with respect to this property. So a naive way of determining the facets is to examine <em>all</em> subsets of the generators and determine whether each one has this property.</p>
+<p>This is hopelessly impractical. Moreover, although the rank function is well-defined for matrices with numbers in <span class="math inline">\(\mathbb{R}\)</span>, it is not computationally meaningful for floating-point numbers. For example, if a set of floating-point vectors spans the xy-plane, their rank is unambiguously 2; the smallest singular value is 0. But if the set is given a random rotation, the smallest singular value will be very small, but non-zero. Some sort of tolerance is needed.</p>
+<p>The central dogma is that there are vector generators in <span class="math inline">\(\mathbb{R}^3\)</span> that are very close to the given (dyadic rational floating point) vectors, and have actual rank 2. The package does a feasibility test that the floating point generators could have come from true real vectors. This test comes from the axioms of matroid theory.</p>
+<p>The facet-finding method chosen for <code>zonohedron()</code> does not use rank, but it also requires a tolerance - the argument <code>e2</code>.</p>
+The computational steps in <code>zonohedron()</code> are:
+<ol>
+<li>
+Eliminate the zero generators; argument <code>e0</code> is used here
+</li>
+<li>
+Unify the non-zero generators that are multiples of each other; argument <code>e1</code> is used here. Every set of two distinct generators <span class="math inline">\(\{ v_i, v_j \}\)</span> now has rank 2, so their cross-product <span class="math inline">\(v_i \times v_j \neq 0\)</span>.
+</li>
+<li>
+Compute all pairwise cross-products of the generators, and unitize them to the unit sphere. For generators <span class="math inline">\(v_i\)</span> and <span class="math inline">\(v_j\)</span>, denote the unit vector by <span class="math inline">\(u_{i,j} := v_i \times v_j / || v_i \times v_j ||\)</span>.
+</li>
+<li>
+Perform a cluster analysis for the unitized cross-products, using <code>e2</code> as a “pseudo-angular” threshold. Special measures are taken so that vector <span class="math inline">\(u_{i,j}\)</span> is considered identical to <span class="math inline">\(-u_{i,j}\)</span>.
+</li>
+<li>
+for each cluster of unit vectors, take all the generators associated with this cluster and call them the generators of a pair of antipodal facets. Most of the clusters have only one unit vector, and thus only 2 generators of antipodal parallelogram facets. But some facets may have 3 or even more generators.
+</li>
+<li>
+Perform a feasibility test on these subsets of generators, and if the test fails, the zonohedron is invalid and the constructor fails. This test depends on the hyperplane axioms of matroid theory, and is outlined in the rest of the vignette.
+</li>
+</ol>
+<p><br><br></p>
+</div>
+<div id="rank-functions" class="section level1">
+<h1>Rank Functions</h1>
+Let <span class="math inline">\(E\)</span> be a finite set of vectors in <span class="math inline">\(\mathbb{R}^n\)</span>. For any <span class="math inline">\(A \subseteq E\)</span> the <em>rank function</em> <span class="math inline">\(r(A) := \operatorname{dim}( \operatorname{span}(A) )\)</span> has these properties:
+<ul style="line-height: 2em; margin-bottom: 15px">
+<li style="list-style: none">
+(R1) <span class="math inline">\(0 \le r(A) \le |A|\)</span> (<em>cardinality bound</em>)
+</li>
+<li style="list-style: none">
+(R2) If <span class="math inline">\(A \subseteq B\)</span>, then <span class="math inline">\(r(A) \le r(B)\)</span> (<em>monotonicity</em>)
+</li>
+<li style="list-style: none">
+(R3) <span class="math inline">\(r(A \cup B) + r(A \cap B) \le r(A) + r(B)\)</span> (<em>submodularity</em>)
+</li>
+</ul>
+<p>If <span class="math inline">\(E\)</span> is changed to be just a set of abstract <em>points</em>, then an integer-valued function defined on subsets of <span class="math inline">\(E\)</span> that satisfies the axioms (R1), (R2), and (R3) defines a <em>matroid</em> on the <em>ground set</em> <span class="math inline">\(E\)</span>. The <em>rank</em> of the matroid is defined to be <span class="math inline">\(r(E)\)</span>. We mostly follow references <span class="citation">[1]</span> and <span class="citation">[2]</span>.</p>
+<p>A given matroid <span class="math inline">\(M\)</span> may not be represented by a set of vectors in <span class="math inline">\(\mathbb{R}^n\)</span>. But if it <em>is</em>, we say that <span class="math inline">\(M\)</span> is <em>representable over</em> <span class="math inline">\(\mathbb{R}\)</span>. We also say that <span class="math inline">\(M\)</span> is a <em>vector matroid</em>.</p>
+<p>From (R1) it follows that a point has rank 0 or 1. A point of rank 0 is called a <em>loop</em>; in a vector matroid a loop corresponds to the 0 vector. A <em>multiple group</em> is a subset of size 2 or more, which has rank 1, and with all points of rank 1, and which is maximal. In a vector matroid a multiple group is a maximal set of 2 or more non-zero vectors that are all multiples of each other.</p>
+<p>A <em>simple matroid</em> is a matroid with no loops or multiple groups.</p>
+<p>A rank function is defined for every subset of <span class="math inline">\(E\)</span>, and is much too large to deal with directly. Matroid theory provides more efficient alternatives.</p>
+<p><br><br></p>
+</div>
+<div id="matroid-hyperplanes" class="section level1">
+<h1>Matroid Hyperplanes</h1>
+<p>In a matroid <span class="math inline">\(M\)</span> on a ground set <span class="math inline">\(E\)</span>, a <em>hyperplane</em> is a maximal subset <span class="math inline">\(H \subseteq E\)</span> with <span class="math inline">\(r(H)=r(E)-1\)</span>.</p>
+One can show that the set of hyperplanes has these properties:
+<ul style="line-height: 2em; margin-bottom: 15px">
+<li style="list-style: none">
+(H1) <span class="math inline">\(E\)</span> is not a hyperplane (<em>nontriviality</em>)
+</li>
+<li style="list-style: none">
+(H2) if <span class="math inline">\(H_1\)</span> and <span class="math inline">\(H_2\)</span> are hyperplanes and <span class="math inline">\(H_1 \subseteq H_2\)</span>, then <span class="math inline">\(H_1 = H_2\)</span> (<em>incomparability</em>)
+</li>
+<li style="list-style: none">
+(H3) if <span class="math inline">\(H_1\)</span> and <span class="math inline">\(H_2\)</span> are distinct hyperplanes and <span class="math inline">\(x \in E\)</span>, then there is a hyperplane <span class="math inline">\(H_3\)</span> with <span class="math inline">\((H_1 \cap H_2) \cup x \subseteq H_3\)</span> (<em>covering</em>)
+</li>
+</ul>
+<p>For a proof see <span class="citation">[1]</span> p. 39.</p>
+<p>Conversely, if a collection of subsets of <span class="math inline">\(E\)</span> satisfies the axioms (H1), (H2) and (H3), then the collection defines a valid rank function and a matroid on <span class="math inline">\(E\)</span>. To do this, first define the <em>corank</em> function <span class="math inline">\(c()\)</span> by: <span class="math display">\[\begin{equation}
+c(A) := \max \Bigl\{ k : \text{there are hyperplanes } H_1,..., H_k
+\text{ where for all } j,
+A \subseteq H_j \text{ and } H_1 \cap ... \cap H_{j-1} \nsubseteq H_j \Bigr\}
+\end{equation}\]</span> And now define <span class="math inline">\(r(A) := c(\varnothing) - c(A)\)</span>. This function <span class="math inline">\(r()\)</span> satisfies the axioms (R1), (R2), and (R3). The above formula appears in <span class="citation">[2]</span> p. 306, without a proof.</p>
+<p>Given a collection of hyperplanes, checking the hyperplane axioms (H1), (H2), and (H3) is more efficient than checking the rank function axioms (R1), (R2), and (R3), but <em>still</em> too time-consuming in practice.</p>
+<p><br><br></p>
+</div>
+<div id="matroid-circuits" class="section level1">
+<h1>Matroid Circuits</h1>
+<p>In a matroid <span class="math inline">\(M\)</span> on a ground set <span class="math inline">\(E\)</span>, a <em>circuit</em> is a subset <span class="math inline">\(C \subseteq E\)</span> with <span class="math inline">\(r(C)=|C|-1\)</span> and <span class="math inline">\(r(C - x) = r(C)\)</span> for all <span class="math inline">\(x \in C\)</span>.</p>
+One can show that the set of circuits has these properties:
+<ul style="line-height: 2em; margin-bottom: 15px">
+<li style="list-style: none">
+(C1) <span class="math inline">\(\varnothing\)</span> is not a circuit (<em>nontriviality</em>)
+</li>
+<li style="list-style: none">
+(C2) if <span class="math inline">\(C_1\)</span> and <span class="math inline">\(C_2\)</span> are circuits and <span class="math inline">\(C_1 \subseteq C_2\)</span>, then <span class="math inline">\(C_1 = C_2\)</span> (<em>incomparability</em>)
+</li>
+<li style="list-style: none">
+(C3) if <span class="math inline">\(C_1\)</span> and <span class="math inline">\(C_2\)</span> are distinct circuits and <span class="math inline">\(x \in E\)</span>, then there is a circuit <span class="math inline">\(C_3 \subseteq(C_1 \cup C_2) - x\)</span> (<em>weak elimination</em>)
+</li>
+</ul>
+<p>For a proof see <span class="citation">[1]</span> p. 9.</p>
+<p>Conversely, if a collection of subsets of <span class="math inline">\(E\)</span> satisfies the axioms (C1), (C2) and (C3), then the collection defines a valid rank function and a matroid on <span class="math inline">\(E\)</span>. <span class="math display">\[\begin{equation}
+r(A) := |A| - \max \Bigl\{ k : \text{there are circuits } C_1,..., C_k
+\text{ where for all } j,
+C_j \subseteq A \text{ and } C_j \nsubseteq C_1 \cup ... \cup C_{j-1}  \Bigr\}
+\end{equation}\]</span> This formula appears in <span class="citation">[2]</span> p. 306, without a proof.</p>
+<p>A circuit of size 1 is a loop. A circuit of size 2 is a pair of points in a multiple group. Recall that <em>simple matroid</em> is a matroid with no loops or multiple groups. Thus, a simple matroid is a matroid with no circuits of size 1 or 2.</p>
+<p><br><br></p>
+</div>
+<div id="efficient-checking-of-hyperplane-axioms" class="section level1">
+<h1>Efficient Checking of Hyperplane Axioms</h1>
+<p>In this section we derive an efficient way to check the hyperplane axioms, but only in the case when the matroid rank is 3.</p>
+Given an integer <span class="math inline">\(d \ge 1\)</span> a <span class="math inline">\(d\)</span>-<em>partition of</em> <span class="math inline">\(E\)</span> is a collection of subsets of <span class="math inline">\(E\)</span>, called <em>blocks</em>, with these properties:
+<ul style="line-height: 2em; margin-bottom: 15px">
+<li style="list-style: none">
+(D1) there are 2 or more blocks
+</li>
+<li style="list-style: none">
+(D2) each block has <span class="math inline">\(d\)</span> or more points
+</li>
+<li style="list-style: none">
+(D3) every <span class="math inline">\(d\)</span>-element subset of <span class="math inline">\(E\)</span> is a subset of exactly one block
+</li>
+</ul>
+<p>One can show that the blocks of a <span class="math inline">\(d\)</span>-partition satisfy the hyperplane axioms (H1), (H2), and (H3). For a proof see <span class="citation">[1]</span> p. 40. The resulting matroid on <span class="math inline">\(E\)</span> is called a <em>paving matroid</em> and has rank <span class="math inline">\(d{+}1\)</span>. Note that the 3 properties of a <span class="math inline">\(d\)</span>-partition can be checked efficiently.</p>
+<p><strong>Theorem</strong> A matroid of rank <span class="math inline">\(r \ge 2\)</span> is a paving matroid if and only if every circuit has size <span class="math inline">\(r\)</span> or greater.</p>
+<p><strong>Proof</strong> See <span class="citation">[1]</span>, p. 40.</p>
+<p><br></p>
+<p><strong>Theorem</strong> A simple matroid <span class="math inline">\(M\)</span> of rank 3 is a paving matroid.</p>
+<p><strong>Proof</strong> (trivial) Since <span class="math inline">\(M\)</span> is simple no circuit has size 1 or 2. Therefore every circuit has size 3 or greater. By the previous theorem, <span class="math inline">\(M\)</span> is paving. <span class="math inline">\(\square\)</span></p>
+Given a set of proposed hyperplanes for a matroid of rank 3, we finally have an efficient way to check the hyperplane axioms, by checking the <span class="math inline">\(d\)</span>-partition block axioms instead.
+<ol>
+<li>
+simplify the hyperplanes
+</li>
+<li>
+verify (D1) and (D2), which are linear in the number of hyperplanes
+</li>
+<li>
+verify (D3), which is quadratic in the number of generators
+</li>
+</ol>
+<p>For the hyperplane simplification in item 1, the number of hyperplanes is preserved, but all loops are removed, and every generator except one from each multiple group are removed.</p>
+<p><br><br></p>
+</div>
+<div id="conclusion-and-conjecture" class="section level1">
+<h1>Conclusion and Conjecture</h1>
+<p>To summarize, let <span class="math inline">\(E\)</span> be a finite set of floating point 3D vectors, with no vector equal to 0 and no vector a multiple of another (with tolerances). The vectors generate a zonohedron. A collection of subsets of <span class="math inline">\(E\)</span> is then computed, with each subset coplanar, or very close to coplanar using the tolerance parameter <code>e2</code> discussed above. Each subset is the proposed set of generators of a facet of the generated zonohedron, and all facets are represented. These subsets are proposed as the hyperplanes of a matroid. We have shown that:</p>
+<blockquote>
+If <span class="math inline">\(E\)</span> can be slightly perturbed to a set of actual real vectors <span class="math inline">\(E&#39; \subset \mathbb{R}^3\)</span>, so that the rank of each real hyperplane is 2, and is maximal w.r.t. this property, then these hyperplanes satisfy properties (D1), (D2), and (D3).
+</blockquote>
+<p>In the software package, we use the contrapositive form:</p>
+<blockquote>
+If these proposed hyperplanes do not satisfy (D1), (D2), and (D3), then the hyperplanes do not form a valid matroid, and <span class="math inline">\(E\)</span> <em>cannot</em> be slightly perturbed to satisfy the desired rank=2 property.
+</blockquote>
+<p>Even if the matroid is valid, the perturbation <span class="math inline">\(E&#39;\)</span> may not exist, because the matroid might not be representable over the real numbers <span class="math inline">\(\mathbb{R}\)</span>. A classical example is the <em>Fano plane</em> matroid on 7 points with 7 hyperplanes. It has just too many hyperplanes, see <span class="citation">[3]</span>.</p>
+<p>Nevertheless, we conjecture that such non-representable matroids cannot occur in practice.</p>
+<blockquote>
+<strong>Conjecture</strong> If the hyperplanes for the floating point set <span class="math inline">\(E\)</span> are computed following the procedure in the <strong>Introduction</strong>, and the tolerance <code>e2</code> (depending on <span class="math inline">\(E\)</span>) is sufficiently small, then a perturbation <span class="math inline">\(E&#39; \subset \mathbb{R}^3\)</span> representing the matroid exists.
+</blockquote>
+<p>This statement is theoretical in nature, since real numbers in <span class="math inline">\(\mathbb{R}\)</span> cannot be represented exactly.</p>
+<p>The conjecture is true in some simple cases. Before exploring this, call the hyperplanes of size 2 the <em>trivial hyperplanes</em>. Note that for the Fano plane matroid, all 7 hyperplanes are size 3 and non-trivial.</p>
+<p>Suppose that <em>all</em> the hyperplanes are trivial, so the matroid is uniform and all the facets of the zonohedron are parallelograms. Then no perturbation is needed at all; the given vectors (with dyadic rational numbers) already represent. This is the case for 7 of the 13 classical zonohedra in <code>classics.genlist</code>. And it is also the case for the generators in <code>colorimetry.genlist[[3]]</code>.</p>
+<p>Now suppose that the matroid has only 1 non-trivial hyperplane. Then there are 3 or more generators that (approximately) span a plane, and all the other generators are far from the plane. Perturb this plane to the “best fit” linear plane <span class="math inline">\(P\)</span> to these generators where <span class="math inline">\(P \subset \mathbb{R}^3\)</span>, and then project them onto <span class="math inline">\(P\)</span>. If this perturbation accidentally creates non-trivial hyperplanes with the <em>other</em> generators, then just perturb the other generators to get the original matroid. An example is the matroid generated by <code>colorimetry.genlist[[2]]</code>, which has 1 non-trivial hyperplane with 50 generators.</p>
+<p>Now suppose that all the non-trivial hyperplanes are disjoint. Then we can repeat the procedure in the previous paragraph for each hyperplane. Since the hyperplanes are disjoint, there is no “interaction” between them. An example is the matroid generated by <code>colorimetry.genlist[[1]]</code>, which has 2 disjoint non-trivial hyperplanes with sizes 3 and 26.</p>
+<p>Now suppose that the non-trivial hyperplanes intersect in a single generator. We can perform a “constrained best fit” perturbation for each plane <span class="math inline">\(P\)</span>, where the constraint is that that single generator is in the plane. An example is the matroid generated by <code>classics.genlist[[5]]</code>, which has 2 non-trivial hyperplanes: <span class="math inline">\(\{1, 3, 4\}\)</span> and <span class="math inline">\(\{2, 3, 5\}\)</span>. The generated zonohedron is the <em>rhombo-hexagonal dodecahedron</em>.</p>
+<p>More simple cases can be listed by mixing the above, but we cannot find a general proof of the conjecture.</p>
+<p><br><br></p>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+<div id="refs" class="references csl-bib-body">
+<div id="ref-Welsh1976" class="csl-entry">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">WELSH, D. J. A. <em>Matroid theory</em> [online]. B.m.: Academic Press, 1976. Available at: <a href="https://books.google.com/books?id=QL2iYMBLpFwC">https://books.google.com/books?id=QL2iYMBLpFwC</a></div>
+</div>
+<div id="ref-White1986" class="csl-entry">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">WHITE, Neil. <em>Theory of matroids</em>. B.m.: Cambridge University Press, 1986. Encyclopedia of mathematics and its applications. ISBN 9780521309370. </div>
+</div>
+<div id="ref-FanoWiki" class="csl-entry">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">WIKIPEDIA CONTRIBUTORS. <em>Fano plane — <span>Wikipedia</span><span>,</span> the free encyclopedia</em> [online]. 2023. Available at: <a href="https://en.wikipedia.org/w/index.php?title=Fano_plane&amp;oldid=1149666161">https://en.wikipedia.org/w/index.php?title=Fano_plane&amp;oldid=1149666161</a>. [Online; accessed 27-April-2023]</div>
+</div>
+</div>
+<p><br><br></p>
+</div>
+<div id="session-information" class="section level1">
+<h1>Session Information</h1>
+This document was prepared Sat May 27, 2023 with the following configuration:
+<pre>
+R version 4.3.0 (2023-04-21 ucrt)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 10 x64 (build 19045)
+
+Matrix products: default
+
+
+locale:
+[1] LC_COLLATE=C                          
+[2] LC_CTYPE=English_United States.utf8   
+[3] LC_MONETARY=English_United States.utf8
+[4] LC_NUMERIC=C                          
+[5] LC_TIME=English_United States.utf8    
+
+time zone: America/Los_Angeles
+tzcode source: internal
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base     
+
+loaded via a namespace (and not attached):
+ [1] digest_0.6.31   R6_2.5.1        fastmap_1.1.1   xfun_0.39      
+ [5] cachem_1.0.8    knitr_1.42      htmltools_0.5.5 rmarkdown_2.21 
+ [9] cli_3.6.1       sass_0.4.6      jquerylib_0.1.4 compiler_4.3.0 
+[13] tools_4.3.0     evaluate_0.21   bslib_0.4.2     yaml_2.3.7     
+[17] rlang_1.1.1     jsonlite_1.8.4 
+</pre>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
