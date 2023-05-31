@@ -12,7 +12,7 @@
 
 <meta name="author" content="Glenn Davis" />
 
-<meta name="date" content="2023-05-27" />
+<meta name="date" content="2023-05-30" />
 
 <title>Ray Tracing the Zonohedron Boundary and the 2-Transition Surface</title>
 
@@ -363,7 +363,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Ray Tracing the Zonohedron Boundary and the 2-Transition Surface</h1>
 <h4 class="author">Glenn Davis</h4>
-<h4 class="date">2023-05-27</h4>
+<h4 class="date">2023-05-30</h4>
 
 
 <div id="TOC">
@@ -406,7 +406,7 @@ body {
 <p>Calculate the intersection of the ray with the boundary of <span class="math inline">\(Z\)</span>.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df_opt <span class="ot">=</span> <span class="fu">raytrace</span>( zono, base, u ) ; df_opt</span></code></pre></div>
 <pre><code>##     base.1   base.2   base.3 direction.1 direction.2 direction.3 facetidx sign     tmax  point.1  point.2  point.3 timetrace
-## 1 50.00400 50.00000 50.01653  0.03331263  0.36131522  0.93184848    49283   -1 53.63393 51.79069 69.37875 99.99523 0.0030668</code></pre>
+## 1 50.00400 50.00000 50.01653  0.03331263  0.36131522  0.93184848    49283   -1 53.63393 51.79069 69.37875 99.99523 0.0026449</code></pre>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>xyz_opt <span class="ot">=</span> df_opt<span class="sc">$</span>point[<span class="dv">1</span>, ] ; xyz_opt</span></code></pre></div>
 <pre><code>## [1] 51.79069 69.37875 99.99523</code></pre>
 <p>This matches Burns’ value of <span class="math inline">\(XYZ_{\text{LPsoln}}\)</span>. From Figure 8 of <span class="citation">[1]</span> we see that this point (and every point in the same parallelogram) comes from a reflectance spectrum with 4 transitions. This can be verified by inverting:</p>
@@ -417,7 +417,7 @@ body {
 <pre><code>##     base.1   base.2   base.3 direction.1 direction.2 direction.3 gndpair.1 gndpair.2   alpha.1   alpha.2     tmax  point.1  point.2  point.3
 ## 1 50.00400 50.00000 50.01653  0.03331263  0.36131522  0.93184848       629       575 0.2246808 0.4459951 53.63263 51.79065 69.37829 99.99402
 ##    iters timetrace
-## 1 107564 0.0072617</code></pre>
+## 1 107564 0.0038576</code></pre>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>xyz_2trans <span class="ot">=</span> df_2trans<span class="sc">$</span>point[<span class="dv">1</span>, ] ; xyz_2trans</span></code></pre></div>
 <pre><code>## [1] 51.79065 69.37829 99.99402</code></pre>
 <p>This matches Burns’ value of <span class="math inline">\(XYZ_{\text{two-trans}}\)</span> to 4 decimal places. The transition wavelengths 629 and 575nm, and the parallelogram coordinates 0.2246808 and 0.4459951 (these are the corresponding reflectances), are clearly visible in Figure 8.</p>
@@ -438,7 +438,7 @@ body {
 ## 1 51.79067 69.37852 99.99462   TRUE -0.0006013682    49283</code></pre>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">inside2trans</span>( zono, xyz_mid )</span></code></pre></div>
 <pre><code>##        p.1      p.2      p.3     distance linkingnumber inside  timecalc
-## 1 51.79067 69.37852 99.99462 0.0006013897             0  FALSE 0.0524293</code></pre>
+## 1 51.79067 69.37852 99.99462 0.0006013897             0  FALSE 0.0488543</code></pre>
 <p><br><br></p>
 </div>
 <div id="references" class="section level1">
@@ -455,7 +455,7 @@ body {
 </div>
 <div id="session-information" class="section level1">
 <h1>Session Information</h1>
-This document was prepared Sat May 27, 2023 with the following configuration:
+This document was prepared Tue May 30, 2023 with the following configuration:
 <pre>
 R version 4.3.0 (2023-04-21 ucrt)
 Platform: x86_64-w64-mingw32/x64 (64-bit)
@@ -478,7 +478,7 @@ attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] zonohedra_0.2-1
+[1] zonohedra_0.2-2
 
 loaded via a namespace (and not attached):
  [1] digest_0.6.31         R6_2.5.1              microbenchmark_1.4.10

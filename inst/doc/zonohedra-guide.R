@@ -11,11 +11,11 @@ rgl::setupKnitr(autoprint = TRUE)
 library(zonohedra)
 library(rgl)
 
-## ---- echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=8, fig.height=4, fig.cap='polar zonohedra with 5 generators (left) and 25 generators (right)   &emsp;&emsp;&emsp;&emsp; [both of these are interactive WebGL widgets]', fig.keep='none', fig.show='hide', out.width="100%", cache=FALSE----
+## ---- echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=8, fig.height=4, fig.cap='polar zonohedra with 5 generators (left) and 25 generators (right) &emsp;&emsp; [both of these are interactive WebGL widgets]', fig.keep='none', fig.show='hide', out.width="100%", cache=FALSE----
 rgl::mfrow3d( 1, 2 )
 pz5 = polarzonohedron( 5 ) ;  plot( pz5, ewd=5 )
 rgl::next3d()
-plot( polarzonohedron( 25), ewd=3 )
+plot( polarzonohedron( 25 ), ewd=3 )
 rgl::rglwidget( webgl=TRUE )
 
 ## ---- echo=TRUE, message=FALSE----------------------------------------------------------------------------------------

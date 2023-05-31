@@ -1666,6 +1666,9 @@ invertboundarydata <- function( x, boundarydata, tol=5.e-14 )
 
     distance    = rep( NA_real_, m )
     pcube       = matrix( NA_real_, m, nsimp )
+    
+    tolW    = 5.e-9
+    tolE    = 5.e-5
 
     for( k in 1:m )
         {
@@ -1703,11 +1706,23 @@ invertboundarydata <- function( x, boundarydata, tol=5.e-14 )
             y       = y[1:2]
 
             #   test for inside parallelogram, with a tolerance
-            ok  = all( abs(y) <= 0.5 + tol )
+            ok  = all( abs(y) <= 0.5 + tolW )
             if( ! ok )
                 {
-                log_level( ERROR, "Internal error.  y=%g,%g is outside [-1/2,1/2]^2.  tol=%g", y[1], y[2], tol )
-                next    # something went wrong
+                if( all( abs(y) <= 0.5 + tolE ) )   # tolE is much bigger than tolW
+                    {
+                    lev = WARN      # keep going and translate and clamp
+                    tol2 = tolW
+                    }
+                else
+                    {
+                    lev = ERROR     # this will force stoppage
+                    tol2 = tolE
+                    }
+                    
+                log_level( lev, "Internal problem.  y=[%.15g,%.15g] is outside the square [-1/2,1/2]^2.  tol2=%g",
+                                                    y[1], y[2], tol2 )
+                # next    # something went wrong
                 }
 
             # translate from [-0.5,0.5] to [0,1]

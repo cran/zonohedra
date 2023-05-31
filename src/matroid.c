@@ -1712,7 +1712,7 @@ anyissuperset( SEXP ssetlist, SEXP sset, SEXP sdecreasing )
 //
 //  returns a list of two items
 //      *) incident[] an integer vector.  incident[i] = # of hyperplanes that contain point i
-//      *) hash[] a real vector of point i, hash[i] can be very large, so use real
+//      *) hash[] a floating-point vector of point i, hash[i] can be very large, so use double
 
 SEXP
 incidencedata( SEXP shyper, SEXP sground )
@@ -1746,7 +1746,9 @@ incidencedata( SEXP shyper, SEXP sground )
             {
             incident[ hp[k]-1 ]++ ;     //  1-based to 0-based
 
-            hash[ hp[k]-1 ] += (j+1)*(j+1)*M_LN2;      //  1-based to 0-based
+            //  use 1.0 here to prevent signed integer overflow,
+            //  which was detected as an Additional Issue May 29, 2023
+            hash[ hp[k]-1 ] += (j+1.0)*(j+1.0)*M_LN2;      //  1-based to 0-based
             }
         }
 

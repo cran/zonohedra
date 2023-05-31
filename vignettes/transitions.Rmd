@@ -334,8 +334,9 @@ suitable linear map.
 The squares are distorted into parallelograms.
 The figure on the left draws the full subcomplex,
 and the one on the right only draws levels 0, 4, and 7.
-The "necklace of 9 diamonds" at level=4 is 4 is easily visible.
-The black dot is the image of 0, and the white dot is the image of $(1,...,1)$.
+The "necklace of 9 diamonds" at level=4 is easily visible.
+The black dot is the image of $(0,...,0)$,
+and the white dot is the image of $(1,...,1)$.
 
 More about these linear maps is given in the next section.
 
@@ -605,7 +606,8 @@ With $Z$, $S_2$, $L_2$, and $P$ defined as above, the following are equivalent:
 </ol>
 
 The equivalence of properties 1 and 3 is proved in West & Brill @Brill1983,
-but in the differentiable category.
+except the sequence of vector generators in this theorem
+is replaced by a continuous path of vectors in @Brill1983.
 To our knowledge, property 2 is new.
 
 
@@ -1141,7 +1143,8 @@ par( oldpar )
 Note that the values at 570 and 608 are both 1/2, and all the other values are 0 or 1.
 
 <br>
-The following figure is a helpful 3D visualization.
+The following figure is a helpful 3D visualization
+of *all* the abundant parallelograms:
 ```{r, rgl=TRUE, dev='png', echo=TRUE,  message=TRUE,  warning=FALSE, fig.width=6.5, fig.height=4, fig.cap='Figure 10.3', fig.keep='last', fig.show='hold', out.width="100%", cache=FALSE }
 library( orientlib )
 user3x3 = orientlib::rotmatrix( orientlib::eulerzyx( -0.249417, 0.7116067, 2.324364 ) )@x
