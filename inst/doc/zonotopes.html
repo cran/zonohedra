@@ -12,7 +12,7 @@
 
 <meta name="author" content="Glenn Davis" />
 
-<meta name="date" content="2023-05-30" />
+<meta name="date" content="2024-07-06" />
 
 <title>Zonotopes</title>
 
@@ -363,7 +363,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Zonotopes</h1>
 <h4 class="author">Glenn Davis</h4>
-<h4 class="date">2023-05-30</h4>
+<h4 class="date">2024-07-06</h4>
 
 
 <div id="TOC">
@@ -390,6 +390,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </div>
 
 <p>This vignette is a long-winded mathematical exposition on zonotopes that concentrates on inversion. Discussion of software is delayed until the end. Featured functions are: <code>zonoseg()</code>, <code>zonogon()</code>, <code>zonohedron()</code>, <code>invert()</code>, and <code>invertboundary()</code>.</p>
+<p><br><br></p>
 <div id="basic-concepts" class="section level1" number="1">
 <h1><span class="header-section-number">1</span> Basic Concepts</h1>
 <p>The emphasis in this vignette are the concepts needed to understand the inversion functions in the <strong>zonohedra</strong> package. Much of this is based on <span class="citation">[5]</span>.</p>
@@ -417,9 +418,9 @@ A <em>supporting hyperplane</em> of a compact set <span class="math inline">\(C\
 </ol>
 <p><strong>Proof:</strong><br />
 not ii. <span class="math inline">\(\implies\)</span> not 2.<br />
-Let ii. be false, so hyperplane <span class="math inline">\(P\)</span> <em>does</em> intersect <span class="math inline">\(int(B)\)</span>, at a point <span class="math inline">\(p\)</span>. Then there is an open ball centered at <span class="math inline">\(p\)</span>, and the ball is inside <span class="math inline">\(B\)</span>. There are clearly points in the ball in <em>both</em> halfspaces, and so 2. is false.</p>
+Let ii. be false, so hyperplane <span class="math inline">\(P\)</span> <em>does</em> intersect <span class="math inline">\(\operatorname{int}(B)\)</span>, at a point <span class="math inline">\(p\)</span>. Then there is an open ball centered at <span class="math inline">\(p\)</span>, and the ball is inside <span class="math inline">\(B\)</span>. There are clearly points in the ball in <em>both</em> halfspaces, and so 2. is false.</p>
 <p>not 2. <span class="math inline">\(\implies\)</span> not ii.<br />
-Let 2. be false, so there are points <span class="math inline">\(b^-, b^+ \in B\)</span> that are in <em>different</em> open halfspaces. Let <span class="math inline">\(b_i\)</span> be a point in <span class="math inline">\(int(B)\)</span>. If <span class="math inline">\(b_i \in P\)</span> then ii. is false and we are done. Otherwise, either <span class="math inline">\(b^-\)</span> or <span class="math inline">\(b^+\)</span> are in a different halfspace than <span class="math inline">\(b_i\)</span>. Take it to be <span class="math inline">\(b^+\)</span>, w.l.o.g. Since <span class="math inline">\(b_i\)</span> and <span class="math inline">\(b^+\)</span> are in opposite halfspaces, the segment <span class="math inline">\([b_i,b^+]\)</span> intersects <span class="math inline">\(P\)</span>; let <span class="math inline">\(c_i\)</span> be this point of intersection. There is an open ball in <span class="math inline">\(B\)</span> centered at <span class="math inline">\(b_i\)</span>. Let <span class="math inline">\(C\)</span> denote the convex hull of <span class="math inline">\(b^+\)</span> and this ball - a partial open cone. By convexity of <span class="math inline">\(B\)</span>, <span class="math inline">\(C\)</span> is in <span class="math inline">\(B\)</span>. There is a scaled down open ball centered at <span class="math inline">\(c_i\)</span> and contained in <span class="math inline">\(C\)</span>. Thus <span class="math inline">\(c_i \in P \cap int(B)\)</span> and ii. is false. <span class="math inline">\(\square\)</span></p>
+Let 2. be false, so there are points <span class="math inline">\(b^-, b^+ \in B\)</span> that are in <em>different</em> open halfspaces. Let <span class="math inline">\(b_i\)</span> be a point in <span class="math inline">\(\operatorname{int}(B)\)</span>. If <span class="math inline">\(b_i \in P\)</span> then ii. is false and we are done. Otherwise, either <span class="math inline">\(b^-\)</span> or <span class="math inline">\(b^+\)</span> are in a different halfspace than <span class="math inline">\(b_i\)</span>. Take it to be <span class="math inline">\(b^+\)</span>, w.l.o.g. Since <span class="math inline">\(b_i\)</span> and <span class="math inline">\(b^+\)</span> are in opposite halfspaces, the segment <span class="math inline">\([b_i,b^+]\)</span> intersects <span class="math inline">\(P\)</span>; let <span class="math inline">\(c_i\)</span> be this point of intersection. There is an open ball in <span class="math inline">\(B\)</span> centered at <span class="math inline">\(b_i\)</span>. Let <span class="math inline">\(C\)</span> denote the convex hull of <span class="math inline">\(b^+\)</span> and this ball - a partial open cone. By convexity of <span class="math inline">\(B\)</span>, <span class="math inline">\(C\)</span> is in <span class="math inline">\(B\)</span>. There is a scaled down open ball centered at <span class="math inline">\(c_i\)</span> and contained in <span class="math inline">\(C\)</span>. Thus <span class="math inline">\(c_i \in P \cap \operatorname{int}(B)\)</span> and ii. is false. <span class="math inline">\(\square\)</span></p>
 </div>
 <div id="faces" class="section level2" number="1.2">
 <h2><span class="header-section-number">1.2</span> faces</h2>
@@ -473,9 +474,10 @@ A (proper) <em>face</em> <span class="math inline">\(F\)</span> of a compact set
 </div>
 <div id="matroids-and-zonotopes" class="section level2" number="1.5">
 <h2><span class="header-section-number">1.5</span> matroids and zonotopes</h2>
-<p>This section assumes some knowledge of <em>matroids</em>; for background on them see the matroids vignette.</p>
+<p>This section assumes some knowledge of <em>matroids</em>; for background on them see the <a href="matroids.html">Matroids</a> vignette.</p>
 <p>Given a zonotope <span class="math inline">\(Z = L([0,1]^n) + z_0\)</span> as above, the generators define a matroid <span class="math inline">\(M\)</span>. Since <span class="math inline">\(L\)</span> is surjective, <span class="math inline">\(\mathrm{rank}(M) = m\)</span>. A hyperplane of <span class="math inline">\(M\)</span> corresponds to a pair of antipodal facets of <span class="math inline">\(Z\)</span> (the concept of <em>hyperplane</em> here is the the one used in matroid theory).</p>
 <p>Assume now that <span class="math inline">\(m=3\)</span>, so <span class="math inline">\(Z\)</span> is a zonohedron and all its facets are zonogons. If <span class="math inline">\(M\)</span> is simple, then the number of sides of a zonogon facet is twice the number of points in the corresponding hyperplane. So a parallelogram corresponds to a hyperplane with 2 points, which is called a <em>trivial</em> hyperplane.</p>
+<p><br><br></p>
 </div>
 </div>
 <div id="inversion" class="section level1" number="2">
@@ -540,7 +542,7 @@ or <span class="math inline">\(z\)</span> is in a parallelogram facet of <span c
 <p>Each parallelogram is the image of a square in <span class="math inline">\([0,1]^n\)</span>, and the squares are “glued” together on the edges to form a “surface” (in fact a topological sphere) embedded in <span class="math inline">\([0,1]^n\)</span>. We see another example of this in the <a href="transitions.html">The 2-Transition Subcomplex and the 2-Transition Surface</a> vignette.</p>
 <p>Now suppose that a facet of <span class="math inline">\(Z\)</span> is an arbitrary zonogon, with a high number of generators. Then by rotating this non-trivial facet to the plane, and choosing the standard tiling, we can use the construction in the previous section to extend the right inverse across this facet. Once again, the right inverse is unique on the edges, which implies that the extended <span class="math inline">\(\sigma()\)</span> is continuous.</p>
 <p>To summarize this section, a right inverse <span class="math inline">\(\sigma()\)</span> defined on <span class="math inline">\(\partial Z\)</span> always exists and is continuous, but is only unique up to the selected tiling of the non-trivial facets of <span class="math inline">\(Z\)</span>.</p>
-<p><br></p>
+<p><br><br></p>
 </div>
 </div>
 <div id="software" class="section level1" number="3">
@@ -552,7 +554,7 @@ or <span class="math inline">\(z\)</span> is in a parallelogram facet of <span c
 <p>In many calculations, the central symmetry is used to reduce storage. For example, only one facet in a pair of antipodal facets needs to be stored, and the other can easily be derived by reflection. In some cases, the symmetry is also used to reduce computation time.</p>
 <p>The section <strong>extending the right inverse, using parallelogram tilings</strong> is implemented in the function <code>invert()</code>, which takes the zonogon as argument. The section <strong>a right inverse on the boundary of a zonohedron</strong> is implemented in the function <code>invertboundary()</code>, which takes the zonohedron as argument.</p>
 <p>For a pointed zonohedron <span class="math inline">\(Z\)</span>, the function <code>plotpolygon()</code> plots the generator polygon for <span class="math inline">\(Z\)</span> at 0.</p>
-<p><br></p>
+<p><br><br><br></p>
 </div>
 <div id="references" class="section level1" number="4">
 <h1><span class="header-section-number">4</span> References</h1>
@@ -576,14 +578,14 @@ or <span class="math inline">\(z\)</span> is in a parallelogram facet of <span c
 <div class="csl-left-margin">[6] </div><div class="csl-right-inline"><em>Number of primitive sorting networks on n elements; also number of rhombic tilings of a 2n-gon</em>. B.m.: <a href="https://oeis.org/A006245" class="uri">https://oeis.org/A006245</a>. Sequence <span>A</span>006245 in the <span>O</span>n-line <span>E</span>ncyclopedia of <span>I</span>nteger <span>S</span>equences (n.d.). Accessed on Mar 5 2023</div>
 </div>
 </div>
-<p><br></p>
+<p><br><br></p>
 </div>
 <div id="session-information" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> Session Information</h1>
-This document was prepared Tue May 30, 2023 with the following configuration:
+This document was prepared Sat Jul 06, 2024 with the following configuration:
 <pre>
-R version 4.3.0 (2023-04-21 ucrt)
-Platform: x86_64-w64-mingw32/x64 (64-bit)
+R version 4.4.1 (2024-06-14 ucrt)
+Platform: x86_64-w64-mingw32/x64
 Running under: Windows 10 x64 (build 19045)
 
 Matrix products: default
@@ -596,25 +598,25 @@ locale:
 [4] LC_NUMERIC=C                          
 [5] LC_TIME=English_United States.utf8    
 
-time zone: America/Los_Angeles
+time zone: America/New_York
 tzcode source: internal
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] gifski_1.12.0    orientlib_0.10.5 rgl_1.1.3        zonohedra_0.2-2 
+[1] gifski_1.12.0-2  orientlib_0.10.5 rgl_1.3.1        zonohedra_0.3-0 
 
 loaded via a namespace (and not attached):
- [1] microbenchmark_1.4.10 cli_3.6.1             knitr_1.42           
- [4] rlang_1.1.1           xfun_0.39             highr_0.10           
- [7] jsonlite_1.8.4        glue_1.6.2            htmltools_0.5.5      
-[10] sass_0.4.6            rmarkdown_2.21        evaluate_0.21        
-[13] jquerylib_0.1.4       ellipsis_0.3.2        fastmap_1.1.1        
-[16] base64enc_0.1-3       yaml_2.3.7            compiler_4.3.0       
-[19] htmlwidgets_1.6.2     digest_0.6.31         R6_2.5.1             
-[22] magrittr_2.0.3        bslib_0.4.2           logger_0.2.2         
-[25] tools_4.3.0           cachem_1.0.8         
+ [1] digest_0.6.35         R6_2.5.1              base64enc_0.1-3      
+ [4] microbenchmark_1.4.10 fastmap_1.2.0         xfun_0.44            
+ [7] magrittr_2.0.3        glue_1.7.0            cachem_1.1.0         
+[10] knitr_1.47            htmltools_0.5.8.1     logger_0.3.0         
+[13] rmarkdown_2.27        lifecycle_1.0.4       cli_3.6.2            
+[16] sass_0.4.9            jquerylib_0.1.4       compiler_4.4.1       
+[19] highr_0.11            tools_4.4.1           evaluate_0.23        
+[22] bslib_0.7.0           yaml_2.3.8            htmlwidgets_1.6.4    
+[25] rlang_1.1.3           jsonlite_1.8.8       
 </pre>
 </div>
 

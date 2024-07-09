@@ -59,8 +59,8 @@ SEXP dupAtomMatHash(SEXP x, SEXP MARGIN, SEXP fromLast)
 {/* returns a logical vector of duplicated rows of numeric matrix x */
 	SEXP out;
 	int* dim;
-	dim=INTEGER(getAttrib(x, R_DimSymbol));
-	out = PROTECT(allocVector(LGLSXP, dim[*INTEGER(MARGIN)-1]));
+	dim=INTEGER(Rf_getAttrib(x, R_DimSymbol));
+	out = PROTECT(Rf_allocVector(LGLSXP, dim[*INTEGER(MARGIN)-1]));
 	
 	switch (TYPEOF(x)) {
 		case REALSXP:
@@ -91,7 +91,7 @@ SEXP dupAtomMatHash(SEXP x, SEXP MARGIN, SEXP fromLast)
 			rawVecSetHash.duplicatedMat	(RAW(x), dim, dim+1,  LOGICAL(out), *INTEGER(MARGIN)==1, (bool)(*(LOGICAL(fromLast))) );
 			break;
 		default:
-			error("C function 'dupAtomMatHash' only accepts REALSXP, LGLSXP, INTSXP and STRSXP");
+			Rf_error("C function 'dupAtomMatHash' only accepts REALSXP, LGLSXP, INTSXP and STRSXP");
 	}
 	
 	UNPROTECT(1);
@@ -104,8 +104,8 @@ SEXP anyDupAtomMatHash(SEXP x, SEXP MARGIN, SEXP fromLast)
 {/* returns a logical vector of duplicated rows of numeric matrix x */
     SEXP out;
 	int* dim;
-	dim=INTEGER(getAttrib(x, R_DimSymbol));
-	out = PROTECT(allocVector(INTSXP, 1));
+	dim=INTEGER(Rf_getAttrib(x, R_DimSymbol));
+	out = PROTECT(Rf_allocVector(INTSXP, 1));
 	
 	switch (TYPEOF(x)) {
 		case REALSXP:
@@ -136,7 +136,7 @@ SEXP anyDupAtomMatHash(SEXP x, SEXP MARGIN, SEXP fromLast)
 			rawVecSetHash.anyDuplicatedMat	(RAW(x), dim, dim+1,  INTEGER(out), *INTEGER(MARGIN)==1, (bool)(*(LOGICAL(fromLast))) );
 			break;
 		default:
-			error("C function 'anyDupAtomMatHash' only accepts REALSXP, LGLSXP, INTSXP and STRSXP");
+			Rf_error("C function 'anyDupAtomMatHash' only accepts REALSXP, LGLSXP, INTSXP and STRSXP");
 	}
 	
 	UNPROTECT(1);
@@ -147,8 +147,8 @@ SEXP anyDupAtomMatHash(SEXP x, SEXP MARGIN, SEXP fromLast)
 /* returns an integer vector of duplicated rows of numeric matrix x */
 SEXP grpDupAtomMatHash( SEXP x, SEXP MARGIN )
     {
-	int     *dim = INTEGER(getAttrib(x, R_DimSymbol));
-	SEXP    out = PROTECT( allocVector(INTSXP, dim[*INTEGER(MARGIN)-1]) );
+	int     *dim = INTEGER(Rf_getAttrib(x, R_DimSymbol));
+	SEXP    out = PROTECT( Rf_allocVector(INTSXP, dim[*INTEGER(MARGIN)-1]) );
     
     bool    ok;
     int     nGrps[3];    
@@ -182,19 +182,21 @@ SEXP grpDupAtomMatHash( SEXP x, SEXP MARGIN )
 			ok = rawVecMapHash.grpDuplicatedMat(RAW(x), dim, dim+1, *INTEGER(MARGIN)==1,  INTEGER(out), nGrps );
 			break;
 		default:
-			error( "C function 'grpDupAtomMatHash' only accepts REALSXP, LGLSXP, INTSXP, STRSXP, CPLXSXP, and RAWSXP.");
+			Rf_error( "C function 'grpDupAtomMatHash' only accepts REALSXP, LGLSXP, INTSXP, STRSXP, CPLXSXP, and RAWSXP.");
 	}
     
     if( ! ok )
-        error( "C function 'grpDupAtomMatHash' unexpected failure !" );
+        Rf_error( "C function 'grpDupAtomMatHash' unexpected failure !" );
 	
     SEXP nGroups;
-    nGroups = PROTECT( allocVector(INTSXP,3) );
+    nGroups = PROTECT( Rf_allocVector(INTSXP,3) );
     INTEGER(nGroups)[0] = nGrps[0];
     INTEGER(nGroups)[1] = nGrps[1];
     INTEGER(nGroups)[2] = nGrps[2];
-    setAttrib(out, install("ngroups"), nGroups);
-    UNPROTECT(2);
+    
+    Rf_setAttrib(out, Rf_install("ngroups"), nGroups);
+    
+    UNPROTECT(2);   //  out and nGroups
     
 	return out;
     }

@@ -352,29 +352,6 @@ dist2pgram( const double point[3], const double v1[3], const double v2[3], const
 
 
 
-//  this function is only used for testing
-
-SEXP
-dist2pgram_test( SEXP spoint, SEXP sv1, SEXP sv2, SEXP scenter, SEXP snormal )
-    {
-    const   double  *point  = REAL(spoint);
-    const   double  *v1     = REAL(sv1);
-    const   double  *v2     = REAL(sv2);
-    const   double  *center = REAL(scenter);
-    const   double  *normal = REAL(snormal);
-
-    double  d = dist2pgram( point, v1, v2, center, normal ) ;
-
-    SEXP    out = PROTECT( allocVector(REALSXP,1) );
-
-    REAL(out)[0]    = d ;
-
-    UNPROTECT(1);
-
-    return( out );
-    }
-
-
 //  smatgen     3xN matrix of generators, for the simplified matroid
 //  sidxpair    N(N-1)/2 x 3 integer matrix of pairs of generators, 1-based
 //  scenter     N(N-1)/2 x 3 matrix of pgram centers, in centered zonohedron coordinates
@@ -392,7 +369,7 @@ dist2surface( SEXP smatgen, SEXP sidxpair, SEXP scenter, SEXP snormal, SEXP spoi
     {
     const   int *dim ;
 
-    dim = INTEGER(getAttrib(smatgen, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(smatgen, R_DimSymbol));
     if( dim[0] != 3  ||  dim[1] < 3 )
         {
         Rprintf( "dist2surface().  bad smatgen %d x %d.\n", dim[0], dim[1] );
@@ -403,7 +380,7 @@ dist2surface( SEXP smatgen, SEXP sidxpair, SEXP scenter, SEXP snormal, SEXP spoi
 
     int facets = (n*(n-1))/2 ;
 
-    dim = INTEGER(getAttrib(sidxpair, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(sidxpair, R_DimSymbol));
     if( dim[0] != facets  || dim[1] != 2  )
         {
         Rprintf( "dist2surface().  bad sidxpair %d x %d.\n", dim[0], dim[1] );
@@ -411,7 +388,7 @@ dist2surface( SEXP smatgen, SEXP sidxpair, SEXP scenter, SEXP snormal, SEXP spoi
         }
     const   int *idxpair = INTEGER(sidxpair);
 
-    dim = INTEGER(getAttrib(scenter, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(scenter, R_DimSymbol));
     if( dim[0] != facets  || dim[1] != 3  )
         {
         Rprintf( "dist2surface().  bad scenter %d x %d.\n", dim[0], dim[1] );
@@ -419,7 +396,7 @@ dist2surface( SEXP smatgen, SEXP sidxpair, SEXP scenter, SEXP snormal, SEXP spoi
         }
     const   double  *center = REAL(scenter);
 
-    dim = INTEGER(getAttrib(snormal, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(snormal, R_DimSymbol));
     if( dim[0] != facets  || dim[1] != 3  )
         {
         Rprintf( "dist2surface().  bad snormal %d x %d.\n", dim[0], dim[1] );
@@ -490,10 +467,36 @@ dist2surface( SEXP smatgen, SEXP sidxpair, SEXP scenter, SEXP snormal, SEXP spoi
 
 
 
-    SEXP    out = PROTECT( allocVector(REALSXP,1) );
+    SEXP    out = PROTECT( Rf_allocVector(REALSXP,1) );
     *( REAL(out) ) = dist_min ;
 
     UNPROTECT(1);
 
     return(out);
     }
+
+    
+
+//  this function is only used for testing
+
+SEXP
+dist2pgram_test( SEXP spoint, SEXP sv1, SEXP sv2, SEXP scenter, SEXP snormal )
+    {
+    const   double  *point  = REAL(spoint);
+    const   double  *v1     = REAL(sv1);
+    const   double  *v2     = REAL(sv2);
+    const   double  *center = REAL(scenter);
+    const   double  *normal = REAL(snormal);
+
+    double  d = dist2pgram( point, v1, v2, center, normal ) ;
+
+    SEXP    out = PROTECT( Rf_allocVector(REALSXP,1) );
+
+    REAL(out)[0]    = d ;
+
+    UNPROTECT(1);
+
+    return( out );
+    }
+
+    

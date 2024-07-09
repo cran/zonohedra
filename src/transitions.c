@@ -16,7 +16,7 @@ transitioncount( SEXP spt )
 
     //  make logical mask of the interior points
     //  and find the first boundary point
-    bool    *interior = Calloc( n, bool );
+    bool    *interior = R_Calloc( n, bool );
     
     int     bfirst  = -1;
     
@@ -31,9 +31,9 @@ transitioncount( SEXP spt )
     if( bfirst < 0 )
         {
         //  all values are interior, a special case
-        Free( interior );
+        R_Free( interior );
         
-        SEXP    out = PROTECT( allocVector(INTSXP,1) );
+        SEXP    out = PROTECT( Rf_allocVector(INTSXP,1) );
         *INTEGER(out)   =  2 * ( (n+1)/2 ) ;
         UNPROTECT(1) ;
         return( out ) ;
@@ -75,9 +75,9 @@ transitioncount( SEXP spt )
             }
         }
     
-    Free( interior );
+    R_Free( interior );
     
-    SEXP    out = PROTECT( allocVector(INTSXP,1) );
+    SEXP    out = PROTECT( Rf_allocVector(INTSXP,1) );
     *INTEGER(out)   =  count ;
     UNPROTECT(1) ;
     

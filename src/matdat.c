@@ -12,7 +12,7 @@ extractmatdat( SEXP sx, SEXP smargin )
 
     memset( &out, 0, sizeof(out) );
 
-    int *dim    = INTEGER(getAttrib(sx, R_DimSymbol));
+    int *dim    = INTEGER(Rf_getAttrib(sx, R_DimSymbol));
     int nrow    = out.dim[0] = dim[0] ;
     int ncol    = out.dim[1] = dim[1] ;
 

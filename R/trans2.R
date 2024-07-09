@@ -81,7 +81,7 @@ getmetrics2trans <- function( x, angles=TRUE, more=TRUE, tol=5.e-12 )
     #dotvec  = .colSums( centermat * matsimple$crossprods, nrow(centermat), ncol(centermat) )
 
     #   get the linking number with respect to the center
-    linkingnum  = linkingnumber( x, pgramdf )        # , , c(0,0,0) )
+    linkingnum  = linkingnumber3( x, pgramdf )        # , , c(0,0,0) )
 
     #   alternate still needs work
     #linkingnum  = linkingnumber2( x )        # , , c(0,0,0) )
@@ -353,6 +353,8 @@ inside2trans <- function( x, p )       #  tol=5.e-12
     matsimp = getsimplified( x$matroid )
     matgen  = getmatrix(matsimp)
 
+    pointed = is_pointed(x)
+
     m   = nrow(p)
 
     inside      = rep( NA, m )      # logical
@@ -363,11 +365,21 @@ inside2trans <- function( x, p )       #  tol=5.e-12
     for( k in 1:m )
         {
         time_start  = gettime()
+        
+        pcent   = point_centered[k, ]
 
-        distance[k] = .Call( C_dist2surface, matgen, pgramdf$idxpair, pgramdf$center, pgramdf$cross, point_centered[k, ] )
+        #   quick check for black point or white point
+        black_or_white = pointed  &&  ( all(pcent == -x$center)  ||  all(pcent == x$center) )
+
+        if( ! black_or_white )
+            #   the usual case
+            distance[k] = .Call( C_dist2surface, matgen, pgramdf$idxpair, pgramdf$center, pgramdf$cross, pcent )
+        else
+            #   black and white points are vertices, special cases
+            distance[k] = 0
 
         if( distance[k] != 0 )
-            linknum[k] =   linkingnumber( x, pgramdf, point_centered[k, ] )
+            linknum[k] =   linkingnumber3( x, pgramdf, pcent )
             #   else if distance[k]==0 we just leave linknum[k] as it is, which is NA_integer_
 
         inside[k]   = (linknum[k] != 0L)
@@ -792,6 +804,7 @@ linkingnumber <- function( zono, pgramdf=NULL, point=c(0,0,0) )
     return( out )
     }
 
+#   this version replaces pgramdf by the simpler matcum, but needs more work
 
 linkingnumber2 <- function( zono, point=c(0,0,0) )
     {
@@ -806,7 +819,24 @@ linkingnumber2 <- function( zono, point=c(0,0,0) )
     return( out )
     }
 
+#   this version replaces spherical triangles by planar polygons
 
+linkingnumber3 <- function( zono, pgramdf=NULL, point=c(0,0,0) )
+    {
+    matsimp = getsimplified( zono$matroid )
+
+    matgen  = getmatrix(matsimp)
+
+    if( is.null(pgramdf) )
+        {
+        pgramdf   = allpgramcenters2trans( zono )
+        if( is.null(pgramdf) )  return(NULL)
+        }
+
+    out = .Call( C_linkingnumber3, matgen, pgramdf$idxpair, pgramdf$center, point )
+
+    return( out )
+    }
 
 
 #   k1 and k2   distinct integers in 1:n, not in any specific order
@@ -1126,7 +1156,7 @@ raytrace2trans <- function( x, base, direction, invert=FALSE, plot=FALSE, tol=1.
     pgramdf = allpgramcenters2trans(x)
     if( is.null(pgramdf) )  return(NULL)
 
-    linknum = linkingnumber( x, pgramdf, base_centered )
+    linknum = linkingnumber3( x, pgramdf, base_centered )
 
     if( is.na(linknum) )
         {
@@ -2246,7 +2276,7 @@ PAIRINDEX_plus  <- function( i, j, n )
     }
 
 
-    
+
 if( FALSE )
 {
 #   b   point in the square [-1/2,1/2]^2

@@ -97,10 +97,10 @@ whichMaxMatrix( SEXP sx, SEXP smargin )
         return(R_NilValue);
         }
 
-    SEXP    sidx    = PROTECT( allocVector(INTSXP,md.nVec) );
+    SEXP    sidx    = PROTECT( Rf_allocVector(INTSXP,md.nVec) );
     int     *idxvec = INTEGER(sidx);
 
-    SEXP    sval    = PROTECT( allocVector(REALSXP,md.nVec) );
+    SEXP    sval    = PROTECT( Rf_allocVector(REALSXP,md.nVec) );
     double  *valvec = REAL(sval);
 
     for( int j=0 ; j<md.nVec ; j++ )
@@ -132,7 +132,7 @@ whichMaxMatrix( SEXP sx, SEXP smargin )
         valvec[j]   = vmax ;
         }
 
-    SEXP    out = PROTECT( allocVector(VECSXP,2) );
+    SEXP    out = PROTECT( Rf_allocVector(VECSXP,2) );
 
     SET_VECTOR_ELT( out, 0, sidx );
     SET_VECTOR_ELT( out, 1, sval );
@@ -224,7 +224,7 @@ plusEqual( SEXP smat, SEXP svec, SEXP smargin )
             v[ j*md.eltStep ] += vec[j] ;   // this line is the crux
         }
 
-	SEXP    out = PROTECT( allocVector(LGLSXP,1) );
+	SEXP    out = PROTECT( Rf_allocVector(LGLSXP,1) );
 
     *(LOGICAL(out)) = 1 ;
 
@@ -267,7 +267,7 @@ timesEqual( SEXP smat, SEXP svec, SEXP smargin )
             v[ j*md.eltStep ] *= vec[j] ;   // this line is the crux
         }
 
-	SEXP    out = PROTECT( allocVector(LGLSXP,1) );
+	SEXP    out = PROTECT( Rf_allocVector(LGLSXP,1) );
 
     *(LOGICAL(out)) = 1 ;
 
@@ -306,7 +306,7 @@ sumMatVec( SEXP smat, SEXP svec, SEXP smargin )
 
     const   double  *vec = REAL(svec);
 
-    SEXP    out = PROTECT( allocMatrix(REALSXP,md.dim[0],md.dim[1]) );
+    SEXP    out = PROTECT( Rf_allocMatrix(REALSXP,md.dim[0],md.dim[1]) );
     double  *matout = REAL(out);
 
     for( int i=0 ; i<md.nVec ; i++ )
@@ -332,7 +332,7 @@ sumMatVec( SEXP smat, SEXP svec, SEXP smargin )
 SEXP
 extend_antipodal( SEXP smat )
     {
-    const int *dim  = INTEGER(getAttrib(smat, R_DimSymbol));
+    const int *dim  = INTEGER(Rf_getAttrib(smat, R_DimSymbol));
 
     int n   = dim[0] ;
     int m   = dim[1] ;
@@ -340,7 +340,7 @@ extend_antipodal( SEXP smat )
     const   double  *mat = REAL(smat);
 
     //  allocate matrix with twice the number of rows
-    SEXP    out = PROTECT( allocMatrix(REALSXP,2*n,m) );
+    SEXP    out = PROTECT( Rf_allocMatrix(REALSXP,2*n,m) );
     double  *matout = REAL(out);
 
     for( int j=0 ; j<m ; j++ )

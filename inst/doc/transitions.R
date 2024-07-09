@@ -7,10 +7,10 @@ old_opt = options( width=144 )
 require("rgl",quietly=TRUE)
 rgl::setupKnitr(autoprint = TRUE)
 
-## ---- echo=TRUE,  message=FALSE---------------------------------------------------------------------------------------------------------------
+## ----echo=TRUE,  message=FALSE----------------------------------------------------------------------------------------------------------------
 library(zonohedra)
 
-## ---- echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=6.5, fig.height=4, fig.cap='Figure 2.1  four points in the 2-transition complex, visualized with bar graphs', out.width="100%", cache=FALSE----
+## ----echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=6.5, fig.height=4, fig.cap='Figure 2.1  four points in the 2-transition complex, visualized with bar graphs', out.width="100%", cache=FALSE----
 mybarplot <- function( x )  {
 n = length(x)
 plot( c(0,n), c(0,1), type='n', tcl=0, las=1, xaxt='n', xlab='', ylab='', mgp=c(3,0.25,0) )
@@ -26,7 +26,7 @@ mybarplot( x1 )   ; mybarplot( x2 )     #  row #1
 mybarplot( 1-x1 ) ; mybarplot( 1-x2 )   #  row #2
 par( oldpar )
 
-## ---- echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=6.5, fig.height=4, fig.cap='Figure 2.2', out.width="100%", cache=FALSE---------------
+## ----echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=6.5, fig.height=4, fig.cap='Figure 2.2', out.width="100%", cache=FALSE----------------
 
 mystepplot <- function( x )  {
 # assumption: x is Type I
@@ -44,7 +44,7 @@ mystepplot( x1 ) ; mystepplot( x2 )     #  row #1
 mybarplot( x1 ) ; mybarplot( x2 )       #  row #2
 par( oldpar )
 
-## ---- rgl=TRUE, dev='png', echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=6.5, fig.height=4, fig.cap='Figure 2.3  &emsp;&emsp;&emsp;  [these are interactive WebGL widgets]', fig.keep='none', fig.show='hide', out.width="100%", cache=FALSE----
+## ----rgl=TRUE, dev='png', echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=6.5, fig.height=4, fig.cap='Figure 2.3  &emsp;&emsp;&emsp;  [these are interactive WebGL widgets]', fig.keep='none', fig.show='hide', out.width="100%", cache=FALSE----
 rgl::par3d( zoom=0.7 )
 rgl::mfrow3d( 1, 2 )
 zono =  polarzonohedron(9)
@@ -53,7 +53,7 @@ rgl::next3d()
 plot2trans( zono, level=c(0,4,7) )
 rgl::rglwidget( webgl=TRUE )
 
-## ---- echo=FALSE,  message=TRUE,  warning=TRUE, fig.width=8, fig.height=3, fig.cap='Figure 10.1', out.width="100%", cache=FALSE---------------
+## ----echo=FALSE,  message=TRUE,  warning=TRUE, fig.width=8, fig.height=3, fig.cap='Figure 10.1', out.width="100%", cache=FALSE----------------
 
 plot_slabs <- function()
     {
@@ -183,14 +183,14 @@ plot_slabs() ; plot_slab()
 
 par( oldpar )
 
-## ---- echo=TRUE,  message=TRUE,  warning=TRUE-------------------------------------------------------------------------------------------------
+## ----echo=TRUE,  message=TRUE,  warning=TRUE--------------------------------------------------------------------------------------------------
 matgen = colorimetry.genlist[[2]]   # the CIE 1931 CMFs at 1nm step
 matgen = 100 * matgen / sum( matgen[2, ] )   # it's traditional to scale so the center has Y=50
 zono =  zonohedron( matgen )
 getcenter(zono) ; dim( getmatrix( getsimplified( getmatroid(zono) ) ) )
 transitionsdf( zono )
 
-## ---- echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=6.5, fig.height=3, fig.cap='Figure 10.2', out.width="100%", cache=FALSE--------------
+## ----echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=6.5, fig.height=3, fig.cap='Figure 10.2', out.width="100%", cache=FALSE---------------
 oldpar = par( omi=c(0,0,0,0), mai=c(0.45,0.5,0.1,0) )
 gnd = getground( getsimplified( getmatroid(zono) ) )
 pcube = boundarypgramdata( zono, c(570,608), cube=TRUE )$pcube
@@ -200,14 +200,14 @@ grid( col='gray', lty=1 )
 lines( gnd, pcube, type='s' )
 par( oldpar )
 
-## ---- rgl=TRUE, dev='png', echo=TRUE,  message=TRUE,  warning=FALSE, fig.width=6.5, fig.height=4, fig.cap='Figure 10.3', fig.keep='last', fig.show='hold', out.width="100%", cache=FALSE----
+## ----rgl=TRUE, dev='png', echo=TRUE,  message=TRUE,  warning=FALSE, fig.width=6.5, fig.height=4, fig.cap='Figure 10.3', fig.keep='last', fig.show='hold', out.width="100%", cache=FALSE----
 library( orientlib )
 user3x3 = orientlib::rotmatrix( orientlib::eulerzyx( -0.249417, 0.7116067, 2.324364 ) )@x
 dim(user3x3) = c(3,3)
 par3d( userMatrix=rotationMatrix(matrix=user3x3), zoom=0.35 )
 plothighertrans( zono )
 
-## ---- echo=FALSE, results='asis'----------------------------------------------
+## ----echo=FALSE, results='asis'-----------------------------------------------
 options( old_opt )
 sessionInfo()
 

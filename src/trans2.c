@@ -225,11 +225,11 @@ vertexfromcode( SEXP sn, SEXP scount, SEXP sstart )
 SEXP
 allpgramcenters2trans( SEXP smatgen, SEXP sgensum )
     {
-    const int *dim1  = INTEGER(getAttrib(smatgen, R_DimSymbol));
+    const int *dim1  = INTEGER(Rf_getAttrib(smatgen, R_DimSymbol));
     int m   = dim1[0] ;
     int n   = dim1[1] ;
 
-    const int *dim2  = INTEGER(getAttrib(sgensum, R_DimSymbol));
+    const int *dim2  = INTEGER(Rf_getAttrib(sgensum, R_DimSymbol));
 
     if( dim2[0] != m  ||  dim2[1] != n )    return(R_NilValue);
 
@@ -280,7 +280,7 @@ allpgramcenters2trans( SEXP smatgen, SEXP sgensum )
 SEXP
 optimalcenter( SEXP scenterrot, SEXP sbaserot )
     {
-    const int *dim1  = INTEGER(getAttrib(scenterrot, R_DimSymbol));
+    const int *dim1  = INTEGER(Rf_getAttrib(scenterrot, R_DimSymbol));
 
     int n   = dim1[0] ;
 
@@ -313,7 +313,7 @@ optimalcenter( SEXP scenterrot, SEXP sbaserot )
 
     if( imin < 0 )  return(R_NilValue) ;    //  no row found
 
-    SEXP    out = PROTECT( allocVector(INTSXP,1) );
+    SEXP    out = PROTECT( Rf_allocVector(INTSXP,1) );
 
     *INTEGER(out)   = imin ;
 
@@ -348,7 +348,7 @@ findpgram2D( SEXP scenterrot, SEXP sbaserot, SEXP sidxpair, SEXP sgenrot )
     {
     const int *dim ;
 
-    dim = INTEGER(getAttrib(scenterrot, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(scenterrot, R_DimSymbol));
 
     int n   = dim[0] ;
 
@@ -356,11 +356,11 @@ findpgram2D( SEXP scenterrot, SEXP sbaserot, SEXP sidxpair, SEXP sgenrot )
 
     if( Rf_length(sbaserot) != 3 )  return(R_NilValue);
 
-    dim = INTEGER(getAttrib(sidxpair, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(sidxpair, R_DimSymbol));
 
     if( dim[0] != n  ||  dim[1] != 2 )  return(R_NilValue);
 
-    dim = INTEGER(getAttrib(sgenrot, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(sgenrot, R_DimSymbol));
 
     int m   = dim[1] ;
 
@@ -452,12 +452,12 @@ findpgram2D( SEXP scenterrot, SEXP sbaserot, SEXP sidxpair, SEXP sgenrot )
         break ;
         }
 
-    SEXP    out = PROTECT( allocVector(VECSXP,2) );
+    SEXP    out = PROTECT( Rf_allocVector(VECSXP,2) );
 
-    SEXP    sisect      = PROTECT( allocVector(INTSXP,1) );
+    SEXP    sisect      = PROTECT( Rf_allocVector(INTSXP,1) );
     *INTEGER(sisect)    = isect ;
 
-    SEXP    salpha  = PROTECT( allocVector(REALSXP,2) );
+    SEXP    salpha  = PROTECT( Rf_allocVector(REALSXP,2) );
 
     REAL(salpha)[0] = alphagood[0] ;
     REAL(salpha)[1] = alphagood[1] ;

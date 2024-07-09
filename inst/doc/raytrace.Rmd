@@ -61,7 +61,7 @@ library(zonohedra)
 
 In Burns' example, the base of the ray is the center of the zonohedron $Z$:
 ```{r, echo=TRUE,  message=FALSE}
-matgen = colorimetry.genlist[[2]]   # the CIE 1931 CMFs at 1nm step
+matgen = colorimetry.genlist[["xyz1931.1nm"]]   # the CIE 1931 CMFs at 1nm step
 matgen = 100 * matgen / sum( matgen[2, ] )   # it is traditional to scale so the center has Y=50, recall we use Illuminant E
 zono =  zonohedron( matgen )
 base = getcenter(zono) ; base
@@ -78,7 +78,7 @@ u = c( sin(phi)*cos(theta), sin(phi)*sin(theta), cos(phi) ) ; u
 Calculate the intersection of the ray with the boundary of $Z$.
 ```{r, echo=TRUE,  message=TRUE}
 df_opt = raytrace( zono, base, u ) ; df_opt
-xyz_opt = df_opt$point[1, ] ; xyz_opt
+XYZ_opt = df_opt$point[1, ] ; XYZ_opt
 ```
 This matches Burns' value of $XYZ_{\text{LPsoln}}$.
 From Figure 8 of @Burns2021 we see that this point
@@ -86,7 +86,7 @@ From Figure 8 of @Burns2021 we see that this point
 comes from a reflectance spectrum with 4 transitions.
 This can be verified by inverting:
 ```{r, echo=TRUE,  message=TRUE}
-invertboundary( zono, xyz_opt )$transitions
+invertboundary( zono, XYZ_opt )$transitions
 ```
 
 
@@ -94,7 +94,7 @@ Now calculate the intersection of the ray with the 2-transition surface
 associated with $Z$.
 ```{r, echo=TRUE,  message=TRUE}
 df_2trans = raytrace2trans( zono, base, u ) ; df_2trans
-xyz_2trans = df_2trans$point[1, ] ; xyz_2trans
+XYZ_2trans = df_2trans$point[1, ] ; XYZ_2trans
 ```
 This matches Burns' value of $XYZ_{\text{two-trans}}$ to 4 decimal places.
 The transition wavelengths 629 and 575nm,
@@ -126,7 +126,7 @@ This confirms Burns' statement from @Burns2021 that the distance between
 these surfaces has
 "... no practical impact on typical colorimetric calculations".
 
-If the zonohedron $Z$ is called the _Optimal Color Solid_ (OCS),
+If the zonohedron $Z$ is called the _Object Color Solid_ (OCS),
 and the inside of the 2-transition surface is called the 
 _Schr&ouml;dinger Color Solid_ (SCS),
 we see that the OCS is obtained by adding a very thin "skin"
@@ -142,9 +142,9 @@ It lies on the same ray as these 2 points,
 so it must be *inside* the zonohedron, but *outside* the 2-transition surface.
 We can verify this easily:
 ```{r, echo=TRUE,  message=FALSE}
-xyz_mid = (xyz_opt + xyz_2trans) / 2
-inside( zono, xyz_mid )
-inside2trans( zono, xyz_mid )
+XYZ_mid = (XYZ_opt + XYZ_2trans) / 2
+inside( zono, XYZ_mid )
+inside2trans( zono, XYZ_mid )
 ```
 
 

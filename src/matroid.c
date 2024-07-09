@@ -16,7 +16,7 @@ SEXP
 collapseGroups1D_R( SEXP x, SEXP eps )
     {
     int     n =  Rf_length(x);
-	SEXP    out = PROTECT( allocVector(LGLSXP,1) );
+	SEXP    out = PROTECT( Rf_allocVector(LGLSXP,1) );
 
     *(LOGICAL(out)) = collapseGroups1D( REAL(x), n, *(REAL(eps)) ) ;
 
@@ -47,7 +47,7 @@ conditionalAntipodal( SEXP sx, SEXP seps, SEXP smargin )
     //  Rprintf( "eps=%g  margin=%d\n", eps, margin );
 
 
-	SEXP    out = PROTECT( allocVector(LGLSXP,1) );
+	SEXP    out = PROTECT( Rf_allocVector(LGLSXP,1) );
 
     matdat  md = extractmatdat( sx, smargin );
     if( md.mat == NULL )
@@ -100,7 +100,7 @@ conditionalAntipodal( SEXP sx, SEXP seps, SEXP smargin )
 SEXP
 normalizeMatrix( SEXP sx, SEXP smargin )
     {
-    SEXP    out = PROTECT( allocVector(LGLSXP,1) );
+    SEXP    out = PROTECT( Rf_allocVector(LGLSXP,1) );
 
     matdat  md = extractmatdat( sx, smargin );
     if( md.mat == NULL )
@@ -159,7 +159,7 @@ normalizeMatrix( SEXP sx, SEXP smargin )
 SEXP
 allcrossproducts( SEXP sx )
     {
-    int *dim    = INTEGER(getAttrib(sx, R_DimSymbol));
+    int *dim    = INTEGER(Rf_getAttrib(sx, R_DimSymbol));
     int nrow    = dim[0] ;
     int n       = dim[1] ;
 
@@ -212,11 +212,11 @@ snapcrossprods( SEXP scrossprods, SEXP shyperplane, SEXP scrossprodsref, SEXP sg
     int n   = Rf_length(sground) ;
     int m   = Rf_length(shyperplane);
                 
-    const   int *dim    = INTEGER(getAttrib(scrossprods,R_DimSymbol));
+    const   int *dim    = INTEGER(Rf_getAttrib(scrossprods,R_DimSymbol));
 
     if( dim[0] != 3  ||  dim[1] != n*(n-1)/2 )   return(R_NilValue);
 
-    dim    = INTEGER(getAttrib(scrossprodsref,R_DimSymbol));
+    dim    = INTEGER(Rf_getAttrib(scrossprodsref,R_DimSymbol));
     
     if( dim[0] != 3  ||  dim[1] != m ) return(R_NilValue);
     
@@ -225,7 +225,7 @@ snapcrossprods( SEXP scrossprods, SEXP shyperplane, SEXP scrossprodsref, SEXP sg
     const int     *ground = INTEGER(sground);
 
     int     gmax = ground[ n-1 ];
-    int     *idxfromgnd = Calloc( gmax+1, int );
+    int     *idxfromgnd = R_Calloc( gmax+1, int );
 
     for( int k=0 ; k<n ; k++ )
         idxfromgnd[ ground[k] ] = k+1 ;     //  1-based output
@@ -289,9 +289,9 @@ snapcrossprods( SEXP scrossprods, SEXP shyperplane, SEXP scrossprodsref, SEXP sg
             }
         }
         
-    Free( idxfromgnd );
+    R_Free( idxfromgnd );
     
-    SEXP    out = PROTECT( allocVector(LGLSXP,1) );
+    SEXP    out = PROTECT( Rf_allocVector(LGLSXP,1) );
    
     *(LOGICAL(out)) = true ;
 
@@ -324,14 +324,14 @@ diametervector( SEXP sgenidx, SEXP snormal, SEXP smatgen, SEXP scrossprods )
 
     if( Rf_length(snormal) != 3 )    return(R_NilValue);
 
-    const   int *dim    = INTEGER(getAttrib(smatgen,R_DimSymbol));
+    const   int *dim    = INTEGER(Rf_getAttrib(smatgen,R_DimSymbol));
 
     int nrow    = dim[0] ;
     int n       = dim[1] ;
 
     if( nrow != 3 ) return(R_NilValue);
 
-    dim = INTEGER(getAttrib(scrossprods, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(scrossprods, R_DimSymbol));
     if( dim[0] != 3 ) return(R_NilValue);
     if( dim[1] != (n*(n-1))/2 ) return(R_NilValue);
 
@@ -352,7 +352,7 @@ diametervector( SEXP sgenidx, SEXP snormal, SEXP smatgen, SEXP scrossprods )
 
     if( absmax == 0 )   return(R_NilValue);
 
-    SEXP    out = PROTECT( allocVector(REALSXP,3) );
+    SEXP    out = PROTECT( Rf_allocVector(REALSXP,3) );
     double  *vecout = REAL(out);
     vecout[0]=vecout[1]=vecout[2]=0;
 
@@ -368,6 +368,7 @@ diametervector( SEXP sgenidx, SEXP snormal, SEXP smatgen, SEXP scrossprods )
         if( genidx[i]<1  ||  n<genidx[i] )
             {
             Rprintf( "Internal Error.  genidx[%d]=%d.\n",  i, genidx[i] );
+            UNPROTECT(1);   // variable out            
             return(R_NilValue);
             }
 #endif
@@ -386,6 +387,7 @@ diametervector( SEXP sgenidx, SEXP snormal, SEXP smatgen, SEXP scrossprods )
             {
             Rprintf( "Internal Error.  pairidx=%d.  genidx[0]=%d  genidx[%d]=%d.\n",
                         pairidx, genidx[0], i, genidx[i] );
+            UNPROTECT(1);   // variable out                        
             return(R_NilValue);
             }
 #endif
@@ -463,7 +465,7 @@ diametermatrix( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground
 
     //  make lookup table from ground points to raw index, 1..n
     int     gmax = ground[ n-1 ];
-    int     *idxfromgnd = Calloc( gmax+1, int );
+    int     *idxfromgnd = R_Calloc( gmax+1, int );
 
     for( int k=0 ; k<n ; k++ )
         idxfromgnd[ ground[k] ] = k+1;  // 0-based to 1-based
@@ -475,7 +477,7 @@ diametermatrix( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground
         return(R_NilValue);
         }
 
-    double  *pcube = Calloc( n, double );
+    double  *pcube = R_Calloc( n, double );
     memcpy( pcube, REAL(scube), n*sizeof(*pcube) );
 
 
@@ -488,27 +490,27 @@ diametermatrix( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground
 
     const   int *dim ;
 
-    dim = INTEGER(getAttrib(snormal, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(snormal, R_DimSymbol));
     if( dim[0] != m ) return(R_NilValue);
     if( dim[1] != 3 ) return(R_NilValue);
     const   double  *normalmat = REAL(snormal);
 
 
-    dim = INTEGER(getAttrib(smatgen, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(smatgen, R_DimSymbol));
     if( dim[0] != 3 ) return(R_NilValue);
     if( dim[1] != n ) return(R_NilValue);
     const   double  *matgen     = REAL(smatgen);
 
-    dim = INTEGER(getAttrib(scrossprods, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(scrossprods, R_DimSymbol));
     if( dim[0] != 3 ) return(R_NilValue);
     if( dim[1] != (n*(n-1))/2 ) return(R_NilValue);
     const   double  *crossprods = REAL(scrossprods);
 
-    SEXP    smat = PROTECT( allocMatrix(REALSXP,3,m) );
+    SEXP    smat = PROTECT( Rf_allocMatrix(REALSXP,3,m) );
     double  *matout = REAL(smat);
     memset( matout, 0, 3*m*sizeof(*matout) ) ;
 
-    SEXP    sfacet0 = PROTECT( allocVector(LGLSXP,m) ) ;
+    SEXP    sfacet0 = PROTECT( Rf_allocVector(LGLSXP,m) ) ;
     int     *facet0 = LOGICAL(sfacet0) ;
     memset( facet0, 0, m*sizeof(*facet0) ) ;
 
@@ -522,6 +524,7 @@ diametermatrix( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground
             {
             Rprintf( "Internal Error. hyperidx=%d  is invalid.  numhypers=%d.\n",
                         hyperidx, numhypers );
+            UNPROTECT(2);   // variables smat, sfacet0                        
             return(R_NilValue);
             }
 
@@ -549,8 +552,12 @@ diametermatrix( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground
                 }
             }
 
-        if( absmax == 0 )   return(R_NilValue);
-
+        if( absmax == 0 )   
+            {
+            UNPROTECT(2);   // variables smat, sfacet0
+            return(R_NilValue);
+            }
+            
         double  signmultiplier  = (i==0) ? 0.5 : 1.0 ;
 
         //  get pointer to the i'th column of the output matrix
@@ -583,6 +590,7 @@ diametermatrix( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground
                 {
                 Rprintf( "Internal Error. i=%d  k=%d  pairidx=%d.  genidx=%d  genkidx=%d.\n",
                             i, k, pairidx, genidx, genkidx );
+                UNPROTECT(2);   // variables smat, sfacet0                            
                 return(R_NilValue);
                 }
 #endif
@@ -603,6 +611,7 @@ diametermatrix( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground
             {
             Rprintf( "Internal Error. i=%d  distinguished point %d not found in hyperplane %d.\n",
                         i, gen, hyperidx );
+            UNPROTECT(2);   // variables smat, sfacet0                        
             return(R_NilValue);
             }
 
@@ -619,6 +628,7 @@ diametermatrix( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground
         if( 0 < badcount )
             {
             Rprintf( "Internal Error. i=%d  pcube has %d bad values.\n", i, badcount );
+            UNPROTECT(2);   // variables smat, sfacet0            
             return(R_NilValue);
             }
 #endif
@@ -631,10 +641,10 @@ diametermatrix( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground
         }
 
 
-    Free( pcube );
-    Free( idxfromgnd );
+    R_Free( pcube );
+    R_Free( idxfromgnd );
 
-    SEXP    out = PROTECT( allocVector(VECSXP,2) );
+    SEXP    out = PROTECT( Rf_allocVector(VECSXP,2) );
     SET_VECTOR_ELT( out, 0, smat );
     SET_VECTOR_ELT( out, 1, sfacet0 );
 
@@ -762,7 +772,7 @@ fastunion( SEXP x1, SEXP x2, SEXP x3 )
 
     if( n == 0 )    return R_NilValue ;
 
-    SEXP    *buff = Calloc( n, SEXP );
+    SEXP    *buff = R_Calloc( n, SEXP );
 
     int k = 0;
 
@@ -789,7 +799,7 @@ fastunion( SEXP x1, SEXP x2, SEXP x3 )
 
     //Rprintf( "imax=%d\n", imax );
 
-    int     *mask = Calloc( imax+1, int );
+    int     *mask = R_Calloc( imax+1, int );
 
     //  Pass 2.  mark each position in mask[] with a 1
     for( k=0 ; k<n ; k++ )
@@ -800,13 +810,13 @@ fastunion( SEXP x1, SEXP x2, SEXP x3 )
         for( int j=0 ; j<m ; j++ )  mask[ vec[j] ] = 1;
         }
 
-    Free( buff );
+    R_Free( buff );
 
     //  count the number of 1s
     int count = 0;
     for( int i=0 ; i<=imax ; i++ )   count += mask[i] ;
 
-    SEXP    out = PROTECT( allocVector(INTSXP,count) );
+    SEXP    out = PROTECT( Rf_allocVector(INTSXP,count) );
 
     int     *pout   = INTEGER(out) ;
 
@@ -816,7 +826,7 @@ fastunion( SEXP x1, SEXP x2, SEXP x3 )
         if( mask[i] )   pout[k++] = i ;
         }
 
-    Free( mask );
+    R_Free( mask );
 
     UNPROTECT(1);
 
@@ -859,7 +869,7 @@ unsimplify( SEXP shyper, SEXP sground, SEXP sloop, SEXP smultiple )
     //Rprintf( "gmax=%d\n", gmax );
 
     //  make a mask for the ground set
-    int     *setmask = Calloc( gmax+1, int );
+    int     *setmask = R_Calloc( gmax+1, int );
 
     for( int k=0 ; k<nground  ; k++ )
         setmask[ ground[k] ] = 1;
@@ -872,7 +882,7 @@ unsimplify( SEXP shyper, SEXP sground, SEXP sloop, SEXP smultiple )
         if( setmask[ loop[k] ] )
             {
             Rprintf( "unsimplify(). ERR.  Point %d is in both ground and loop.\n", loop[k] );
-            Free( setmask );
+            R_Free( setmask );
             return( R_NilValue );
             }
         }
@@ -880,7 +890,7 @@ unsimplify( SEXP shyper, SEXP sground, SEXP sloop, SEXP smultiple )
     //  for each set in multiple, compute intersection with ground
     //  SEXP     *multiple = VECTOR_PTR(smultiple);
 
-    int     *inter = Calloc( nmultiple, int );
+    int     *inter = R_Calloc( nmultiple, int );
 
     for( int k=0 ; k<nmultiple ; k++ )
         {
@@ -902,8 +912,8 @@ unsimplify( SEXP shyper, SEXP sground, SEXP sloop, SEXP smultiple )
             else
                 {
                 Rprintf( "unsimplify(). ERR.  Intersection of multiple #%d and ground set is not a singleton.\n", k+1 );
-                Free( setmask );
-                Free( inter );
+                R_Free( setmask );
+                R_Free( inter );
                 return( R_NilValue );
                 }
             }
@@ -911,8 +921,8 @@ unsimplify( SEXP shyper, SEXP sground, SEXP sloop, SEXP smultiple )
         if( count == 0 )
             {
             Rprintf( "unsimplify(). ERR.  Intersection of multiple %d and ground set is empty.\n", k+1 );
-            Free( setmask );
-            Free( inter );
+            R_Free( setmask );
+            R_Free( inter );
             return( R_NilValue );
             }
         }
@@ -920,7 +930,7 @@ unsimplify( SEXP shyper, SEXP sground, SEXP sloop, SEXP smultiple )
 
     int     nhyper = Rf_length(shyper);
 
-    SEXP    out = PROTECT( allocVector(VECSXP,nhyper) );
+    SEXP    out = PROTECT( Rf_allocVector(VECSXP,nhyper) );
 
     for( int i=0 ; i<nhyper ; i++ )
         {
@@ -980,7 +990,7 @@ unsimplify( SEXP shyper, SEXP sground, SEXP sloop, SEXP smultiple )
             continue ;
             }
 
-        SEXP    hpout = PROTECT( allocVector(INTSXP,count) );
+        SEXP    hpout = PROTECT( Rf_allocVector(INTSXP,count) );
         int     *vecout = INTEGER(hpout);
 
         int     m=0 ;
@@ -992,8 +1002,9 @@ unsimplify( SEXP shyper, SEXP sground, SEXP sloop, SEXP smultiple )
         if( m != count )
             {
             Rprintf( "unsimplify().  ERR.  Internal %d != %d.\n", m, count );
-            Free( inter );
-            Free( setmask );
+            R_Free( inter );
+            R_Free( setmask );
+            UNPROTECT(2) ;      //  for hpout and out
             return( R_NilValue );
             }
 
@@ -1002,8 +1013,8 @@ unsimplify( SEXP shyper, SEXP sground, SEXP sloop, SEXP smultiple )
         UNPROTECT(1);   //  for the variable hpout
         }
 
-    Free( inter );
-    Free( setmask );
+    R_Free( inter );
+    R_Free( setmask );
 
     UNPROTECT(1);    // for the variable out
 
@@ -1035,7 +1046,7 @@ simplify( SEXP shyper, SEXP sground, SEXP sloop, SEXP smultiple )
     int     nground = Rf_length(sground);
     int     gmax = ground[ nground-1 ];
 
-    Rbyte   *maskremove = Calloc( gmax+1, Rbyte );
+    Rbyte   *maskremove = R_Calloc( gmax+1, Rbyte );
 
     const int     *loop = INTEGER(sloop);
     int     nloop = Rf_length(sloop);
@@ -1058,7 +1069,7 @@ simplify( SEXP shyper, SEXP sground, SEXP sloop, SEXP smultiple )
 
     int     nhyper = Rf_length(shyper);
 
-    SEXP    out = PROTECT( allocVector(VECSXP,nhyper) );
+    SEXP    out = PROTECT( Rf_allocVector(VECSXP,nhyper) );
 
     for( int k=0 ; k<nhyper ; k++ )
         {
@@ -1085,7 +1096,7 @@ simplify( SEXP shyper, SEXP sground, SEXP sloop, SEXP smultiple )
             }
 
         //  Pass #2. load the output set, using exactly the same test
-        SEXP    hpout = PROTECT( allocVector(INTSXP,count) );
+        SEXP    hpout = PROTECT( Rf_allocVector(INTSXP,count) );
         int     *vecout = INTEGER(hpout);
 
         int     m=0 ;
@@ -1099,7 +1110,7 @@ simplify( SEXP shyper, SEXP sground, SEXP sloop, SEXP smultiple )
         UNPROTECT(1);   //  for the variable hpout
         }
 
-    Free( maskremove );
+    R_Free( maskremove );
 
     UNPROTECT( 1 );    // for the variable out
 
@@ -1134,7 +1145,7 @@ simplifygeneral( SEXP slist, SEXP sground, SEXP sloop, SEXP smultiple )
 
 
     //  maskloop marks all loops.  It does not change.
-    Rbyte   *maskloop = Calloc( gmax+1, Rbyte );
+    Rbyte   *maskloop = R_Calloc( gmax+1, Rbyte );
     const int     *loop = INTEGER(sloop);
     int     nloop = Rf_length(sloop);
 
@@ -1143,12 +1154,12 @@ simplifygeneral( SEXP slist, SEXP sground, SEXP sloop, SEXP smultiple )
 
     //  idxgroup records the 1-based index of the multiple groups.
     //  test for no duplicates at the same time.
-    int     *idxgroup = Calloc( gmax+1, int );
+    int     *idxgroup = R_Calloc( gmax+1, int );
 
     int     nmultiple = Rf_length(smultiple);
 
     //  mingroup records the minimum point of each group
-    int     *mingroup = Calloc( nmultiple+1, int );     // add +1 to make the group index 1-based
+    int     *mingroup = R_Calloc( nmultiple+1, int );     // add +1 to make the group index 1-based
 
     for( int k=0 ; k<nmultiple ; k++ )
         {
@@ -1166,9 +1177,9 @@ simplifygeneral( SEXP slist, SEXP sground, SEXP sloop, SEXP smultiple )
                 {
                 //  group k contains a loop, which is forbidden
                 Rprintf( "simplifygeneral(). Internal error.  group %d contains a loop %d.\n", k, p );
-                Free( maskloop );
-                Free( idxgroup );
-                Free( mingroup );
+                R_Free( maskloop );
+                R_Free( idxgroup );
+                R_Free( mingroup );
                 return( R_NilValue );
                 }
 
@@ -1177,9 +1188,9 @@ simplifygeneral( SEXP slist, SEXP sground, SEXP sloop, SEXP smultiple )
                 //  group k intersects another group, which is forbidden
                 Rprintf( "simplifygeneral(). Internal error.  group %d intersects group %d.  point %d\n",
                                     k, idxgroup[p]-1, p );
-                Free( maskloop );
-                Free( idxgroup );
-                Free( mingroup );
+                R_Free( maskloop );
+                R_Free( idxgroup );
+                R_Free( mingroup );
                 return( R_NilValue );
                 }
 
@@ -1191,14 +1202,14 @@ simplifygeneral( SEXP slist, SEXP sground, SEXP sloop, SEXP smultiple )
         }
 
     //  firstgroup[] records whether the group has been encountered when scanning each set in slist
-    bool    *metgroup = Calloc( nmultiple+1, bool );
+    bool    *metgroup = R_Calloc( nmultiple+1, bool );
 
     //  vecset[] is a scratch buffer to hold the modified set from slist
-    int     *vecset = Calloc( gmax, int );     // add +1 to make the group index 1-based
+    int     *vecset = R_Calloc( gmax, int );     // add +1 to make the group index 1-based
 
     int     nlist = Rf_length(slist);
 
-    SEXP    out = PROTECT( allocVector(VECSXP,nlist) );
+    SEXP    out = PROTECT( Rf_allocVector(VECSXP,nlist) );
 
     for( int k=0 ; k<nlist ; k++ )
         {
@@ -1236,7 +1247,7 @@ simplifygeneral( SEXP slist, SEXP sground, SEXP sloop, SEXP smultiple )
                 }
             }
 
-        SEXP    setout = PROTECT( allocVector(INTSXP,count) );
+        SEXP    setout = PROTECT( Rf_allocVector(INTSXP,count) );
         int     *vecout = INTEGER(setout);
 
         for( int i=0 ; i<count ; i++ )
@@ -1247,11 +1258,11 @@ simplifygeneral( SEXP slist, SEXP sground, SEXP sloop, SEXP smultiple )
         UNPROTECT(1);   //  for the variable setout
         }
 
-    Free( vecset );
-    Free( maskloop );
-    Free( idxgroup );
-    Free( mingroup );
-    Free( metgroup );
+    R_Free( vecset );
+    R_Free( maskloop );
+    R_Free( idxgroup );
+    R_Free( mingroup );
+    R_Free( metgroup );
 
     UNPROTECT( 1 );    // for the variable out
 
@@ -1268,7 +1279,7 @@ simplifygeneral( SEXP slist, SEXP sground, SEXP sloop, SEXP smultiple )
 SEXP
 pairindex( SEXP spair, SEXP sn )
     {
-    const   int *dim    = INTEGER(getAttrib(spair,R_DimSymbol)) ;
+    const   int *dim    = INTEGER(Rf_getAttrib(spair,R_DimSymbol)) ;
 
     int m   = dim[0] ;
     if( dim[1] != 2 )   return(R_NilValue);
@@ -1278,7 +1289,7 @@ pairindex( SEXP spair, SEXP sn )
     int n   = *INTEGER(sn);
 
 
-    SEXP    out = PROTECT( allocVector(INTSXP,m) );
+    SEXP    out = PROTECT( Rf_allocVector(INTSXP,m) );
     int     *idxvec = INTEGER(out);
 
     for( int k=0 ; k<m ; k++ )
@@ -1326,14 +1337,14 @@ trivialhypers2( SEXP shyper, SEXP sground )
     int     gmax = ground[ nground-1 ];
 
     //  make lookup table from ground points to raw index, 1..nground
-    int     *idxfromgnd = Calloc( gmax+1, int );
+    int     *idxfromgnd = R_Calloc( gmax+1, int );
 
     for( int k=0 ; k<nground ; k++ )
         idxfromgnd[ ground[k] ] = k+1 ;     //  this *was* just k
 
     //  make buffer to count the pairs
     int     npairs = (nground*(nground-1)) / 2 ;
-    Rbyte   *paircount = Calloc( npairs, Rbyte );
+    Rbyte   *paircount = R_Calloc( npairs, Rbyte );
 
     int     nhyper = Rf_length(shyper);
 
@@ -1379,30 +1390,30 @@ trivialhypers2( SEXP shyper, SEXP sground )
     if( 1 < cmax )
         {
         //  ! ERROR !
-        Free( paircount );
-        Free( idxfromgnd );
+        R_Free( paircount );
+        R_Free( idxfromgnd );
 
         //  return enough details for a good error message from the caller
 
         //  Rprintf( "trivialhypers2().  ERR. paircount[%d,%d] = %d.\n", pmax[0], pmax[1], cmax );
-        SEXP    out = PROTECT( allocVector(VECSXP,2) );
+        SEXP    out = PROTECT( Rf_allocVector(VECSXP,2) );
 
         SEXP    svec ;
 
-        svec = PROTECT( allocVector(INTSXP,1) );
+        svec = PROTECT( Rf_allocVector(INTSXP,1) );
         INTEGER(svec)[0] = cmax ;
         SET_VECTOR_ELT( out, 0, svec );
 
-        svec = PROTECT( allocVector(INTSXP,2) );
+        svec = PROTECT( Rf_allocVector(INTSXP,2) );
         INTEGER(svec)[0] = pmax[0] ;
         INTEGER(svec)[1] = pmax[1] ;
         SET_VECTOR_ELT( out, 1, svec );
 
         UNPROTECT(2);   //  svec x 2
 
-        SEXP    name2 = PROTECT(allocVector(STRSXP,2));
-        SET_STRING_ELT(name2, 0, mkChar("cmax") );
-        SET_STRING_ELT(name2, 1, mkChar("pmax") );
+        SEXP    name2 = PROTECT(Rf_allocVector(STRSXP,2));
+        SET_STRING_ELT(name2, 0, Rf_mkChar("cmax") );
+        SET_STRING_ELT(name2, 1, Rf_mkChar("pmax") );
         Rf_setAttrib( out, R_NamesSymbol, name2 );
         UNPROTECT(1) ;  // name2
 
@@ -1417,12 +1428,12 @@ trivialhypers2( SEXP shyper, SEXP sground )
         {
         //  ERROR
         Rprintf( "trivialhypers2().  Internal Error. outcount = %d.\n", outcount );
-        Free( paircount );
-        Free( idxfromgnd );
+        R_Free( paircount );
+        R_Free( idxfromgnd );
         return( R_NilValue );
         }
 
-    SEXP    out = PROTECT( allocVector(VECSXP,outcount) );
+    SEXP    out = PROTECT( Rf_allocVector(VECSXP,outcount) );
 
     int row=0 ;
 
@@ -1436,7 +1447,7 @@ trivialhypers2( SEXP shyper, SEXP sground )
 
             if( paircount[k] == 0 )
                 {
-                SEXP    svec = PROTECT( allocVector(INTSXP,2) );
+                SEXP    svec = PROTECT( Rf_allocVector(INTSXP,2) );
                 int     *vec = INTEGER( svec );
 
                 vec[0]  = ground[i-1];      //  back to 0-based
@@ -1453,8 +1464,8 @@ trivialhypers2( SEXP shyper, SEXP sground )
         }
 
 
-    Free( paircount );
-    Free( idxfromgnd );
+    R_Free( paircount );
+    R_Free( idxfromgnd );
 
     UNPROTECT(1);    // the variable out
 
@@ -1482,13 +1493,13 @@ matrix2list( SEXP sx, SEXP smargin )
         return(R_NilValue);
         }
 
-    SEXP  out = PROTECT( allocVector(VECSXP,md.nVec) );
+    SEXP  out = PROTECT( Rf_allocVector(VECSXP,md.nVec) );
 
     for( int j=0 ; j<md.nVec ; j++ )
         {
         int     *vec = md.imat + j*md.vecStep ;
 
-        SEXP    svec = PROTECT( allocVector(INTSXP,md.vecLen) );
+        SEXP    svec = PROTECT( Rf_allocVector(INTSXP,md.vecLen) );
 
         int     *ovec = INTEGER(svec);
 
@@ -1525,12 +1536,12 @@ issubset( SEXP ssetlist, SEXP sset )
     for( int k=0 ; k<nset ; k++ )   { setmax = MAX2( set[k], setmax ) ; }
 
     //  pass #2 allocate mask and assign it
-    Rbyte   *setmask = Calloc( setmax+1, Rbyte );
+    Rbyte   *setmask = R_Calloc( setmax+1, Rbyte );
     for( int k=0 ; k<nset ; k++ )   { setmask[ set[k] ] = 1 ; }
 
     int     m = Rf_length(ssetlist) ;
 
-    SEXP    out = PROTECT( allocVector(LGLSXP,m) );
+    SEXP    out = PROTECT( Rf_allocVector(LGLSXP,m) );
     int     *pout = LOGICAL(out);
 
     for( int j=0 ; j<m ; j++ )
@@ -1554,7 +1565,7 @@ issubset( SEXP ssetlist, SEXP sset )
         pout[j] = (i == n) ;
         }
 
-    Free( setmask ) ;
+    R_Free( setmask ) ;
 
     UNPROTECT(1) ;      // variable out
 
@@ -1580,13 +1591,13 @@ issuperset( SEXP ssetlist, SEXP sset )
     for( int k=0 ; k<nset ; k++ )   { setmax = MAX2( set[k], setmax ) ; }
 
     //  pass #2 allocate mask and assign it
-    Rbyte   *setmask = Calloc( setmax+1, Rbyte );
+    Rbyte   *setmask = R_Calloc( setmax+1, Rbyte );
     for( int k=0 ; k<nset ; k++ )   { setmask[ set[k] ] = 1 ; }
 
     int     m = Rf_length(ssetlist) ;
 
     //  allocate output, but no need to initialize it
-    SEXP    out = PROTECT( allocVector(LGLSXP,m) );
+    SEXP    out = PROTECT( Rf_allocVector(LGLSXP,m) );
     int     *pout = LOGICAL(out);
 
     for( int j=0 ; j<m ; j++ )
@@ -1615,7 +1626,7 @@ issuperset( SEXP ssetlist, SEXP sset )
         pout[j] = (count == nset) ;
         }
 
-    Free( setmask ) ;
+    R_Free( setmask ) ;
 
     UNPROTECT(1) ;      // variable out
 
@@ -1643,7 +1654,7 @@ anyissuperset( SEXP ssetlist, SEXP sset, SEXP sdecreasing )
     for( int k=0 ; k<nset ; k++ )   { setmax = MAX2( set[k], setmax ) ; }
 
     //  pass #2 allocate mask and assign it
-    Rbyte   *setmask = Calloc( setmax+1, Rbyte );
+    Rbyte   *setmask = R_Calloc( setmax+1, Rbyte );
     for( int k=0 ; k<nset ; k++ )   { setmask[ set[k] ] = 1 ; }
 
     const bool  decreasing = *(LOGICAL(sdecreasing)) ;
@@ -1651,7 +1662,7 @@ anyissuperset( SEXP ssetlist, SEXP sset, SEXP sdecreasing )
     int     m = Rf_length(ssetlist) ;
 
     //  allocate output
-    SEXP    out = PROTECT( allocVector(LGLSXP,1) );
+    SEXP    out = PROTECT( Rf_allocVector(LGLSXP,1) );
     int     *pout = LOGICAL(out);
     *pout   = false ;
 
@@ -1692,7 +1703,7 @@ anyissuperset( SEXP ssetlist, SEXP sset, SEXP sdecreasing )
             }
         }
 
-    Free( setmask ) ;
+    R_Free( setmask ) ;
 
     UNPROTECT(1) ;      // variable out
 
@@ -1721,13 +1732,13 @@ incidencedata( SEXP shyper, SEXP sground )
     int     nground = Rf_length(sground);
     int     gmax = ground[ nground-1 ];
 
-    SEXP    out = PROTECT( allocVector(VECSXP,2) );
+    SEXP    out = PROTECT( Rf_allocVector(VECSXP,2) );
 
-    SEXP    sincid      = PROTECT( allocVector(INTSXP,gmax) );
+    SEXP    sincid      = PROTECT( Rf_allocVector(INTSXP,gmax) );
     int     *incident   = INTEGER(sincid);
     memset( incident, 0, gmax*sizeof(*incident) );
 
-    SEXP    shash   = PROTECT( allocVector(REALSXP,gmax) );
+    SEXP    shash   = PROTECT( Rf_allocVector(REALSXP,gmax) );
     double  *hash   = REAL(shash);
     memset( hash, 0, gmax*sizeof(*hash) );
 
@@ -1755,9 +1766,9 @@ incidencedata( SEXP shyper, SEXP sground )
     UNPROTECT(2);   //  variables sincid, shash
 
     //  name both items in the output list
-    SEXP    name2 = PROTECT(allocVector(STRSXP,2));
-    SET_STRING_ELT(name2, 0, mkChar("incident") );
-    SET_STRING_ELT(name2, 1, mkChar("hash") );
+    SEXP    name2 = PROTECT(Rf_allocVector(STRSXP,2));
+    SET_STRING_ELT(name2, 0, Rf_mkChar("incident") );
+    SET_STRING_ELT(name2, 1, Rf_mkChar("hash") );
     Rf_setAttrib( out, R_NamesSymbol, name2 );
 
     UNPROTECT(2);   //  variables out, name2
@@ -1782,7 +1793,7 @@ incidencematrix( SEXP shyper, SEXP sground, SEXP ssubset )
     int     gmax = ground[ nground-1 ];
 
     //  make small lookup table, with 1-based index of ssubset
-    int     *index  = Calloc( gmax+1, int );
+    int     *index  = R_Calloc( gmax+1, int );
 
     const int   *subset = INTEGER(ssubset);
     int     n = Rf_length(ssubset) ;
@@ -1810,7 +1821,7 @@ incidencematrix( SEXP shyper, SEXP sground, SEXP ssubset )
             }
         }
 
-    Free( index );
+    R_Free( index );
 
     UNPROTECT(1);   //  out
 
@@ -1841,7 +1852,7 @@ beltmatrix( SEXP shyper, SEXP sground )
     int     gmax = ground[ n-1 ];
 
     //  make lookup table from ground points to raw index, 0..n-1
-    int     *idxfromgnd = Calloc( gmax+1, int );
+    int     *idxfromgnd = R_Calloc( gmax+1, int );
 
     for( int k=0 ; k<n ; k++ )
         idxfromgnd[ ground[k] ] = k ;
@@ -1852,7 +1863,7 @@ beltmatrix( SEXP shyper, SEXP sground )
 
 
     //  make vector to count the number of hyperplanes containing point i, so far
-    int *count  = Calloc( n, int );
+    int *count  = R_Calloc( n, int );
 
     bool    ok = true ;
 
@@ -1888,8 +1899,8 @@ beltmatrix( SEXP shyper, SEXP sground )
             }
         }
 
-    Free( count );
-    Free( idxfromgnd );
+    R_Free( count );
+    R_Free( idxfromgnd );
 
     UNPROTECT(1);   //  out
 
@@ -1918,7 +1929,7 @@ obj_addr( SEXP x )
 
     p.s  = x;
 
-    SEXP    out = PROTECT( allocVector(INTSXP,1) );
+    SEXP    out = PROTECT( Rf_allocVector(INTSXP,1) );
 
     //  INTEGER(out)[0] = (int) x;
 

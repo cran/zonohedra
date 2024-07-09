@@ -781,9 +781,14 @@ It is independent of the chosen ray.
 Reversing the sign of every $n_i$ yields a consistent vector field
 and changes the sign of the linking number.
 The linking number is a straightforward generalization of the
-_winding number_ of a closed polygonal curve in the plane,
-with respect to a point not on the curve.
-For more on this subject, see @Milnor1997.
+_winding number_
+of a closed polygonal curve in the plane
+and a point not on the curve.
+The linking number is the _degree_ of a certain projection map
+(sometimes called the _Gauss map_ or _linking map_) that depends on $p$ and $f(S)$.
+For more on this subject,
+see @Milnor1997 p 53
+and @Spivak1999 p. 296.
 
 Suppose now that $f: S \to \mathbb{R}^3$ is injective.
 It is well-known (@Alexander1924, @Moise1977 p. 117, and @Bing1983 p. 161)

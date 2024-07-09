@@ -63,7 +63,7 @@ but especially the ones in these 2 families:
 In the first case, 13 classical zonohedra have been taken from
 @wikiZonohedron
 and are built in to the package.
-In the second case, an _optimal color solid_ is viewed as a zonohedron;
+In the second case, an _object color solid_ is viewed as a zonohedron;
 this connection was discovered by Paul Centore
 and is explained very clearly in @Centore2013.
 
@@ -199,16 +199,16 @@ return( out )
 
 # Colorimetry Zonohedra
 
-In colorimetry, an optimal color solid is a zonohedron.
+In colorimetry, an object color solid is a zonohedron.
 
-```{r, echo=TRUE, message=TRUE, warning=TRUE, fig.cap='optimal color solid', fig.keep='last', fig.show='hide', cache=FALSE }
+```{r, echo=TRUE, message=TRUE, warning=TRUE, fig.cap='object color solid', fig.keep='last', fig.show='hide', cache=FALSE }
 # colorimetry.genlist[[1]] is a 3x81 matrix with the CIE 1931 CMFs at 5nm interval
 zono5 = zonohedron( colorimetry.genlist[[1]] )
 plot( zono5, type='f' )
 gif_file = spinit( zono5, 2, vpsize=c(256,256) )
 ```
 
-![optimal color solid at 5nm interval](`r gif_file`){width=60%}
+![object color solid at 5nm interval](`r gif_file`){width=60%}
 
 In this figure, the black dot is the _black point_ [0,0,0].
 The white dot is the _white point_, i.e. the column sums of the

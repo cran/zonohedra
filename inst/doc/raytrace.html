@@ -12,7 +12,7 @@
 
 <meta name="author" content="Glenn Davis" />
 
-<meta name="date" content="2023-05-30" />
+<meta name="date" content="2024-07-06" />
 
 <title>Ray Tracing the Zonohedron Boundary and the 2-Transition Surface</title>
 
@@ -363,7 +363,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">Ray Tracing the Zonohedron Boundary and the 2-Transition Surface</h1>
 <h4 class="author">Glenn Davis</h4>
-<h4 class="date">2023-05-30</h4>
+<h4 class="date">2024-07-06</h4>
 
 
 <div id="TOC">
@@ -392,7 +392,7 @@ body {
 <div id="a-ray-tracing-example" class="section level1">
 <h1>A Ray Tracing Example</h1>
 <p>In Burns’ example, the base of the ray is the center of the zonohedron <span class="math inline">\(Z\)</span>:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>matgen <span class="ot">=</span> colorimetry.genlist[[<span class="dv">2</span>]]   <span class="co"># the CIE 1931 CMFs at 1nm step</span></span>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>matgen <span class="ot">=</span> colorimetry.genlist[[<span class="st">&quot;xyz1931.1nm&quot;</span>]]   <span class="co"># the CIE 1931 CMFs at 1nm step</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>matgen <span class="ot">=</span> <span class="dv">100</span> <span class="sc">*</span> matgen <span class="sc">/</span> <span class="fu">sum</span>( matgen[<span class="dv">2</span>, ] )   <span class="co"># it is traditional to scale so the center has Y=50, recall we use Illuminant E</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>zono <span class="ot">=</span>  <span class="fu">zonohedron</span>( matgen )</span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>base <span class="ot">=</span> <span class="fu">getcenter</span>(zono) ; base</span></code></pre></div>
@@ -406,19 +406,19 @@ body {
 <p>Calculate the intersection of the ray with the boundary of <span class="math inline">\(Z\)</span>.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df_opt <span class="ot">=</span> <span class="fu">raytrace</span>( zono, base, u ) ; df_opt</span></code></pre></div>
 <pre><code>##     base.1   base.2   base.3 direction.1 direction.2 direction.3 facetidx sign     tmax  point.1  point.2  point.3 timetrace
-## 1 50.00400 50.00000 50.01653  0.03331263  0.36131522  0.93184848    49283   -1 53.63393 51.79069 69.37875 99.99523 0.0026449</code></pre>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>xyz_opt <span class="ot">=</span> df_opt<span class="sc">$</span>point[<span class="dv">1</span>, ] ; xyz_opt</span></code></pre></div>
+## 1 50.00400 50.00000 50.01653  0.03331263  0.36131522  0.93184848    49283   -1 53.63393 51.79069 69.37875 99.99523 0.0026433</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>XYZ_opt <span class="ot">=</span> df_opt<span class="sc">$</span>point[<span class="dv">1</span>, ] ; XYZ_opt</span></code></pre></div>
 <pre><code>## [1] 51.79069 69.37875 99.99523</code></pre>
 <p>This matches Burns’ value of <span class="math inline">\(XYZ_{\text{LPsoln}}\)</span>. From Figure 8 of <span class="citation">[1]</span> we see that this point (and every point in the same parallelogram) comes from a reflectance spectrum with 4 transitions. This can be verified by inverting:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">invertboundary</span>( zono, xyz_opt )<span class="sc">$</span>transitions</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">invertboundary</span>( zono, XYZ_opt )<span class="sc">$</span>transitions</span></code></pre></div>
 <pre><code>## [1] 4</code></pre>
 <p>Now calculate the intersection of the ray with the 2-transition surface associated with <span class="math inline">\(Z\)</span>.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df_2trans <span class="ot">=</span> <span class="fu">raytrace2trans</span>( zono, base, u ) ; df_2trans</span></code></pre></div>
 <pre><code>##     base.1   base.2   base.3 direction.1 direction.2 direction.3 gndpair.1 gndpair.2   alpha.1   alpha.2     tmax  point.1  point.2  point.3
 ## 1 50.00400 50.00000 50.01653  0.03331263  0.36131522  0.93184848       629       575 0.2246808 0.4459951 53.63263 51.79065 69.37829 99.99402
 ##    iters timetrace
-## 1 107564 0.0038576</code></pre>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>xyz_2trans <span class="ot">=</span> df_2trans<span class="sc">$</span>point[<span class="dv">1</span>, ] ; xyz_2trans</span></code></pre></div>
+## 1 107564 0.0054155</code></pre>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>XYZ_2trans <span class="ot">=</span> df_2trans<span class="sc">$</span>point[<span class="dv">1</span>, ] ; XYZ_2trans</span></code></pre></div>
 <pre><code>## [1] 51.79065 69.37829 99.99402</code></pre>
 <p>This matches Burns’ value of <span class="math inline">\(XYZ_{\text{two-trans}}\)</span> to 4 decimal places. The transition wavelengths 629 and 575nm, and the parallelogram coordinates 0.2246808 and 0.4459951 (these are the corresponding reflectances), are clearly visible in Figure 8.</p>
 <p>Now consider the distance between these 2 points <span class="math inline">\(XYZ_{\text{LPsoln}}\)</span> and <span class="math inline">\(XYZ_{\text{two-trans}}\)</span>. The parameter <code>tmax</code> in both data frames is the parameter on the ray where it intersects the boundary or the surface. Since <code>u</code> is a unit vector, the difference between the parameters is this distance.</p>
@@ -426,19 +426,19 @@ body {
 <pre><code>## [1] 0.001292229</code></pre>
 <p>This matches Burns’ value of <span class="math inline">\(1.29 \times 10^{-3}\)</span>, which is very tiny especially compared to the two <span class="math inline">\(XYZ\)</span>s.</p>
 <p>What is the maximum that this distance can be over the entire <span class="math inline">\(\partial Z\)</span> ? To get a rough estimate, a search was made over the rays passing though the centers of all the 21900 deficient parallelograms, and with the same basepoint as before. The largest distance over these rays was <span class="math inline">\(2.47 \times 10^{-3}\)</span>. This distance is for the parallelogram with generators corresponding to 592 and 608 nm; the generating ‘spectrum’ has 8 transitions. The actual maximum distance between the boundary of the color solid and the 2-transition surface is not much larger than this sampling. This confirms Burns’ statement from <span class="citation">[1]</span> that the distance between these surfaces has “… no practical impact on typical colorimetric calculations”.</p>
-<p>If the zonohedron <span class="math inline">\(Z\)</span> is called the <em>Optimal Color Solid</em> (OCS), and the inside of the 2-transition surface is called the <em>Schrödinger Color Solid</em> (SCS), we see that the OCS is obtained by adding a very thin “skin” on some regions of the SCS.</p>
+<p>If the zonohedron <span class="math inline">\(Z\)</span> is called the <em>Object Color Solid</em> (OCS), and the inside of the 2-transition surface is called the <em>Schrödinger Color Solid</em> (SCS), we see that the OCS is obtained by adding a very thin “skin” on some regions of the SCS.</p>
 <p><br><br></p>
 </div>
 <div id="inside-or-outside" class="section level1">
 <h1>Inside or Outside ?</h1>
 <p>Consider the midpoint of <span class="math inline">\(XYZ_{\text{LPsoln}}\)</span> and <span class="math inline">\(XYZ_{\text{two-trans}}\)</span>. It lies on the same ray as these 2 points, so it must be <em>inside</em> the zonohedron, but <em>outside</em> the 2-transition surface. We can verify this easily:</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>xyz_mid <span class="ot">=</span> (xyz_opt <span class="sc">+</span> xyz_2trans) <span class="sc">/</span> <span class="dv">2</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">inside</span>( zono, xyz_mid )</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>XYZ_mid <span class="ot">=</span> (XYZ_opt <span class="sc">+</span> XYZ_2trans) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">inside</span>( zono, XYZ_mid )</span></code></pre></div>
 <pre><code>##        p.1      p.2      p.3 inside      distance idxhyper
 ## 1 51.79067 69.37852 99.99462   TRUE -0.0006013682    49283</code></pre>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">inside2trans</span>( zono, xyz_mid )</span></code></pre></div>
-<pre><code>##        p.1      p.2      p.3     distance linkingnumber inside  timecalc
-## 1 51.79067 69.37852 99.99462 0.0006013897             0  FALSE 0.0488543</code></pre>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">inside2trans</span>( zono, XYZ_mid )</span></code></pre></div>
+<pre><code>##        p.1      p.2      p.3     distance linkingnumber inside timecalc
+## 1 51.79067 69.37852 99.99462 0.0006013897             0  FALSE 0.022179</code></pre>
 <p><br><br></p>
 </div>
 <div id="references" class="section level1">
@@ -455,10 +455,10 @@ body {
 </div>
 <div id="session-information" class="section level1">
 <h1>Session Information</h1>
-This document was prepared Tue May 30, 2023 with the following configuration:
+This document was prepared Sat Jul 06, 2024 with the following configuration:
 <pre>
-R version 4.3.0 (2023-04-21 ucrt)
-Platform: x86_64-w64-mingw32/x64 (64-bit)
+R version 4.4.1 (2024-06-14 ucrt)
+Platform: x86_64-w64-mingw32/x64
 Running under: Windows 10 x64 (build 19045)
 
 Matrix products: default
@@ -471,23 +471,24 @@ locale:
 [4] LC_NUMERIC=C                          
 [5] LC_TIME=English_United States.utf8    
 
-time zone: America/Los_Angeles
+time zone: America/New_York
 tzcode source: internal
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] zonohedra_0.2-2
+[1] zonohedra_0.3-0
 
 loaded via a namespace (and not attached):
- [1] digest_0.6.31         R6_2.5.1              microbenchmark_1.4.10
- [4] fastmap_1.1.1         xfun_0.39             glue_1.6.2           
- [7] cachem_1.0.8          knitr_1.42            htmltools_0.5.5      
-[10] logger_0.2.2          rmarkdown_2.21        cli_3.6.1            
-[13] sass_0.4.6            jquerylib_0.1.4       compiler_4.3.0       
-[16] tools_4.3.0           evaluate_0.21         bslib_0.4.2          
-[19] yaml_2.3.7            rlang_1.1.1           jsonlite_1.8.4       
+ [1] digest_0.6.35         R6_2.5.1              microbenchmark_1.4.10
+ [4] fastmap_1.2.0         xfun_0.44             glue_1.7.0           
+ [7] cachem_1.1.0          knitr_1.47            htmltools_0.5.8.1    
+[10] logger_0.3.0          rmarkdown_2.27        lifecycle_1.0.4      
+[13] cli_3.6.2             sass_0.4.9            jquerylib_0.1.4      
+[16] compiler_4.4.1        tools_4.4.1           evaluate_0.23        
+[19] bslib_0.7.0           yaml_2.3.8            rlang_1.1.3          
+[22] jsonlite_1.8.8       
 </pre>
 </div>
 

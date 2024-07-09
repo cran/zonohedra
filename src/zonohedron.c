@@ -94,7 +94,7 @@ beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP
 
     //  make lookup table from ground points to raw index, 1..n
     int     gmax = ground[ n-1 ];
-    int     *idxfromgnd = Calloc( gmax+1, int );
+    int     *idxfromgnd = R_Calloc( gmax+1, int );
 
     for( int k=0 ; k<n ; k++ )
         idxfromgnd[ ground[k] ] = k+1;  // 0-based to 1-based
@@ -107,14 +107,14 @@ beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP
         }
 
     //  pcube[] starts at the 0'th center, and then alternates between edge and center points
-    double  *pcube = Calloc( n, double );
+    double  *pcube = R_Calloc( n, double );
     memcpy( pcube, REAL(scube), n*sizeof(*pcube) );
 
     //  pcubedelta[] is the delta between consecutive center and edge points
-    double  *pcubedelta = Calloc( n, double );
+    double  *pcubedelta = R_Calloc( n, double );
 
     //  hypermask[k] = true    iff the k'th generator is in the current hyperplane
-    bool    *hypermask  = Calloc( n, bool );
+    bool    *hypermask  = R_Calloc( n, bool );
 
     //  get distinguished generator in ground set and then convert to raw 1-based index
     int gen     = *INTEGER(sgen);
@@ -123,31 +123,31 @@ beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP
 
     const   int *dim ;
 
-    dim = INTEGER(getAttrib(snormal, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(snormal, R_DimSymbol));
     if( dim[0] != m ) return(R_NilValue);
     if( dim[1] != 3 ) return(R_NilValue);
     const   double  *normalmat = REAL(snormal);
 
 
-    dim = INTEGER(getAttrib(smatgen, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(smatgen, R_DimSymbol));
     if( dim[0] != 3 ) return(R_NilValue);
     if( dim[1] != n ) return(R_NilValue);
     const   double  *matgen     = REAL(smatgen);
 
-    dim = INTEGER(getAttrib(scrossprods, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(scrossprods, R_DimSymbol));
     if( dim[0] != 3 ) return(R_NilValue);
     if( dim[1] != (n*(n-1))/2 ) return(R_NilValue);
     const   double  *crossprods = REAL(scrossprods);
 
-    SEXP    sradmat = PROTECT( allocMatrix(REALSXP,3,m) );
+    SEXP    sradmat = PROTECT( Rf_allocMatrix(REALSXP,3,m) );
     double  *radmat = REAL(sradmat);
     memset( radmat, 0, 3*m*sizeof(*radmat) ) ;
 
-    SEXP    scentermat = PROTECT( allocMatrix(REALSXP,3,m) );
+    SEXP    scentermat = PROTECT( Rf_allocMatrix(REALSXP,3,m) );
     double  *centermat = REAL(scentermat);
     memset( centermat, 0, 3*m*sizeof(*centermat) ) ;
 
-    SEXP    sfacet0 = PROTECT( allocVector(LGLSXP,m) ) ;
+    SEXP    sfacet0 = PROTECT( Rf_allocVector(LGLSXP,m) ) ;
     int     *facet0 = LOGICAL(sfacet0) ;
     memset( facet0, 0, m*sizeof(*facet0) ) ;
 
@@ -172,6 +172,7 @@ beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP
             {
             Rprintf( "Internal Error. hyperidx=%d  is invalid.  numhypers=%d.\n",
                         hyperidx, numhypers );
+            UNPROTECT(3);   // variables sradmat, scentermat, sfacet0                        
             return(R_NilValue);
             }
 
@@ -202,6 +203,7 @@ beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP
         if( absmax == 0 )
             {
             Rprintf( "Internal Error. hyperidx=%d  normal vector = 0 is invalid.\n", hyperidx );
+            UNPROTECT(3);   // variables sradmat, scentermat, sfacet0            
             return(R_NilValue);
             }
 
@@ -241,6 +243,7 @@ beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP
                 {
                 Rprintf( "Internal Error. i=%d  k=%d  pairidx=%d.  genidx=%d  genkidx=%d.\n",
                             i, k, pairidx, genidx, genkidx );
+                UNPROTECT(3);   // variables sradmat, scentermat, sfacet0                            
                 return(R_NilValue);
                 }
 #endif
@@ -263,6 +266,7 @@ beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP
             {
             Rprintf( "Internal Error. i=%d  distinguished point %d not found in hyperplane %d.\n",
                         i, gen, hyperidx );
+            UNPROTECT(3);   // variables sradmat, scentermat, sfacet0                        
             return(R_NilValue);
             }
 
@@ -311,6 +315,7 @@ beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP
         if( 0 < badcount )
             {
             Rprintf( "Internal Error. i=%d  pcube has %d bad values.\n", i, badcount );
+            UNPROTECT(3);   // variables sradmat, scentermat, sfacet0            
             return(R_NilValue);
             }
 #endif
@@ -338,13 +343,13 @@ beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP
         }
 
 
-    Free( pcube );
-    Free( pcubedelta );
-    Free( idxfromgnd );
-    Free( hypermask );
+    R_Free( pcube );
+    R_Free( pcubedelta );
+    R_Free( idxfromgnd );
+    R_Free( hypermask );
 
 
-    SEXP    out = PROTECT( allocVector(VECSXP,3) );
+    SEXP    out = PROTECT( Rf_allocVector(VECSXP,3) );
     SET_VECTOR_ELT( out, 0, sradmat );
     SET_VECTOR_ELT( out, 1, scentermat );
     SET_VECTOR_ELT( out, 2, sfacet0 );
@@ -382,7 +387,7 @@ radiusfacet( SEXP shyper, SEXP sground, SEXP sradiusgen )
     const int     *ground = INTEGER(sground);
 
     int     gmax = ground[ n-1 ];
-    int     *idxfromgnd = Calloc( gmax+1, int );
+    int     *idxfromgnd = R_Calloc( gmax+1, int );
 
     for( int k=0 ; k<n ; k++ )
         idxfromgnd[ ground[k] ] = k;  // 0-based
@@ -391,7 +396,7 @@ radiusfacet( SEXP shyper, SEXP sground, SEXP sradiusgen )
 
     int     m = Rf_length(shyper);
 
-    SEXP    out = PROTECT( allocVector(REALSXP,m) );
+    SEXP    out = PROTECT( Rf_allocVector(REALSXP,m) );
     double  *radfac = REAL(out);
 
     for( int k=0 ; k<m ; k++ )
@@ -414,7 +419,7 @@ radiusfacet( SEXP shyper, SEXP sground, SEXP sradiusgen )
             }
         }
 
-    Free( idxfromgnd );
+    R_Free( idxfromgnd );
 
     UNPROTECT(1);   //  variable out
 
@@ -462,12 +467,12 @@ sectionzonohedron( SEXP shyper, SEXP sfacetcenter, SEXP sfacetnormal, SEXP scent
     const   int *dim ;
     bool    ok;
 
-    dim = INTEGER(getAttrib(sfacetcenter, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(sfacetcenter, R_DimSymbol));
     ok  = dim[0]==m  &&  dim[1]==3 ;
     if( ! ok )  return(R_NilValue) ;
 
 
-    dim = INTEGER(getAttrib(sfacetnormal, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(sfacetnormal, R_DimSymbol));
     ok  = dim[0]==m  &&  dim[1]==3 ;
     if( ! ok )  return(R_NilValue) ;
 
@@ -480,11 +485,11 @@ sectionzonohedron( SEXP shyper, SEXP sfacetcenter, SEXP sfacetnormal, SEXP scent
 
     if( Rf_length(sgennormal) != n )    return(R_NilValue) ;
 
-    dim = INTEGER(getAttrib(smatgen, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(smatgen, R_DimSymbol));
     ok  = dim[0]==3  &&  dim[1]==n ;
     if( ! ok )  return(R_NilValue) ;
 
-    dim = INTEGER(getAttrib(scrossprods, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(scrossprods, R_DimSymbol));
     ok  = dim[0]==3  &&  dim[1]==(n*(n-1))/2 ;
     if( ! ok )  return(R_NilValue) ;
 
@@ -505,7 +510,7 @@ sectionzonohedron( SEXP shyper, SEXP sfacetcenter, SEXP sfacetnormal, SEXP scent
     const int     *ground = INTEGER(sground);
 
     int     gmax = ground[ n-1 ];
-    int     *idxfromgnd = Calloc( gmax+1, int );
+    int     *idxfromgnd = R_Calloc( gmax+1, int );
 
     for( int k=0 ; k<n ; k++ )
         idxfromgnd[ ground[k] ] = k;  // 0-based index into columns of smatgen
@@ -520,7 +525,7 @@ sectionzonohedron( SEXP shyper, SEXP sfacetcenter, SEXP sfacetnormal, SEXP scent
 
     const   int     next4[4] = { 1, 2, 3, 0 } ;
 
-    SEXP    out = PROTECT( allocMatrix(REALSXP,m,3) );
+    SEXP    out = PROTECT( Rf_allocMatrix(REALSXP,m,3) );
     double  *outmat = REAL(out);
 
     for( int i=0 ; i<m*3 ; i++ )
@@ -545,6 +550,7 @@ sectionzonohedron( SEXP shyper, SEXP sfacetcenter, SEXP sfacetnormal, SEXP scent
         if( jmax < 0 )
             {
             Rprintf( "Internal Error. k=%d  normal facet vector = 0 is invalid.\n", k );
+            UNPROTECT(1);   // variable out         
             return(R_NilValue);
             }
 
@@ -613,7 +619,7 @@ sectionzonohedron( SEXP shyper, SEXP sfacetcenter, SEXP sfacetnormal, SEXP scent
             }
         }
 
-    Free( idxfromgnd );
+    R_Free( idxfromgnd );
 
     UNPROTECT(1);   //  variable out
 
@@ -655,10 +661,10 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
     Rprintf( "TYPEOF(sgen) = %d.\n", TYPEOF(sgen) );
     Rprintf( "TYPEOF(sground) = %d.\n", TYPEOF(sground) );
 
-    Rprintf( "TYPEOF(scenter)=%d    TYPEOF(dim)=%d.\n", TYPEOF(scenter), TYPEOF(getAttrib(scenter,R_DimSymbol)) );
-    Rprintf( "TYPEOF(snormal)=%d    TYPEOF(dim)=%d.\n", TYPEOF(snormal), TYPEOF(getAttrib(snormal,R_DimSymbol)) );
-    Rprintf( "TYPEOF(smatgen)=%d    TYPEOF(dim)=%d.\n", TYPEOF(smatgen), TYPEOF(getAttrib(smatgen,R_DimSymbol)) );
-    Rprintf( "TYPEOF(scrossprods)=%d    TYPEOF(dim)=%d.\n", TYPEOF(scrossprods), TYPEOF(getAttrib(scrossprods,R_DimSymbol)) );
+    Rprintf( "TYPEOF(scenter)=%d    TYPEOF(dim)=%d.\n", TYPEOF(scenter), TYPEOF(Rf_getAttrib(scenter,R_DimSymbol)) );
+    Rprintf( "TYPEOF(snormal)=%d    TYPEOF(dim)=%d.\n", TYPEOF(snormal), TYPEOF(Rf_getAttrib(snormal,R_DimSymbol)) );
+    Rprintf( "TYPEOF(smatgen)=%d    TYPEOF(dim)=%d.\n", TYPEOF(smatgen), TYPEOF(Rf_getAttrib(smatgen,R_DimSymbol)) );
+    Rprintf( "TYPEOF(scrossprods)=%d    TYPEOF(dim)=%d.\n", TYPEOF(scrossprods), TYPEOF(Rf_getAttrib(scrossprods,R_DimSymbol)) );
 #endif
 
     int     numhypers = Rf_length(shyper);
@@ -673,28 +679,28 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
     //  check dimensions
     const   int *dim ;
 
-    dim = INTEGER(getAttrib(scenter, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(scenter, R_DimSymbol));
     if( dim[0] != numhypers ||  dim[1] != 3 )
         {
         Rprintf( "Internal Error. center bad dimensions %dx%d.\n", dim[0], dim[1] );
         return(R_NilValue);
         }
 
-    dim = INTEGER(getAttrib(snormal, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(snormal, R_DimSymbol));
     if( dim[0] != numhypers  ||  dim[1] != 3 )
         {
         Rprintf( "Internal Error. normal bad dimensions %dx%d.\n", dim[0], dim[1] );
         return(R_NilValue);
         }
 
-    dim = INTEGER(getAttrib(smatgen, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(smatgen, R_DimSymbol));
     if( dim[0] != 3  ||  dim[1] != n )
         {
         Rprintf( "Internal Error. matgen bad dimensions %dx%d.\n", dim[0], dim[1] );
         return(R_NilValue);
         }
 
-    dim = INTEGER(getAttrib(scrossprods, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(scrossprods, R_DimSymbol));
     if( dim[0] != 3  ||  dim[1] != (n*(n-1))/2 )
         {
         Rprintf( "Internal Error. crossprods bad dimensions %dx%d.\n", dim[0], dim[1] );
@@ -703,7 +709,7 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
 
     //  make lookup table from ground points to raw index, 1..n
     int     gmax = ground[ n-1 ];
-    int     *idxfromgnd = Calloc( gmax+1, int );
+    int     *idxfromgnd = R_Calloc( gmax+1, int );
 
     for( int k=0 ; k<n ; k++ )
         idxfromgnd[ ground[k] ] = k+1;  // 0-based to 1-based
@@ -721,7 +727,7 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
     const   double  *crossprods = REAL(scrossprods);
 
     //  allocate output
-    SEXP    out = PROTECT( allocMatrix(REALSXP,m,3) );
+    SEXP    out = PROTECT( Rf_allocMatrix(REALSXP,m,3) );
     double  *midpointmat = REAL(out);
     //  memset( midpointmat, 0, 3*m*sizeof(*midpointmat) ) ;
 
@@ -734,6 +740,7 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
             {
             Rprintf( "Internal Error. hyperidx=%d  is invalid.  numhypers=%d.\n",
                         hyperidx, numhypers );
+            UNPROTECT(1);   // variable out                        
             return(R_NilValue);
             }
             
@@ -756,6 +763,7 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
         if( jmax < 0 )
             {
             Rprintf( "Internal Error. i=%d  normal facet vector = 0 is invalid.\n", i );
+            UNPROTECT(1);   // variable out            
             return(R_NilValue);
             }
 
@@ -788,6 +796,7 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
                 {
                 Rprintf( "Internal Error. i=%d  k=%d  pairidx=%d.  genidx=%d  genkidx=%d.\n",
                             i, k, pairidx, genidx, genkidx );
+                UNPROTECT(1);   // variable out                            
                 return(R_NilValue);
                 }
 #endif
@@ -807,6 +816,7 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
             {
             Rprintf( "Internal Error. i=%d  distinguished point %d not found in hyperplane %d.\n",
                         i, gen, hyperidx );
+            UNPROTECT(1);   // variable out                        
             return(R_NilValue);
             }
 
@@ -822,7 +832,7 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
         midpointmat[i + m*2]   = center[2] + radius[2] ;
         }
 
-    Free( idxfromgnd );
+    R_Free( idxfromgnd );
 
     UNPROTECT(1);   //  variable out
 
@@ -862,14 +872,14 @@ multicopy( SEXP sdestmat, SEXP sdiff, SEXP ssrcmat, SEXP sdestidx )
     {
     const   int *dim ;
 
-    dim = INTEGER(getAttrib(sdestmat, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(sdestmat, R_DimSymbol));
     int n = dim[0];
     int d = dim[1];
 
     if( Rf_length(sdiff) != n ) return(R_NilValue);
 
 
-    dim = INTEGER(getAttrib(ssrcmat, R_DimSymbol));
+    dim = INTEGER(Rf_getAttrib(ssrcmat, R_DimSymbol));
     int m = dim[0];
     if( dim[1] != d ) return(R_NilValue);
 
@@ -920,7 +930,7 @@ multicopy( SEXP sdestmat, SEXP sdiff, SEXP ssrcmat, SEXP sdestidx )
 
     //  return numcopies
 
-    SEXP    out = PROTECT( allocVector(INTSXP,1) );
+    SEXP    out = PROTECT( Rf_allocVector(INTSXP,1) );
     *(INTEGER(out)) = numcopies;
 
     UNPROTECT(1);   //  variable out

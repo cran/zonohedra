@@ -89,7 +89,8 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
     ok  = length(loopraw) <= ncol(x) - nrow(x)
     if( ! ok )
         {
-        log_level( ERROR, "Too many loops: %d.", length(loopraw) )
+        log_level( ERROR, "The matrix is rank-deficient.  |loops| = %d > %d = |columns| - |rows|.",
+                            length(loopraw), ncol(x) - nrow(x) )
         return(NULL)
         }
 
@@ -151,9 +152,14 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
         return( out )
         }
 
-    if( length(nonloop) < 2 )
+
+
+    #   nrow(x) is 2 or 3
+
+    if( length(nonloop) < nrow(x) )
         {
-        log_level( ERROR, "The matrix is rank-deficient." )
+        log_level( ERROR, "The matrix is rank-deficient. rank = %d < %d = |rows|.",
+                            length(nonloop), nrow(x) )
         return(NULL)
         }
 
@@ -186,7 +192,7 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
         return( out )
         }
 
-    #  the difficult case is nrow(x)=3
+    #   nrow(x) is now 3, which is the difficult case
 
     # cat( "Computing nontrivial hyperplanes:\n" )
 
@@ -368,10 +374,27 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
     time3   = gettime()
     timethp = time3 - time2
 
+
+    #   degeneracy check
+    #   these 2 tests are equivalent, mathematically
+    #   but perform them separately in case of unknown error
+
+    if( length( hyperplane[[1]] ) == length(gnd.simple) )
+        {
+        log_level( ERROR, "The matrix is rank-deficient. rank = 2 < 3 = |rows|.  The first hyperplane is equal to the ground set (simplified)." )
+        return(NULL)
+        }
+
+    if( length(hyperplane) == 1 )
+        {
+        log_level( ERROR, "The matrix is rank-deficient. rank = 2 < 3 = |rows|.  Only one hyperplane (simplified)." )
+        return(NULL)
+        }
+
+
     #   simplified matroid
 
     colnames(x.simple) = as.character( gnd.simple )
-
 
     if( ! issimple )
         #   record the original loops and multiples as an attribute of the hyperplane list
@@ -585,10 +608,10 @@ matroid.list <- function( x, ground=NULL, ... )
             mess    = c( mess, "    There are %d point pairs that are in no hyperplane." )
             mess    = c( mess, "    One such point pair is %d,%d." )
             mess    = paste0( mess, sep='\n' )
-            
-            pair    = hypertriv[[1]]            
-            
-            log_level( ERROR, mess, length(hypertriv), pair[1], pair[2] )             
+
+            pair    = hypertriv[[1]]
+
+            log_level( ERROR, mess, length(hypertriv), pair[1], pair[2] )
 
             return(NULL)
             }
@@ -608,7 +631,7 @@ matroid.list <- function( x, ground=NULL, ... )
         out$loop        = lmdata$loop
         out$multiple    = lmdata$multiple
         }
-        
+
     out$multiplesupp    = data.frame( contiguous=is_contiguousgroup( out$loop, out$multiple, out$ground ) )
 
     if( ! is_simple(out) )
@@ -1579,8 +1602,8 @@ getbeltdata <- function( x, hypersub, pcube, gen, normal )
     .Call( C_beltdata, x$hyperplane, hypersub, pcube, gen, x$ground, normal, x$matrix, x$crossprods )
     }
 
-    
-    
+
+
 #   returns vector with column indexes of all groups with mixed directions
 getmixed.matroid <- function( x )
     {

@@ -54,6 +54,8 @@ Featured functions are:
 `zonoseg()`, `zonogon()`, `zonohedron()`, `invert()`, and `invertboundary()`.
 
 
+<br><br>
+
 # Basic Concepts
 
 The emphasis in this vignette are the concepts needed to understand
@@ -85,7 +87,7 @@ then $P$ is a supporting hyperplane of $B$ iff $P$ has these properties:
 
 **Proof:**   
 not ii. $\implies$ not 2.  
-Let ii. be false, so hyperplane $P$ _does_ intersect $int(B)$, at a point $p$.
+Let ii. be false, so hyperplane $P$ _does_ intersect $\operatorname{int}(B)$, at a point $p$.
 Then there is an open ball centered at $p$, and the ball is inside $B$.
 There are clearly points in the ball in _both_ halfspaces,
 and so 2. is false.
@@ -93,7 +95,7 @@ and so 2. is false.
 not 2. $\implies$ not ii.   
 Let 2. be false, so there are points $b^-, b^+ \in B$ that are in
 _different_ open halfspaces.
-Let $b_i$ be a point in $int(B)$.
+Let $b_i$ be a point in $\operatorname{int}(B)$.
 If $b_i \in P$ then ii. is false and we are done.
 Otherwise, either $b^-$ or $b^+$ are in a different halfspace than $b_i$.
 Take it to be $b^+$, w.l.o.g.
@@ -104,7 +106,7 @@ There is an open ball in $B$ centered at $b_i$.
 Let $C$ denote the convex hull of $b^+$ and this ball - a partial open cone.
 By convexity of $B$, $C$ is in $B$.
 There is a scaled down open ball centered at $c_i$ and contained in $C$.
-Thus $c_i \in P \cap int(B)$ and ii. is false.
+Thus $c_i \in P \cap \operatorname{int}(B)$ and ii. is false.
 $\square$
 
 
@@ -266,7 +268,7 @@ The polygon is only unique up to a 2D projective transformation.
 ## matroids and zonotopes
 
 This section assumes some knowledge of _matroids_;
-for background on them see the matroids vignette.
+for background on them see the [Matroids](matroids.html) vignette.
 
 Given a zonotope $Z = L([0,1]^n) + z_0$ as above,
 the generators define a matroid $M$.
@@ -281,6 +283,9 @@ of a zonogon facet is twice the number of points in the corresponding hyperplane
 So a parallelogram corresponds to a hyperplane with 2 points,
 which is called a _trivial_ hyperplane.
 
+
+
+<br><br>
 
 # Inversion
 
@@ -521,7 +526,7 @@ but is only unique up to the selected tiling of the
 non-trivial facets of $Z$.
 
 
-<br>
+<br><br>
 
 # Software
 
@@ -564,14 +569,14 @@ which takes the zonohedron as argument.
 For a pointed zonohedron $Z$, the function `plotpolygon()` plots
 the generator polygon for $Z$ at 0.
 
-<br>
+<br><br><br>
 
 # References
 
 <div id="refs"></div>
 
 
-<br>
+<br><br>
 
 # Session Information
 

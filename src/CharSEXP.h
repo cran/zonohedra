@@ -24,7 +24,7 @@ class CharSEXP{
 		CharSEXP(SEXP x)
 		{
 			if (TYPEOF(x) == CHARSXP) sexp = x;
-			else error("CharSEXP should be initialized with a CHARSXP type object");
+			else Rf_error("CharSEXP should be initialized with a CHARSXP type object");
 		}
 				
 		CharSEXP()

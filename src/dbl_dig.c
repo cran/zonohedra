@@ -6,7 +6,7 @@
 
 SEXP dbl_dig(void)
 {
-    SEXP out = PROTECT(allocVector(INTSXP, 1));
+    SEXP out = PROTECT( Rf_allocVector(INTSXP, 1) );
     INTEGER(out)[0] = DBL_DIG;
     UNPROTECT(1);
     return out;

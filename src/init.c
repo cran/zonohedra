@@ -58,6 +58,7 @@ extern  SEXP    snapcrossprods( SEXP scrossprods, SEXP shyperplane, SEXP scrossp
 extern  SEXP    area_sphtri( SEXP pa, SEXP pb, SEXP pc );
 extern  SEXP    linkingnumber( SEXP smatgen, SEXP sidxpair, SEXP scenter, SEXP spoint );
 extern  SEXP    linkingnumber2( SEXP smatcum, SEXP spoint );
+extern  SEXP    linkingnumber3( SEXP smatgen, SEXP sidxpair, SEXP scenter, SEXP spoint );
 extern  SEXP    optimalcenter( SEXP scenterrot, SEXP sbaserot );
 extern  SEXP    extend_antipodal( SEXP smat );
 extern  SEXP    findpgram2D( SEXP scenterrot, SEXP sbaserot, SEXP sidxpair, SEXP sgenrot );
@@ -65,7 +66,7 @@ extern  SEXP    transitioncount( SEXP spt );
 extern  SEXP    rotation2pole_test( SEXP u );
 extern  SEXP    dist2pgram_test( SEXP spoint, SEXP sv1, SEXP sv2, SEXP scenter, SEXP snormal );
 extern  SEXP    dist2surface( SEXP smatgen, SEXP sidxpair, SEXP scenter, SEXP snormal, SEXP spoint );
-
+extern  SEXP    clipquad( SEXP smatquad ) ;
 
 static R_CallMethodDef callMethods[]  = {
   {"dupAtomMatHash", (DL_FUNC) &dupAtomMatHash, 3},
@@ -112,6 +113,7 @@ static R_CallMethodDef callMethods[]  = {
   {"area_sphtri", (DL_FUNC) &area_sphtri, 3},
   {"linkingnumber", (DL_FUNC) &linkingnumber, 4},
   {"linkingnumber2", (DL_FUNC) &linkingnumber2, 2},
+  {"linkingnumber3", (DL_FUNC) &linkingnumber3, 4},  
   {"optimalcenter", (DL_FUNC) &optimalcenter, 2},
   {"extend_antipodal", (DL_FUNC) &extend_antipodal, 1},
   {"findpgram2D", (DL_FUNC) &findpgram2D, 4},
@@ -119,6 +121,7 @@ static R_CallMethodDef callMethods[]  = {
   {"rotation2pole_test", (DL_FUNC) &rotation2pole_test, 1},
   {"dist2pgram_test", (DL_FUNC) &dist2pgram_test, 5},
   {"dist2surface", (DL_FUNC) &dist2surface, 5},
+  {"clipquad", (DL_FUNC) &clipquad, 1},  
   {NULL, NULL, 0}
 };
 
@@ -129,5 +132,5 @@ void R_init_zonohedra(DllInfo *info)
    R_useDynamicSymbols(info, FALSE);
    R_forceSymbols(info, TRUE);
 
-   if( !initHash() )    error("Hashing initialization error");
+   if( !initHash() )    Rf_error("Hashing initialization error");
 }

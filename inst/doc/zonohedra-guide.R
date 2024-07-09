@@ -7,33 +7,33 @@ old_opt = options( width=120 )
 require("rgl",quietly=TRUE)
 rgl::setupKnitr(autoprint = TRUE)
 
-## ---- echo=TRUE,  message=FALSE---------------------------------------------------------------------------------------
+## ----echo=TRUE,  message=FALSE----------------------------------------------------------------------------------------
 library(zonohedra)
 library(rgl)
 
-## ---- echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=8, fig.height=4, fig.cap='polar zonohedra with 5 generators (left) and 25 generators (right) &emsp;&emsp; [both of these are interactive WebGL widgets]', fig.keep='none', fig.show='hide', out.width="100%", cache=FALSE----
+## ----echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=8, fig.height=4, fig.cap='polar zonohedra with 5 generators (left) and 25 generators (right) &emsp;&emsp; [both of these are interactive WebGL widgets]', fig.keep='none', fig.show='hide', out.width="100%", cache=FALSE----
 rgl::mfrow3d( 1, 2 )
 pz5 = polarzonohedron( 5 ) ;  plot( pz5, ewd=5 )
 rgl::next3d()
 plot( polarzonohedron( 25 ), ewd=3 )
 rgl::rglwidget( webgl=TRUE )
 
-## ---- echo=TRUE, message=FALSE----------------------------------------------------------------------------------------
+## ----echo=TRUE, message=FALSE-----------------------------------------------------------------------------------------
 getmatrix( pz5 )
 
-## ---- echo=TRUE, message=FALSE----------------------------------------------------------------------------------------
+## ----echo=TRUE, message=FALSE-----------------------------------------------------------------------------------------
 classics.genlist
 
-## ---- echo=TRUE, message=TRUE-----------------------------------------------------------------------------------------
+## ----echo=TRUE, message=TRUE------------------------------------------------------------------------------------------
 mat = classics.genlist[['TC']] ; mat
 
-## ---- rgl=TRUE, echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=8, fig.height=5, out.width="100%", fig.align="center", fig.cap='truncated cuboctahedron &emsp;&emsp;&emsp;&emsp; [This is an interactive WebGL widget]', fig.keep='last', fig.show='hide', cache=FALSE----
+## ----rgl=TRUE, echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=8, fig.height=5, out.width="100%", fig.align="center", fig.cap='truncated cuboctahedron &emsp;&emsp;&emsp;&emsp; [This is an interactive WebGL widget]', fig.keep='last', fig.show='hide', cache=FALSE----
 rgl::par3d( userMatrix = rotationMatrix( -20*pi/180, 0, 1, 1) )
 zono = zonohedron( mat )
 plot( zono, type='f' )
 rgl::rglwidget( webgl=TRUE )
 
-## ---- echo=TRUE, message=FALSE, warning=FALSE-------------------------------------------------------------------------
+## ----echo=TRUE, message=FALSE, warning=FALSE--------------------------------------------------------------------------
 library(gifski)
 
 #   zono        the zonohedron
@@ -60,13 +60,13 @@ res = file.remove( pathvec )  # cleanup the .PNG files, leaving just the .GIF
 return( out )
 }
 
-## ---- echo=TRUE, message=TRUE, warning=TRUE, fig.cap='optimal color solid', fig.keep='last', fig.show='hide', cache=FALSE----
+## ----echo=TRUE, message=TRUE, warning=TRUE, fig.cap='object color solid', fig.keep='last', fig.show='hide', cache=FALSE----
 # colorimetry.genlist[[1]] is a 3x81 matrix with the CIE 1931 CMFs at 5nm interval
 zono5 = zonohedron( colorimetry.genlist[[1]] )
 plot( zono5, type='f' )
 gif_file = spinit( zono5, 2, vpsize=c(256,256) )
 
-## ---- echo=FALSE, results='asis'----------------------------------------------
+## ----echo=FALSE, results='asis'-----------------------------------------------
 options( old_opt )
 sessionInfo()
 
