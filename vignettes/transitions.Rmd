@@ -110,7 +110,7 @@ which is the center of symmetry.
 
 <br><br>
 
-# The 2-Transition Subcomplex $Q_2^n \subsetneq Q^n$
+# The 2-Transition Subcomplex $Q_2^n \subset Q^n$
 
 This section treats the _2-transition subcomplex_ of $Q^n$ with $n \ge 3$,
 which we denote by $Q^n_2$.
@@ -239,7 +239,7 @@ are equivalent.
 
 Now we look at $J_2$ in more detail.
 Every function in $J_2$ is integrable, so we can think of
-$J_2 \subsetneq L^1(\mathbb{S}^1)$, which is the space of
+$J_2 \subset L^1(\mathbb{S}^1)$, which is the space of
 integrable functions on the circle $\mathbb{S}^1$.
 
 **Theorem**
@@ -344,7 +344,7 @@ More about these linear maps is given in the next section.
 
 <br><br>
 
-# The 2-Transition Surface $S_2 \subsetneq Z \subsetneq \mathbb{R}^3$
+# The 2-Transition Surface $S_2 \subset Z \subset \mathbb{R}^3$
 
 Let the zonohedron $Z := L(Q^n)$,
 where $L : \mathbb{R}^n \twoheadrightarrow \mathbb{R}^3$ is a surjective linear map. 
@@ -361,7 +361,7 @@ We are mainly interested in the case that there are _no_ self-intersections,
 and there is a precise way to state this.
 Let $L_2$ be the restriction of $L$ to $Q^n_2$.
 So $L_2 : Q^n_2 \to \mathbb{R}^3$ is the composition of the
-inclusion $Q^n_2 \subsetneq \mathbb{R}^n$ followed by $L$.
+inclusion $Q^n_2 \subset \mathbb{R}^n$ followed by $L$.
 The surface has no self-intersections iff $L_2$ is injective.
 
 For example, in the previous figure $S_2$ does **not**
@@ -375,7 +375,7 @@ an inside region and an outside region whose intersection is $S_2$.
 Moreover, the inside region is homeomorphic to a closed ball,
 and $S_2$ is the boundary of that ball.
 
-Since $Q^n_2 \subsetneq Q^n$, $S_2 = L(Q^n_2) \subsetneq L(Q^n) = Z$.
+Since $Q^n_2 \subset Q^n$, $S_2 = L(Q^n_2) \subset L(Q^n) = Z$.
 We emphasize that $S_2$ is a surface, and $Z$ is a solid.
 We also emphasize that $S_2$ depends intimately on the order of the generators,
 and $Z$ does not depend on the order at all.
@@ -477,7 +477,7 @@ and for all $k \notin \{ i,j \}$, an assignment of $\alpha_k$ to either 0 or 1.
 The coordinates $\alpha_i$ and $\alpha_j$ are 'free' in [0,1]
 and sweep out the square.
 Let the parallelogram
-$\mathcal{P} := L(\Sigma) \subsetneq Z$ be the image of the square.
+$\mathcal{P} := L(\Sigma) \subset Z$ be the image of the square.
 Let $w := L(e_i) \times L(e_j)$ be the cross product of the edges of $\mathcal{P}$.
 Then $\mathcal{P} \subset \partial Z$
 iff
@@ -588,7 +588,7 @@ and therefore $S_2$ and $\partial Z$ have the same surface area as well.
 
 # A Theorem about $S_2$ and the Convexity of $P$
 
-We have seen that $S_2 \subsetneq Z$.
+We have seen that $S_2 \subset Z$.
 It is natural to ask:
 <div style="text-align: center">
 When is $S_2$ as large as possible, namely the entire boundary of $Z$ ?
@@ -799,7 +799,7 @@ and $f(S)$ is the boundary of that ball.
 
 
 **Definition:**
-Let $B \subseteq \mathbb{R}^3$ be a closed set and $b_0 \in B$.
+Let $B \subset \mathbb{R}^3$ be a closed set and $b_0 \in B$.
 Then $B$ is _starshaped at_ $b_0$ iff
 for any $b \in B$ the segment $[b_0,b] \subseteq B$.
 
@@ -847,7 +847,7 @@ that the computed ray intersection may not be unique.
 
 # Higher-Transition Points in the Cube $Q^n$
 
-In Section 2, the 2-transition subcomplex $Q_2^n \subsetneq Q^n$ was defined;
+In Section 2, the 2-transition subcomplex $Q_2^n \subset Q^n$ was defined;
 it is the subset of points with 2 transitions.
 We now want to define the number of transitions for _any_ point $x \in Q^n$.
 
@@ -970,7 +970,7 @@ The bold line segments correspond to the parallelograms and their antipodals.
 The outward-pointing normals define the functionals to be maximized.
 The 2 slabs are labeled.
 Note $\mathcal{S}_2$ is a proper subset of $\mathcal{S}$;
-in symbols $\mathcal{S}_2 \subsetneq \mathcal{S}$.
+in symbols $\mathcal{S}_2 \subset \mathcal{S}$.
 
 
 ```{r, echo=FALSE,  message=TRUE,  warning=TRUE, fig.width=8, fig.height=3, fig.cap='Figure 10.1', out.width="100%", cache=FALSE }
@@ -1137,7 +1137,7 @@ Here is a plot of the point in the cube that maps to the center
 of the parallelogram:
 ```{r, echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=6.5, fig.height=3, fig.cap='Figure 10.2', out.width="100%", cache=FALSE }
 oldpar = par( omi=c(0,0,0,0), mai=c(0.45,0.5,0.1,0) )
-gnd = getground( getsimplified( getmatroid(zono) ) )
+gnd = getground(  getmatroid(zono)  )
 pcube = boundarypgramdata( zono, c(570,608), cube=TRUE )$pcube
 xlim = range( gnd[which(0<pcube)] ) + 20*c(-1,1)
 plot( xlim, c(0,1), type='n', xlab='', ylab='', las=1, lab=c(5,10,7), cex.axis=0.8 )
@@ -1150,7 +1150,7 @@ Note that the values at 570 and 608 are both 1/2, and all the other values are 0
 <br>
 The following figure is a helpful 3D visualization
 of *all* the abundant parallelograms:
-```{r, rgl=TRUE, dev='png', echo=TRUE,  message=TRUE,  warning=FALSE, fig.width=6.5, fig.height=4, fig.cap='Figure 10.3', fig.keep='last', fig.show='hold', out.width="100%", cache=FALSE }
+```{r, rgl=TRUE, dev='png', echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=6.5, fig.height=4, fig.cap='Figure 10.3', fig.keep='last', fig.show='hold', out.width="100%", cache=FALSE }
 library( orientlib )
 user3x3 = orientlib::rotmatrix( orientlib::eulerzyx( -0.249417, 0.7116067, 2.324364 ) )@x
 dim(user3x3) = c(3,3)

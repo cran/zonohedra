@@ -1275,6 +1275,7 @@ simplifygeneral( SEXP slist, SEXP sground, SEXP sloop, SEXP smultiple )
 //  sn      the integer N
 //
 //  returns an integer M-vector; for each pair (i,j) returns the 1-based index of the pair
+//          if i or j is NA_INTEGER, then the returned index is NA_INTEGER
 
 SEXP
 pairindex( SEXP spair, SEXP sn )
@@ -1294,16 +1295,16 @@ pairindex( SEXP spair, SEXP sn )
 
     for( int k=0 ; k<m ; k++ )
         {
-        int idx;
+        //  int idx;
         int i = pairmat[k] ;        //  column #1
         int j = pairmat[k + m] ;    //  column #2
+        
+        idxvec[k]   = NA_INTEGER;
+        
+        if( i==NA_INTEGER  ||  j==NA_INTEGER )  continue ;
 
         if( 1<=i  &&  i<j  &&  j<=n )
-            idx = PAIRINDEX(i,j,n);
-        else
-            idx = NA_INTEGER;
-
-        idxvec[k]   = idx;
+            idxvec[k] = PAIRINDEX(i,j,n);
         }
 
     UNPROTECT(1);       //  variable out
@@ -1349,8 +1350,8 @@ trivialhypers2( SEXP shyper, SEXP sground )
     int     nhyper = Rf_length(shyper);
 
     Rbyte   cmax=1;
-    int     csum=0;         //  the number of pairs contained in the given non-trivial hyperplanes
-    int     pmax[2];
+    int     csum=0;             //  the number of pairs contained in the given non-trivial hyperplanes
+    int     pmax[2] = {-1,-1};  //  initialized to avoid a warning; anything will do
 
     for( int k=0 ; k<nhyper ; k++ )
         {

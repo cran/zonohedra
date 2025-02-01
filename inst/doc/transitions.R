@@ -192,7 +192,7 @@ transitionsdf( zono )
 
 ## ----echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=6.5, fig.height=3, fig.cap='Figure 10.2', out.width="100%", cache=FALSE---------------
 oldpar = par( omi=c(0,0,0,0), mai=c(0.45,0.5,0.1,0) )
-gnd = getground( getsimplified( getmatroid(zono) ) )
+gnd = getground(  getmatroid(zono)  )
 pcube = boundarypgramdata( zono, c(570,608), cube=TRUE )$pcube
 xlim = range( gnd[which(0<pcube)] ) + 20*c(-1,1)
 plot( xlim, c(0,1), type='n', xlab='', ylab='', las=1, lab=c(5,10,7), cex.axis=0.8 )
@@ -200,7 +200,7 @@ grid( col='gray', lty=1 )
 lines( gnd, pcube, type='s' )
 par( oldpar )
 
-## ----rgl=TRUE, dev='png', echo=TRUE,  message=TRUE,  warning=FALSE, fig.width=6.5, fig.height=4, fig.cap='Figure 10.3', fig.keep='last', fig.show='hold', out.width="100%", cache=FALSE----
+## ----rgl=TRUE, dev='png', echo=TRUE,  message=TRUE,  warning=TRUE, fig.width=6.5, fig.height=4, fig.cap='Figure 10.3', fig.keep='last', fig.show='hold', out.width="100%", cache=FALSE----
 library( orientlib )
 user3x3 = orientlib::rotmatrix( orientlib::eulerzyx( -0.249417, 0.7116067, 2.324364 ) )@x
 dim(user3x3) = c(3,3)

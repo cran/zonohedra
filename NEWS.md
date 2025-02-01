@@ -1,4 +1,13 @@
 
+
+### Version 0.4-0 [Feb 1, 2025]
+
+* for function `boundarypgramdata()`, improved correctness and slightly changed the return value
+* fixed error on the man page for `inside()`
+* added new item - collapsetosimple - to matroid list
+* fixed a compilation warning
+
+
 ### Version 0.3-0 [July 7, 2024]
 
 * improved the wording of three vignettes

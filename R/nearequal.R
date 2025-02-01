@@ -6,14 +6,15 @@
 
 
 #   A           a matrix [possibly with NAs or NaNs ?]
-#   eps         difference tolerance, used to 'collapse' one column at a time
-#   oriented    if FALSE, then 2 rows that differ only in sign are considered the same.
+#   eps         difference tolerance, used to 'collapse' one row at a time
+#   oriented    if FALSE, then 2 columns that differ only in sign are considered the same.
 #   bysize      sort the groups in decreasing order by size; requires extra work
 
-#   returns a list with
-#       groupidx    an integer vector with length(group) = ncol(A)
-#                   0 means this row is a trivial singleton group (most common).
-#                   a row with an NA is always in its own singleton cluster
+#   returns
+#       groupidx    an integer vector with length(groupidx) = ncol(A)
+#                   0 means this column is a trivial singleton group (most common)
+#                   a positive integer g, means this column belongs to non-trivial group g
+#                   a column with an NA is always in its own singleton cluster
 
 findColumnGroups <- function( A, eps, oriented, bysize=FALSE )
     {
@@ -24,15 +25,14 @@ findColumnGroups <- function( A, eps, oriented, bysize=FALSE )
         if( is.null(A) )    return(NULL)
         }
 
-    #   collapse each coordinate, usually 3 of them
+    #   collapse each row, usually 3 of them
     Acollapsed  = array( NA_real_, dim=dim(A) )
     for( i in 1:nrow(A) )
         {
         Acollapsed[i, ]  = collapseGroups1D( A[i, ], eps=eps )
         }
 
-    #out = list()
-    #out$groupidx    = grpDuplicated(Acollapsed,MARGIN=2)
+    #   the next function is accelerated with C++
     out = grpDuplicated( Acollapsed, MARGIN=2 )
     
     if( bysize  &&  ! is.null(out) )

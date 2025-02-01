@@ -453,6 +453,7 @@ inside_zonotope <- function( x, p, hg )
 
     if( TRUE )
         {
+        #   this is the fastest method I found
         data        = .Call( C_whichMaxMatrix, distance, 2L )
         idx         = data[[1]]     #; print( idx )
         distance    = data[[2]]     #; print( distance )
@@ -497,9 +498,9 @@ inside_zonotope <- function( x, p, hg )
     out = data.frame( row.names=rnames )
 
     out$p           = p
-    out$inside      = distance <= 0
+    out$idxhyper    = idx    
     out$distance    = distance
-    out$idxhyper    = idx
+    out$inside      = distance <= 0
 
     return(out)
     }
@@ -657,7 +658,7 @@ projectcubepoints <- function( x, pmat )
 #   tol     boundary tolerance
 #
 #   return  P x N matrix of points in the N-cube, where N is the number of generators of the original matroid
-#           the new N-point maps the same point in the zonogon or zonohedron as the given M-point,
+#           the new N-vector maps the same point in the zonogon or zonohedron as the given M-point,
 #           except for the offset from the original zono* and the simplified zono*
 
 invertcubepoints <- function( x, pmat, tol=5.e-15 )
@@ -780,6 +781,9 @@ invertcubepoints <- function( x, pmat, tol=5.e-15 )
             if( is.null(vec) )  return(NULL)
 
             pout[ idxfromgroundORIG[ x$matroid$multiple[[i]] ] ] = vec    #  lift$pcube
+            
+            #mess    = sprintf( "from pcube[%d]=%g, added this to pout[]: ", j, s )
+            #cat( mess, vec, " to pout[]\n" )
             }
 
         #   handle the loops, which we set to 0 or 1
@@ -812,6 +816,18 @@ invertcubepoints <- function( x, pmat, tol=5.e-15 )
 
         out[k, ]    = pout
         }
+        
+    if( FALSE )
+        {
+        resp_simp   = matsimp %*% t(pmat)
+        
+        resp_org    = matorg %*% t(out)
+        
+        delta   = resp_org - resp_simp
+        cat( "|delta| = ", sum(abs(delta)), '\n' )
+        print( delta )
+        }
+        
 
     return( out )
     }
@@ -821,21 +837,21 @@ invertcubepoints <- function( x, pmat, tol=5.e-15 )
 #   s       value to invert, in [0,1]
 #   sprev   previous value in some hi-dimensional cube, in [0,1]
 #   snext   next value in some hi-dimensional cube, in [0,1]
-#   tol     tolerance passed to zonoseg.invert
+#   tol     tolerance passed to invert.zonoseg
 #
-#   returns  a point in cube corresponding to zono
+#   returns  a point in cube of zono, that maps to (1-s)*zmin + s*zmax
 
 invertval   <- function( zono, s, sprev, snext, tol=5.e-15 )
     {
     #   get the number of generators
     n   = length( zono$matroid$ground )
 
-    out     = numeric( n )
-
     lambda  = lambdavec( sprev, snext ) #; print(lambda)
 
     zmin    = getsegment(zono)[1]   # if the generators are not mixed, zmin is 0
     zmax    = getsegment(zono)[2]
+
+    out     = numeric( n )
 
     if( 0 < lambda[1] )
         {
@@ -850,6 +866,18 @@ invertval   <- function( zono, s, sprev, snext, tol=5.e-15 )
         #   this is the decreasing part
         lift    = invert( zono, (1-s)*zmin + s*zmax, tol=tol )
         out     = out + lambda[2] * lift$pcube
+        }
+        
+    if( FALSE )
+        {
+        #   test it
+        cat( "invertval() test:\n" )
+        # print( x$matroid$matrix )
+        cat( "lambda = ", lambda, '\n' )
+        cat( sprintf( "s=%g   sprev=%g  snext=%g\n", s, sprev, snext ) )
+        ztarget = (1-s)*zmin + s*zmax
+        test    = as.double( zono$matroid$matrix %*% t(out) )  -  ztarget
+        print( range(test) )
         }
 
     return( out )
@@ -917,7 +945,7 @@ supportingnormal0   <- function( zono )
 
 #   xprev, xnext    point in the unit square, not verified
 #
-#   returns a pair of coefficent weights, suitable for a convex combination
+#   returns a pair of coefficent weights that sum to 1, suitable for a convex combination
 #
 
 lambdavec <- function( xprev, xnext )

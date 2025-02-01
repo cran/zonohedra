@@ -33,8 +33,11 @@ prepareNxM  <-  function( A, M, Nmin=1 )
         #log.string( c(ERROR,2L), "Argument '%s' must be a non-empty numeric Nx%d matrix (with N>=%d). %s='%s...'",
         #                            Aname, M, Nmin, Aname, mess )
                                     
+        #   in the next call, note the assignment to .topcall,
+        #   which makes log_level() print the name of the calling function, and *not*  "prepareNxM()".
+        #   Currently, this is the only place in the package where this is done.
         log_level( ERROR, "Argument '%s' must be a non-empty numeric Nx%d matrix (with N>=%d). %s='%s...'",
-                                    Aname, M, Nmin, Aname, mess, .topcall=sys.call(-2L) )
+                                    Aname, M, Nmin, Aname, mess, .topcall=sys.call(-1L) )
         return(NULL)
         }
 
@@ -332,7 +335,27 @@ emptymultiplesupp   <-function( m )
     }
 
 
+#   nonloop     a list of integer vectors, with values in ground[]
+#               the vectors should be a partition of ground[]
+#   ground      an increasing vector of positive integers
 
+collapsetosimple <- function( nonloop, ground )
+    {
+    #   make inverse lookup vector
+    colfromgnd  = integer( max(ground) )
+    colfromgnd[ ground ]    = 1:length(ground)
+    
+    out = rep( NA_integer_, length(ground) )
+    
+    for( i in 1:length(nonloop) )
+        {
+        idx = colfromgnd[ nonloop[[i]] ]
+        
+        out[idx] = i
+        }
+
+    return( out )
+    }
 
 
 #   A           a numeric matrix with rank 1
@@ -456,7 +479,7 @@ setlistfromvec <- function( grp, ground=NULL )
         ground = 1L:length(grp)
     else if( length(ground) != length(grp) )
         {
-        log_level( ERROR, "length(ground)= %d is invalid!", length(ground) )
+        log_level( FATAL, "length(ground)= %d is invalid!", length(ground) )
         return(NULL)
         }
 

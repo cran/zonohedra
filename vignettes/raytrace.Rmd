@@ -60,7 +60,7 @@ library(zonohedra)
 # A Ray Tracing Example
 
 In Burns' example, the base of the ray is the center of the zonohedron $Z$:
-```{r, echo=TRUE,  message=FALSE}
+```{r, echo=TRUE,  message=TRUE, WARNING=TRUE}
 matgen = colorimetry.genlist[["xyz1931.1nm"]]   # the CIE 1931 CMFs at 1nm step
 matgen = 100 * matgen / sum( matgen[2, ] )   # it is traditional to scale so the center has Y=50, recall we use Illuminant E
 zono =  zonohedron( matgen )
@@ -70,13 +70,13 @@ The vector `base` corresponds to Burns' vector $XYZ_{\text{50%}}$.
 
 The direction of the ray is given by spherical angles,
 which define a unit vector `u`:
-```{r, echo=TRUE,  message=FALSE}
+```{r, echo=TRUE,  message=TRUE, WARNING=TRUE}
 theta = 1.478858 ; phi = 0.371322
 u = c( sin(phi)*cos(theta), sin(phi)*sin(theta), cos(phi) ) ; u
 ```
 
 Calculate the intersection of the ray with the boundary of $Z$.
-```{r, echo=TRUE,  message=TRUE}
+```{r, echo=TRUE,  message=TRUE, WARNING=TRUE}
 df_opt = raytrace( zono, base, u ) ; df_opt
 XYZ_opt = df_opt$point[1, ] ; XYZ_opt
 ```
@@ -85,14 +85,14 @@ From Figure 8 of @Burns2021 we see that this point
 (and every point in the same parallelogram)
 comes from a reflectance spectrum with 4 transitions.
 This can be verified by inverting:
-```{r, echo=TRUE,  message=TRUE}
+```{r, echo=TRUE,  message=TRUE, WARNING=TRUE}
 invertboundary( zono, XYZ_opt )$transitions
 ```
 
 
 Now calculate the intersection of the ray with the 2-transition surface
 associated with $Z$.
-```{r, echo=TRUE,  message=TRUE}
+```{r, echo=TRUE,  message=TRUE, WARNING=TRUE}
 df_2trans = raytrace2trans( zono, base, u ) ; df_2trans
 XYZ_2trans = df_2trans$point[1, ] ; XYZ_2trans
 ```
@@ -141,7 +141,7 @@ Consider the midpoint of $XYZ_{\text{LPsoln}}$ and $XYZ_{\text{two-trans}}$.
 It lies on the same ray as these 2 points,
 so it must be *inside* the zonohedron, but *outside* the 2-transition surface.
 We can verify this easily:
-```{r, echo=TRUE,  message=FALSE}
+```{r, echo=TRUE,  message=FALSE, WARNING=TRUE}
 XYZ_mid = (XYZ_opt + XYZ_2trans) / 2
 inside( zono, XYZ_mid )
 inside2trans( zono, XYZ_mid )

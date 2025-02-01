@@ -131,7 +131,7 @@ invert.zonoseg <- function( x, z, tol=0, ... )
     ok  = is.numeric(z)  &&  0<numpoints
     if( ! ok )
         {
-        log_level( ERROR, "z is invalid." )
+        log_level( ERROR, "z or numpoints is invalid." )
         return(NULL)
         }
 
@@ -233,6 +233,9 @@ invert.zonoseg <- function( x, z, tol=0, ... )
     if( FALSE )
         {
         #   test it
+        cat( "invert.zonoseg() test:\n" )
+        print( x$matroid$matrix )
+        cat( sprintf( "z=%g   zmin=%g   zmax=%g   sum(matrix)=%g\n", z, zmin, zmax, sum(x$matroid$matrix) ) )
         test    = as.double( x$matroid$matrix %*% t(pcube) )  -  z
         print( range(test) )
         }

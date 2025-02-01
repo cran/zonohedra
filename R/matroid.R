@@ -24,7 +24,8 @@
 #   hyperplaneidx   integer LUT from crossprods column index to hyperplane index. Only present for simple rank 3.
 #                   this can be used to take a pair of points and find the unique hyperplane that contains them.
 #                   Used in getmetrics.zonohedron()
-#   simplified      a matroid = the simplification of the original matroid - only if the matroid is not simple already
+#   collapsetosimple    integer map from original matrix columns to the simplified one - only present if the matroid is not simple
+#   simplified      a matroid = the simplification of the original matroid - only present if the matroid is not simple already
 
 
 #   x       a numeric matrix with 1,2, or 3 rows
@@ -115,13 +116,24 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
     grp = findColumnGroups( xunit, e1, oriented=FALSE ) #; print(grp)
 
     #   nonloop is a list of vectors, and not a vector
+    #   the nonloop may contain many vectors that are singletons
     nonloop = setlistfromvec( grp, gnd.noloops )
+    
 
-    condata = condenseMatrix( x, ground, nonloop )  # condenseMatrix( x.noloops, gnd.noloops, nonloop )
+    #   condenseMatrix() returns a list with the simplified matrix, and the data frame multiplesupp
+    condata = condenseMatrix( x, ground, nonloop ) 
 
-    x.simple    = condata$matrix
+    x.simple    = condata$matrix        # this matrix has length(nonloop) columns.
 
-    gnd.simple  = sapply( nonloop, function(v) { v[1] } )
+    gnd.simple  = sapply( nonloop, function(v) { v[1] } )   # extract the first point in each group
+    
+    
+    #   make integer vector that maps from the columns of x to the columns of x.simple
+    #   if a column of x is 0, a loop, it maps to NA_integer_
+    collapsetosimple    = rep( NA_integer_, length(loopmask) )
+    
+    collapsetosimple[ ! loopmask ]  = collapsetosimple( nonloop, gnd.noloops )
+    
 
     lenvec      = lengths( nonloop )    #sapply( nonloop, length )
     multiple    = nonloop[ 2 <= lenvec ]
@@ -141,6 +153,8 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
 
         if( ! issimple )
             {
+            out$collapsetosimple = collapsetosimple
+            
             out$simplified  = matroid1( integer(0), gnd.simple[1], gnd.simple, x.simple )
 
             #   record the original loops and multiples as an attribute
@@ -175,6 +189,8 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
 
         if( ! issimple )
             {
+            out$collapsetosimple = collapsetosimple
+            
             #   extract only the 1st point from each hyperplane
             hyperfirst  = lapply( nonloop, function(v) { v[1] } )
             # cat( "======\n" ) ;         print( nonloop ) ;             print( hyperfirst )
@@ -192,7 +208,7 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
         return( out )
         }
 
-    #   nrow(x) is now 3, which is the difficult case
+    #########   nrow(x) is now 3, which is the difficult case       ######
 
     # cat( "Computing nontrivial hyperplanes:\n" )
 
@@ -434,6 +450,8 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
 
         out = matroid3( hyper_un, loop, multiple, ground, x, condata$multiplesupp )
 
+        out$collapsetosimple = collapsetosimple
+            
         #   record the original loops and multiples as an attribute
         #   attr(simplified,"lmdata") = lmdata
 
@@ -1602,6 +1620,36 @@ getbeltdata <- function( x, hypersub, pcube, gen, normal )
     .Call( C_beltdata, x$hyperplane, hypersub, pcube, gen, x$ground, normal, x$matrix, x$crossprods )
     }
 
+
+#   x       a matroid
+#   idx     a vector of raw indexes in the simplified matroid, think of them as column indexes
+#           they should be distinct (not verified)
+
+#   returns a vector of raw indexes in the original matroid.
+#   If an individual idx[k] is in a group, then that index expands to all indexes in the original.
+
+liftrawindexes  <- function( x, idx )
+    {
+    if( ! inherits( x, "matroid" ) )
+        {
+        log_level( ERROR, "x is not a matroid." )
+        return(NULL)
+        }
+        
+    if( is_simple(x) )  return( idx )       # no change !
+    
+    if( is.null(x$collapsetosimple) )
+        {
+        log_level( ERROR, "x$collapsetosimple is NULL." )
+        return(NULL)
+        }
+        
+    mask    = logical( length(x$collapsetosimple) )
+    
+    mask[ x$collapsetosimple  %in%  idx ]   = TRUE
+    
+    return( which(mask) )
+    }
 
 
 #   returns vector with column indexes of all groups with mixed directions

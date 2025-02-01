@@ -11,6 +11,8 @@
 #               in the (simplified) matroid.
 #               The data.frame has these columns:
 #                   center  the center of the facet, in the centered zonohedron, the other facet is antipodal (opposite sign).
+#                           center is computed one belt at a time; for the first facet in the belt it is computed by maximizing wrt unit normal.
+#                           the remaining facets are computed by traversing the belt, and updating the center as we go along
 #                   normal  outward-pointing unit normal, the antipodal facet has the opposite normal
 #                   beta    equation of the slab is  -beta <= <x,normal> <= beta.  We always have beta>0.
 #                   sign    +1 or -1.  It's the difference between the facet normal and the crossproduct coming from the matroid hyperplane.
@@ -1820,9 +1822,12 @@ invertboundarydata <- function( x, boundarydata, tol=5.e-14 )
 
 
 #   x       a zonohedron object
-#   gndpair Mx2 integer matrix, where rows define 2 points in the ground set of the simplified matroid
+#   gndpair Mx2 integer matrix, where rows define 2 points in the ground set of the matroid   #  *simplified* removed
 #           these define 2 generators of the matroid, and a pgram in the boundary of the zonohedron.
-#   cube    should corresponding point in the source cube be returned
+#           If gndpair[1,j] < gndpair[2,j], the 'positive' facet is returned.
+#           If gndpair[1,j] > gndpair[2,j], the 'negative' facet is returned.
+#           If gndpair[1,j]==gndpair[2,j], the facet is undefined, and NA is returned
+#   cube    if TRUE, then the corresponding point in the source cube is returned
 #
 #   returns a data.frame with M rows and these columns:
 #       gndpair         the given gndpair
@@ -1844,55 +1849,114 @@ boundarypgramdata <- function( x, gndpair, cube=FALSE )
         return(NULL)
         }
 
-    
-    matsimple   = getsimplified( x$matroid )
-
-    idxfromground   = idxfromgroundfun( matsimple$ground )
-
     gndpair = prepareNxM( gndpair, 2 )
     if( is.null(gndpair) )  return(NULL)
-
-    idxpair = idxfromground[ gndpair ]      # this also converts to an integer
-    dim( idxpair )  = dim( gndpair )        # ; print( idxpair )
+    
+    dimsave     = dim(gndpair)        
 
     if( ! is.integer(gndpair) )
         {
-        gndpair = matsimple$ground[ idxpair ]
-        dim(gndpair) = dim(idxpair)
+        #   it's probably floating point, because the user typed gndpair on the command line
+        #   change to true integer for the output
+        gndpair = as.integer(gndpair)
+        dim(gndpair) = dimsave          # now it can be assigned to the returned data.frame
+        }
+        
+
+    ground  = getmatroid(x)$ground      # ground set of original matroid
+
+    #   change any entries in gndpair, that are not in ground, to NA_integer_
+    gndpairsave = gndpair               # because we might modify gndpair with NAs
+    mask    = ! (gndpair %in% ground)
+    if( any(mask) )
+        {
+        gndpair[mask]   = NA_integer_
+        dim(gndpair)    = dimsave
         }
 
+    #   convert gndpair to raw indexes in the original matroid
+    idxfromground   = idxfromgroundfun( ground )      # idxfromgroundfun( matsimple$ground )
+
+    idxpair_org         = idxfromground[ gndpair ]
+    dim(idxpair_org)    = dim(gndpair)
+
+
+    #   collapse to raw indexes in the simplified matroid
+    collapsetosimple    = getmatroid(x)$collapsetosimple
+    
+    if( is.null(collapsetosimple) ) collapsetosimple = 1:length(ground)   # matroid is already simple
+    
+    idxpair = collapsetosimple[ idxpair_org ]
+    dim( idxpair )  = dim( gndpair )        # ; print( idxpair )    
+    
+    #   idxpair now contains raw indexes in the simplified matroid
+    #   because of the collapse, there might be duplicates in the rows, even if there were not there before
+
+    #   swap pairs if necessary
+    signvec = sign( idxpair[ ,2] - idxpair[ ,1] )       # signvec might contain NAs
+    mask    = signvec < 0
+    mask[ is.na(mask) ] = FALSE
+    if( any(mask) )     
+        {
+        idxpair[mask, ]     = idxpair[mask, 2:1]
+        idxpair_org[mask, ] = idxpair_org[mask, 2:1]
+        }
+        
+        
+    matsimple   = getsimplified( getmatroid(x) )
+    
+    idxfromgroundsimple = idxfromgroundfun( matsimple$ground )      # idxfromgroundfun( matsimple$ground )
 
     m       = nrow( idxpair )
+    
+    n       = length( ground )
     nsimp   = length( matsimple$ground )
 
-    #   in the next line, invalid idxpair entries lead to NA values in pairidx 
+    #   in the next line, invalid idxpair entries lead to NA values in pairidx, which is a 1-based integer vector of length m
+    #   in particular, if idxpair[ ,1] == idxpair[ ,2] then the value of pairidx is NA_integer_
     pairidx = .Call( C_pairindex, idxpair, nsimp )  #; print( pairidx )
 
+    matrix          = getmatrix( getmatroid(x) )
+
+    #   matrixsimple    = getmatrix( matsimple )
+    
+    loopindexes     = idxfromground[ getmatroid(x)$loop ]
+
     #   NA values in pairidx lead to NA values in hyperplaneidx
-    hyperplaneidx   = matsimple$hyperplaneidx[ pairidx ] ;
+    hyperplaneidx   = matsimple$hyperplaneidx[ pairidx ]
 
-    if( cube )  pcube = matrix( NA_real_, m, nsimp )
+    pcube           = matrix( NA_real_, m, n )
 
-    transitions = rep( NA_integer_, m )
-
-    matrixsimple    = getmatrix( matsimple )
+    transitions     = rep( NA_integer_, m )
 
     for( k in 1:m )
         {
         # cat( "------------  k=", k, '---------\n' )
 
-        hyperidx    = hyperplaneidx[k]
+        hyperidx    = hyperplaneidx[k]      # = matsimple$hyperplaneidx[ pairidx[k] ]
         
         if( is.na(hyperidx) )   next
 
-        normal      = x$facet$normal[hyperidx, ]
+        normal  = x$facet$normal[hyperidx, ]
 
-        colidx  = idxfromground[ matsimple$hyperplane[[ hyperidx ]] ]  #; print( colidx )
+        pc  = normal  %*%  matrix       #;       print( pc[colidx] )
 
-        pc  = normal  %*%  matrixsimple     #;       print( pc[colidx] )
+
+        #   get the raw indexes in the simplified matroid for this facet
+        colidx  = idxfromgroundsimple[ matsimple$hyperplane[[ hyperidx ]] ]  #; print( colidx )
+        
+        #print( "colidx" )
+        #print( colidx )
+        
+        #   lift the indexes to raw index in the original matrix
+        colidx  = liftrawindexes( getmatroid(x), colidx )
+        
+        #   add any loops to colidx, the pc[loop] should be exactly 0
+        colidx  = c( colidx, loopindexes )
+           
 
         #   pc[colidx] should be 0 or nearly 0.
-        #   override the coefficients of the edges of the facet
+        #   override and force to exactly 0
         pc[colidx] = 0
 
         if( FALSE )
@@ -1902,34 +1966,82 @@ boundarypgramdata <- function( x, gndpair, cube=FALSE )
             ok  = length(idx)==length(colidx)  &&  all( idx == colidx )
             if( ! ok )
                 {
-                log_level( WARN, "internal error.   which(pc==0) != colidx" )
+                log_level( WARN, "internal error.  colidx  !=  which(pc==0)" )
+
+                print( "colidx" )
+                print( colidx )
+                
+                print( "which(pc==0)" )
+                print( which(pc==0) )
                 }
             }
 
-        #   scale to interval [0,1]
+        #   scale sign from [-1,+1] to [0,1]
         pc  = (sign(pc) + 1) / 2        #;   print( pc )
+        
+        if( 2 < length(colidx) )
+            {
+            #   the generators are part of a non-pgram zonogon face
+            #   make changes to colidx entries
+            changeable  = logical(n)
+            changeable[ colidx ]    = TRUE
+            changeable[ idxpair_org[k, ] ]  = FALSE     # but do not change the 2 given indexes
+            
+            #   set "inside" to 1, and "outside" to 0
+            inside  = logical(n)
+            inside[ idxpair_org[k,1]:idxpair_org[k,2] ] = TRUE
+            
+            pc[  inside & changeable ]  = 1
+            pc[ !inside & changeable ]  = 0
+            
+            #   now only only 2 entries of pc[] are equal to 1/2, which is what we want for a parallelogram
+            }
 
         transitions[k]  = transitioncount( pc )
 
-        if( cube )   pcube[k, ] = pc
+        if( isTRUE(0 < signvec[k]) )
+            pcube[k, ] = pc
+        else
+            pcube[k, ] = 1 - pc     # complement
         }
 
-    if( anyDuplicated(pairidx)==0  &&  all(is.finite(pairidx)) )
-        rnames  = pairidx
-    else
-        rnames  = 1:length(pairidx)
+        
+    rnames  = rownames( gndpairsave )
+    if( is.null(rnames) )   rnames  = 1:m
     
     out = data.frame( row.names=rnames )
 
-    out$gndpair         = gndpair
+    out$gndpair         = gndpairsave
     out$hyperplaneidx   = hyperplaneidx
-    out$center          = x$facet$center[ hyperplaneidx, , drop=FALSE]
+    out$center          = tcrossprod( pcube, matrix )   # pcube  %*%  t(matrix)      #         x$facet$center[ hyperplaneidx, , drop=FALSE]
     out$transitions     = transitions
+    
+    if( cube )  out$pcube   = pcube     # add cube points
+    
+    
+    #   fix the signs of the center
+    #   out$center  = signvec * out$center  #   all columns are multiplied by signvec
 
-    if( cube )  out$pcube   = pcube
+    if( FALSE  &&  cube )
+        {
+        #   'lift' cube points from the simplified matroid dimension to the original matroid dimension
+        out$pcube   = invertcubepoints( x, pcube )
+        
+        for( k in 1:m )
+            {
+            if( signvec[k] < 0 )
+                #   invert the k'th point
+                out$pcube[k, ] = 1 - out$pcube[k, ]
+            }
+        }
 
     return( out )
     }
+
+
+
+
+
 
 if( FALSE )
 {

@@ -51,10 +51,15 @@ A point is inside iff the zonotope distance \eqn{\le} 0.
 \code{inside.zonotope()} returns a \code{data.frame} with N rows and these columns:
 
 \item{p}{the given point}
-\item{inside}{whether the point is inside the zonotope. For boundary points, \code{inside} is \code{TRUE}.}  
-\item{distance}{the distance from the point to the zonotope. For boundary points, \code{distance} is 0.  When \code{distance} > 0, it may be larger
-than the true mathematical distance, so \code{distance} is really
-a pseudo-distance.}
+\item{distance}{the signed distance from the point to the zonotope.
+When \code{distance} < 0, the point is in the interior, and \code{distance} is the
+true Euclidean distance.
+For boundary points, \code{distance} is 0.
+When \code{distance} > 0, the point is outside, and \code{distance} may be larger
+than the true Euclidean distance, so it is really a pseudo-distance.}
+
+\item{inside}{whether the point is inside the zonotope. \code{inside = distance<=0}.}  
+
 \item{idxhyper}{the index of the \emph{critical hyperplane} in the
 simplified matroid. This is the index of the slab where the maximum slab distance was taken.
 For a \bold{zonoseg} there is only 1 hyperplane (the empty set)
