@@ -41,7 +41,7 @@ components.
 \code{invert.zonoseg()} returns a \code{data.frame} with M rows and these columns:
 
 \item{z}{the given point}
-\item{pcube}{a point in the unit cube that maps to \code{z}. For the 2 boundary points, \code{pcube} is a vertex. If \code{z} is outside the zonoseg, \code{pcube} is all \code{NA}, and a warning message is printed}  
+\item{pcube}{a point in the unit cube that maps to \code{z}. For the 2 boundary points, \code{pcube} is a vertex. If \code{z} is outside the zonoseg, \code{pcube} is all \code{NA}, and a warning message is printed}
 
 If the names of \code{z} are unique,
 they are copied to the row names of the output.
@@ -59,12 +59,12 @@ In case of error, the function returns \code{NULL}.
 zono1 = zonoseg( c(1,-2,3,0,-3,-4) )
 zono1
 # generators:        6 -- 3 negative, 2 positive, and 1 loops.
-# 
+#
 # segment:                   [-9,4]
 #      value pcube.1 pcube.2 pcube.3 pcube.4 pcube.5 pcube.6
 # zmin    -9       0       1       0       0       1       1
 # zmax     4       1       0       1       0       0       0
-# 
+#
 # 2-transition subsegment:   [-8,3]
 #             value source.1 source.2 source.3 source.4 source.5 source.6
 # tmin-2trans    -8        1        1        0        0        1        1
@@ -86,5 +86,3 @@ invert( zono1, z )
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

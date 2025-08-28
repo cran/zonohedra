@@ -94,7 +94,7 @@ and the computed \code{linkingnumber} is \code{NA} (integer).
 This is currently set to \code{linkingnumber != 0}.
 If the \code{linkingnumber} is \code{NA} (integer),
 then \code{inside} is \code{NA} (logical).
-}  
+}
 
 \item{timecalc}{the time to do the calculations, in seconds}
 
@@ -143,5 +143,3 @@ Publish or Perish.
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

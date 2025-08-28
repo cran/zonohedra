@@ -118,22 +118,22 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
     #   nonloop is a list of vectors, and not a vector
     #   the nonloop may contain many vectors that are singletons
     nonloop = setlistfromvec( grp, gnd.noloops )
-    
+
 
     #   condenseMatrix() returns a list with the simplified matrix, and the data frame multiplesupp
-    condata = condenseMatrix( x, ground, nonloop ) 
+    condata = condenseMatrix( x, ground, nonloop )
 
     x.simple    = condata$matrix        # this matrix has length(nonloop) columns.
 
     gnd.simple  = sapply( nonloop, function(v) { v[1] } )   # extract the first point in each group
-    
-    
+
+
     #   make integer vector that maps from the columns of x to the columns of x.simple
     #   if a column of x is 0, a loop, it maps to NA_integer_
     collapsetosimple    = rep( NA_integer_, length(loopmask) )
-    
+
     collapsetosimple[ ! loopmask ]  = collapsetosimple( nonloop, gnd.noloops )
-    
+
 
     lenvec      = lengths( nonloop )    #sapply( nonloop, length )
     multiple    = nonloop[ 2 <= lenvec ]
@@ -154,7 +154,7 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
         if( ! issimple )
             {
             out$collapsetosimple = collapsetosimple
-            
+
             out$simplified  = matroid1( integer(0), gnd.simple[1], gnd.simple, x.simple )
 
             #   record the original loops and multiples as an attribute
@@ -190,7 +190,7 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
         if( ! issimple )
             {
             out$collapsetosimple = collapsetosimple
-            
+
             #   extract only the 1st point from each hyperplane
             hyperfirst  = lapply( nonloop, function(v) { v[1] } )
             # cat( "======\n" ) ;         print( nonloop ) ;             print( hyperfirst )
@@ -225,7 +225,7 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
     timenthp    = time2 - time1
 
 
-    log_level( INFO, "Found %d non-trivial hyperplanes.", hypersnt )
+    log_level( INFO, "In %dx%d matrix, found %d non-trivial hyperplanes.", nrow(x), ncol(x), hypersnt )
 
     if( 0 < hypersnt )
         {
@@ -451,7 +451,7 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
         out = matroid3( hyper_un, loop, multiple, ground, x, condata$multiplesupp )
 
         out$collapsetosimple = collapsetosimple
-            
+
         #   record the original loops and multiples as an attribute
         #   attr(simplified,"lmdata") = lmdata
 
@@ -1635,19 +1635,19 @@ liftrawindexes  <- function( x, idx )
         log_level( ERROR, "x is not a matroid." )
         return(NULL)
         }
-        
+
     if( is_simple(x) )  return( idx )       # no change !
-    
+
     if( is.null(x$collapsetosimple) )
         {
         log_level( ERROR, "x$collapsetosimple is NULL." )
         return(NULL)
         }
-        
+
     mask    = logical( length(x$collapsetosimple) )
-    
+
     mask[ x$collapsetosimple  %in%  idx ]   = TRUE
-    
+
     return( which(mask) )
     }
 

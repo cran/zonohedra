@@ -10,7 +10,8 @@
 #               normal  outward-pointing unit normal
 #               beta    equation of the slab is  -beta <= <x,normal> <= beta.  We always have beta > 0.
 #       facet0      integer vector of facet/hyperplane indexes that contain the point 0
-#       vertex      a (2n)x2 matrix with vertex in each row, not centered
+#       vertex      (2N)x2 matrix with vertex in each row, not centered.  N is the number of simplified generators.
+#       pcube       (2N)xN matrix of raw 0-1 values, that maps to vertex[,]
 #       tilingdata  data.frame with a row for each pgram tile in the standard tiling, and these columns
 #               idxpair     2 indexes of the pgram
 #               center      center of the pgram tile, relative to the center of the zonogon
@@ -109,6 +110,8 @@ zonogon <- function( mat, e0=0, e1=1.e-6, ground=NULL )
     j   = facet$idx[1]
     pcube[ j ]   = 0
 
+    cubemat = matrix( NA_real_, nrow=n, ncol=length(pcube) )
+
     for( k in 1:n )
         {
         #j   = facet$idx[k]
@@ -162,6 +165,9 @@ zonogon <- function( mat, e0=0, e1=1.e-6, ground=NULL )
         #   map pcube to vertex and save it
         vertex[k, ] = matgen %*% pcube
 
+        #   save pcube for vertex k
+        cubemat[k, ]    = pcube
+
         if( k < n )
             {
             #   advance j to the next edge
@@ -178,9 +184,6 @@ zonogon <- function( mat, e0=0, e1=1.e-6, ground=NULL )
         }
 
     facet$center  = center
-
-
-
 
     #   put the facets in column index order, which matches the hyperplane index order
     #   this is currently assumed by section.zonogon
@@ -254,11 +257,21 @@ zonogon <- function( mat, e0=0, e1=1.e-6, ground=NULL )
     out$facet0  = facet0
 
 
-    #   add vertices by symmetry
+    #   add vertices by symmetry, so we complete the *full* boundary
     vertex  = rbind( vertex, -vertex )
 
-    #   translated to original and non-centered zonogon
-    out$vertex = vertex + matrix( out$center, nrow(vertex), 2, byrow=TRUE )     # back to original coords
+    #   translate to original and non-centered zonogon
+    #  out$vertex = vertex + matrix( out$center, nrow(vertex), 2, byrow=TRUE )      # back to original coords, slow
+    out$vertex  = .Call( C_sumMatVec, vertex, out$center, 1L )                      # this is faster
+
+
+    #   add the cube coords by symmetry too, so we complete the *full* boundary
+    cubemat = rbind( cubemat, -cubemat )
+
+    #   record cubemat which has values +/- 0.5
+    #   but convert to raw bytes in 0-1 format to save memory
+    out$pcube       = as.raw( 0 < cubemat )
+    dim(out$pcube)  = dim(cubemat)
 
 
     #   add data for the standard tiling
@@ -301,7 +314,7 @@ zonogon <- function( mat, e0=0, e1=1.e-6, ground=NULL )
                 #   take the center of the pgram on the zonohedron facet, and drop the Z          # and the zonogon center
                 #    centerpgram[k, ]    = zono$facet$center[k,1:2]    #+ out$center
                 }
-                
+
             centerpgram = zono$facet$center[ ,1:2]
 
             if( TRUE )
@@ -970,8 +983,8 @@ plot.zonogon  <- function( x, orientation=TRUE, normals=FALSE, elabels=FALSE,
         xlim    = xlim + 0.1*c(-1,1)
         ylim    = ylim + 0.1*c(-1,1)
         }
-        
-        
+
+
     plot( xlim, ylim, type='n', las=1, asp=1, lab=c(10,10,7), xlab='x', ylab='y' )
     grid( lty=1 )
     abline( h=0, v=0 )
@@ -1008,7 +1021,7 @@ plot.zonogon  <- function( x, orientation=TRUE, normals=FALSE, elabels=FALSE,
         #   quadmat = matrix( 0, nrow=4, ncol=2 )
 
         edgecoeff   = matrix( c( -0.5,-0.5, -0.5,0.5, 0.5,0.5, 0.5,-0.5), 2, 4 )    # 2x4
-    
+
         for( k in 1:nrow(x$tilingdata) )
             {
             col2    = x$tilingdata$idxpair[k, ]
@@ -1021,7 +1034,7 @@ plot.zonogon  <- function( x, orientation=TRUE, normals=FALSE, elabels=FALSE,
             #quadmat[4, ]    =   0.5 * edge[ , 1] - 0.5*edge[ , 2]
 
             quadmat = edge %*% edgecoeff
-            
+
             #   add the center of the pgram relative to the zonogon center, and the zonogon center
             centerpgram = x$tilingdata$center[k, ]  +  x$center
 
@@ -1268,7 +1281,7 @@ lintransform.zonogon <- function( x, W )
     out$facet$beta    = .rowSums( normal * out$facet$center, nrow(normal), ncol(normal) )
 
     out$vertex  = x$vertex %*% t(W)
-    
+
     out$tilingdata$center   = x$tilingdata$center %*% t(W)
 
     attr( out, "lintransform" ) = W
@@ -1373,8 +1386,8 @@ if( FALSE )
 
     # cat( "testmat:\n" ) ; print( testmat )
     }
-    
-    
+
+
 if( FALSE )
     {
         zono    = liftedzonohedron( matsimp, ground=gndsimp )
@@ -1414,5 +1427,5 @@ if( FALSE )
                     text( center[1], center[2], lab, col='red', cex=0.5 )
                     }
                 }
-            }   
-    }                
+            }
+    }

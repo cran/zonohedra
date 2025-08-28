@@ -51,7 +51,7 @@ converted to a matrix with 1 row.
 
 \item{e0}{
 threshold for an entry of \code{mat} to be considered 0.
-Since the default is \code{e0=0}, 
+Since the default is \code{e0=0},
 by default an entry must be exactly 0 to become a loop in the
 associated matroid.
 }
@@ -91,7 +91,7 @@ Finally, it prints data on the associated matroid.
 In case of error, e.g. invalid \code{mat},
 the function prints an error message and returns \code{NULL}.
 \cr\cr
-\code{getsegment()} and \code{getsegment2trans()} 
+\code{getsegment()} and \code{getsegment2trans()}
 return numeric 2-vectors - the min and max endpoints of the corresponding
 segments.
 \cr\cr
@@ -130,7 +130,7 @@ zono1
 #             value source.1 source.2 source.3 source.4 source.5 source.6
 # tmin-2trans    -8        1        1        0        0        1        1
 # tmax-2trans     3        0        0        1        1        0        0
-# 
+#
 # matroid:
 # ground set:           6 points   {1 2 3 4 5 6}
 # hyperplanes:          1     {4}
@@ -143,7 +143,7 @@ zono1
 # This matroid is constructed from a 1x6 real matrix.
 #      1  2 3 4  5  6
 # [1,] 1 -2 3 0 -3 -4
-# 
+#
 # The summary of the simplified matroid is:
 #     ground set:           1 points   {1}
 #                       Point 1 corresponds to the multiple group {1 2 3 5 6} in the original ...
@@ -165,5 +165,3 @@ zono1
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

@@ -31,7 +31,7 @@ a non-zero numeric 3-vector - the normal of all the planes
 }
 
 \item{beta}{
-a numeric M-vector of line-constants.  
+a numeric M-vector of line-constants.
 The equation of the k'th plane k is: \code{<x,normal> = beta[k]}.
 }
 
@@ -41,7 +41,7 @@ being considered a supporting plane
 }
 
 \item{plot}{
-if \code{TRUE}, the polygons formed by the the intersection 
+if \code{TRUE}, the polygons formed by the the intersection
 of the planes and the boundary of the zonohedron are
 \emph{added} to an existing 3D plot of the zonohedron \code{x},
 see \code{\link{plot.zonohedron}()}.
@@ -113,5 +113,3 @@ The package \pkg{rgl} is required for 3D plotting.
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

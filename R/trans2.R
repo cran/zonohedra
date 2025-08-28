@@ -524,7 +524,7 @@ plot2trans <- function( x, type='ef', ecol='black', econc=FALSE,
 
         xyzdisp = .Call( C_sumMatVec, xyz, x$center, 1L )
 
-        #rgl::segments3d( xyzdisp, col=ecol, lwd=1 )
+        rgl::segments3d( xyzdisp, col=ecol, lwd=1 )
 
         conmask = (anglesDH$angle < 0)  #; print( conmask )
 
@@ -535,7 +535,7 @@ plot2trans <- function( x, type='ef', ecol='black', econc=FALSE,
             mask2   = t(mask2)
             dim(mask2)  = NULL
 
-            rgl::segments3d( xyzdisp[mask2, ], col='red', lwd=5 )
+            rgl::segments3d( xyzdisp[mask2, ], col='red', lwd=3 )
             }
 
         if( both )
@@ -545,7 +545,7 @@ plot2trans <- function( x, type='ef', ecol='black', econc=FALSE,
             #rgl::segments3d( xyzdisp, col=ecol, lwd=1 )
 
             if( econc && any(conmask) )
-                rgl::segments3d( xyzdisp[mask2, ], col='red', lwd=5 )
+                rgl::segments3d( xyzdisp[mask2, ], col='red', lwd=3 )
             }
         }
 
@@ -587,7 +587,20 @@ plot2trans <- function( x, type='ef', ecol='black', econc=FALSE,
         else
             xyz = .Call( C_sumMatVec, quadmat[levelmask, ], x$center, 1L )
 
-        rgl::quads3d( xyz, col=fcol, alpha=falpha, lit=TRUE  )              # quad filled
+        #   compute the complementary color, and use this for the 'backfacing' facets
+        fcol_comp   = grDevices::rgb( t( 255 - grDevices::col2rgb(fcol) ), max=255 )
+
+        linknum = linkingnumber3( x, pgramdf )
+        
+        fcolvec = ifelse( 0 < linknum * pgramdf$beta, fcol, fcol_comp )
+
+        #   replicate each color 4 times
+        fcolmat = matrix( fcolvec, nrow=step, ncol=length(fcolvec), byrow=TRUE )
+        fcolvec = as.character( fcolmat )
+        
+        if( ! is.null(level) )  fcolvec = fcolvec[levelmask]
+
+        rgl::quads3d( xyz, col=fcolvec, alpha=falpha, lit=TRUE  )              # quad filled
 
         if( doedges )
             rgl::quads3d( xyz, col=ecol, lwd=1, front='lines', back='lines', lit=FALSE  )   # quad edges
@@ -599,7 +612,7 @@ plot2trans <- function( x, type='ef', ecol='black', econc=FALSE,
             else
                 xyz = .Call( C_sumMatVec, -quadmat[levelmaskanti, ], x$center, 1L )
 
-            rgl::quads3d( xyz, col=fcol, alpha=falpha, lit=TRUE )           # quad filled
+            rgl::quads3d( xyz, col=fcolvec, alpha=falpha, lit=TRUE )           # quad filled
 
             if( doedges )
                 rgl::quads3d( xyz, col=ecol, lwd=1, front='lines', back='lines', lit=FALSE  )   # quad edges
@@ -2849,7 +2862,7 @@ section2trans <- function( x, normal, beta, invert=FALSE, plot=FALSE, tol=1.e-12
         {
         if( ! requireNamespace( 'rgl', quietly=TRUE ) )
             {
-            log_level( WARN, "Package 'rgl' is required for plotting.  Please install it." )
+            log_level( WARN, "Plotting cannot be done, because package 'rgl' is not installed. " )
             }
         else if( rgl::cur3d() == 0 )
             {
@@ -2861,12 +2874,12 @@ section2trans <- function( x, normal, beta, invert=FALSE, plot=FALSE, tol=1.e-12
                 {
                 xyz = out[[k]]$point
                 rgl::polygon3d( xyz[ ,1], xyz[ ,2], xyz[ ,3], fill=FALSE, col='red' )
-                rgl::points3d( xyz[ ,1], xyz[ ,2], xyz[ ,3], col='red', size=13, point_antialias=TRUE )
+                #   rgl::points3d( xyz[ ,1], xyz[ ,2], xyz[ ,3], col='red', size=13, point_antialias=TRUE )
                 }
             }
         }
 
-    return( out )
+    return( invisible(out) )
     }
 
 
@@ -2877,7 +2890,7 @@ transitionsdf <- function( x, trans2=TRUE )
     {
     if( ! inherits(x,"zonohedron") )
         {
-        log_level( ERROR, "Argument x is invalid.  It's not a zonohedron." )
+        log_level( ERROR, "Argument x is invalid.  It is not a zonohedron." )
         return(NULL)
         }
 
@@ -2887,7 +2900,7 @@ transitionsdf <- function( x, trans2=TRUE )
     ok  = is.finite(metrics$starshaped)  &&  metrics$starshaped
     if( ! ok )
         {
-        log_level( "The zonohedron x is invalid.  The 2-transitions surface is not strictly starshaped." )
+        log_level( ERROR, "The zonohedron x is invalid.  The 2-transition surface is NOT strictly starshaped." )
         return(NULL)
         }
 
@@ -3023,6 +3036,13 @@ plothighertrans <- function( x, abalpha=1, defcol='green', defalpha=0, ecol=NA,
 
     if( is.null(metrics) )
         return(FALSE)
+
+    ok  = is.finite(metrics$starshaped)  &&  metrics$starshaped
+    if( ! ok )
+        {
+        log_level( ERROR, "The zonohedron x is invalid.  The 2-transition surface is NOT strictly starshaped." )
+        return(NULL)
+        }
 
     facesok  = ! is.null(metrics$pgramdf$deficient)     #; cat( 'facesok ', facesok, '\n' )
 

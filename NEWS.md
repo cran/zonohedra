@@ -1,10 +1,19 @@
 
 
+### Version 0.5-0 [Aug 28, 2025]
+
+* added new function `as.mesh3d.zonohedron()`, which is derived from `rgl::as.mesh3d()`
+* moved package `rgl` from Suggests to Imports
+* in the User Guide, replaced an animated GIF with a WEBM video
+* in Suggests, dropped package `gifski` and added packages `av` and `base64enc`
+* in function `plot2trans()`, fixed a bug when type='e'
+
+
 ### Version 0.4-0 [Feb 1, 2025]
 
 * for function `boundarypgramdata()`, improved correctness and slightly changed the return value
-* fixed error on the man page for `inside()`
-* added new item - collapsetosimple - to matroid list
+* for function `inside()`, fixed error on the man page
+* added new item - `collapsetosimple` - to matroid list
 * fixed a compilation warning
 
 

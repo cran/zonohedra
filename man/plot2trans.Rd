@@ -110,5 +110,3 @@ A line from the black point to the white point is also drawn.
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

@@ -23,7 +23,9 @@ vignette: >
 body {
   max-width: 750px;     /* make a little wider, default is 700px */
 }
-
+h1{
+  font-size: 25pt;    /* make the level 1 headers smaller */
+}
 /*
 div.figure {
  border: 1px;
@@ -31,6 +33,23 @@ div.figure {
 }
 */
 ```
+
+
+<script>
+function ToggleDiv(ID) {
+  var D = document.getElementById("D-" + ID);
+  var B = document.getElementById("B-" + ID);
+  if (D.style.display === "none") {
+    // open the div and change button text
+    D.style.display = "block";
+    B.innerText = "Hide " + ID;
+  } else {
+    // close the div and change button text
+    D.style.display = "none";
+    B.innerText = "Show " + ID;
+  }
+}
+</script>
 
 
 ```{r setup, include=FALSE}
@@ -47,13 +66,14 @@ rgl::setupKnitr(autoprint = TRUE)
 
 # Introduction
 
-A _zonohedron_, roughly speaking, is the projection of
-a high-dimensional cube to $\mathbb{R}^3$.
-For a precise definition see the [Zonotopes](zonotopes.html) vignette,
-section 1.3.
+A _zonohedron_ is the linear image of a high-dimensional cube
+$[0,1]^N$ to $\mathbb{R}^3$.
 A zonohedron is a special type of convex polyhedron.
+The images of the standard basis of $\mathbb{R}^N$ are called the
+_generators_ of the zonohedron.
 
-The goal of this package is to construct any zonohedron,
+
+The goal of this package is to construct _any_ zonohedron from the generators,
 but especially the ones in these 2 families:
 <ul>
 <li> the classical zonohedra, with high symmetry </li> 
@@ -164,10 +184,12 @@ rgl::rglwidget( webgl=TRUE )
 ```
 
 <br>
-Before continuing, define function `spinit()` used for creating animated GIFs.
+Some WebM video plots in the next section are made with help of the package **av** and this function:
 
+<button id="B-spinit()" onclick="ToggleDiv('spinit()')">
+Show spinit()</button>
+<div id="D-spinit()" style="display: none">
 ```{r, echo=TRUE, message=FALSE, warning=FALSE}
-library(gifski)
 
 #   zono        the zonohedron
 #   id          unique ID for this animation, a positive integer
@@ -179,20 +201,48 @@ spinit <- function( zono, index, fps=5, duration=8, revolutions=1, vpsize=c(480,
 #  enlarge viewport
 wr = par3d( "windowRect" ) 
 par3d( windowRect = c( wr[1:2], wr[1:2] + vpsize ) )
-pathtemp = "./figs" ;   if( ! file.exists(pathtemp) ) dir.create(pathtemp)  # make temp folder
+pathtemp = tempdir()   #"./figs" ;   if( ! file.exists(pathtemp) ) dir.create(pathtemp)  # make temp folder
 #  make a lot of .PNG files in pathtemp
 movie3d( spin3d( getcenter(zono), rpm=revolutions*60/duration ), duration=duration, fps=fps, startTime=1/fps,
            convert=F, movie='junk', dir=pathtemp, verbose=F, webshot=F )
-#  combine all the .PNGs into a single .GIF
+#  combine all the .PNGs into a single .webm
 pathvec = dir( pathtemp, pattern="png$", full=T )
-gif_file = sprintf( "./figs/animation%g.gif", index ) 
-# if( file.exists(gif_file) )  file.remove( gif_file )
-out = gifski::gifski( pathvec, gif_file=gif_file, delay=1/fps, progress=F, width=vpsize[1], height=vpsize[2] )
-res = file.remove( pathvec )  # cleanup the .PNG files, leaving just the .GIF
+
+webm_file = sprintf( "%s/animation%g.webm", pathtemp, index )
+out = av::av_encode_video( pathvec, output=webm_file, framerate=fps, codec='libvpx-vp9', verbose=F )
+res = file.remove( pathvec )  # cleanup the .PNG files, leaving just the .webm
 
 return( out )
 }
 ```
+</div>
+
+
+
+<br>
+
+Embedding videos in the HTML output is done with the help of the package **base64enc** and this function:
+
+<button id="B-video2html()" onclick="ToggleDiv('video2html()')">Show video2html()</button>
+<div id="D-video2html()" style="display: none">
+```{r, echo=TRUE, message=FALSE}
+
+video2html  <- function( path, attributes="controls loop autoplay muted" )
+    {
+    requireNamespace( "base64enc", quietly=TRUE )
+    
+    i   = regexpr( "[.][a-z]+$", path, ignore.case=T )
+    if( i < 0 ) return('')
+    ext = substring( path, i+1 )    # extract the extension, and skip over the '.'
+    
+    part1   = sprintf( '<video %s src="data:video/%s;base64,\n', attributes, ext )
+    part2   = base64enc::base64encode( path, linewidth=120, newline='\n' )
+    part3   = '"></video>'
+    
+    return( paste0( part1, part2, part3, collapse='' ) )
+    }
+```
+</div>
 
 
 <br><br>
@@ -205,14 +255,23 @@ In colorimetry, an object color solid is a zonohedron.
 # colorimetry.genlist[[1]] is a 3x81 matrix with the CIE 1931 CMFs at 5nm interval
 zono5 = zonohedron( colorimetry.genlist[[1]] )
 plot( zono5, type='f' )
-gif_file = spinit( zono5, 2, vpsize=c(256,256) )
+webm_file = spinit( zono5, 2, vpsize=c(480,480) )
 ```
 
-![object color solid at 5nm interval](`r gif_file`){width=60%}
+<div style="text-align: center">
+```{r, echo=FALSE, message=TRUE, warning=TRUE }
+video_html  = video2html(webm_file)
+knitr::raw_html( video_html, meta=NULL, cacheable=FALSE )
+unlink( dirname(webm_file) )
+```
+object color solid at 5nm interval; this zonohedron has 81 generators
+</div>
 
 In this figure, the black dot is the _black point_ [0,0,0].
-The white dot is the _white point_, i.e. the column sums of the
-generating matrix.
+The white dot is the _white point_, i.e. the column sums of the generating matrix.
+
+
+
 
 <br><br>
 
@@ -221,8 +280,8 @@ generating matrix.
 Here are a few possible improvements and additions.
 
 **export**   
-There should be a way to export a zonohedron as
-a quadrilateral mesh in some standard format(s).
+There should be a way to export a zonohedron as a quadrilateral mesh in some standard format(s).
+DONE. Version 0.5-0 adds `as.mesh3d().zonohedron()`, which is derived from `rgl::as.mesh3d()`.
 
 **vignettes**  
 There should be more vignettes.
@@ -275,6 +334,7 @@ This is a powerful package that allows a separate configuration
 for logging from within **zonohedra**, and that is what I have done.
 During package loading, the logging threshold is changed from `INFO` to `WARN`.
 To change it back again, one can execute:  
+`library( logger )`  
 `log_threshold( INFO, namespace="zonohedra" )`
 
 The layout callback functions is customized;

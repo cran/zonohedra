@@ -29,7 +29,7 @@ a non-zero numeric 2-vector - the normal of all the lines
 }
 
 \item{beta}{
-a numeric M-vector of line-constants.  
+a numeric M-vector of line-constants.
 The equation of the k'th line k is: \code{<x,normal> = beta[k]}.
 }
 
@@ -39,7 +39,7 @@ being considered a supporting line
 }
 
 \item{plot}{
-if \code{TRUE},  the line segments formed by the the intersection 
+if \code{TRUE},  the line segments formed by the the intersection
 of the lines and the zonogon are \emph{added} to an existing
 plot of the zonogon \code{x}, see \code{\link{plot.zonogon}()}.
 The segments are drawn in dashed linestyle and the color red.
@@ -67,13 +67,13 @@ the 1st intersection point - a 2-vector
 the 2nd intersection point - a 2-vector
 }
 
-Regarding orientation, if \code{normal} is considered "north" then 
+Regarding orientation, if \code{normal} is considered "north" then
 \code{boundary1} is on the "west" and \code{boundary2} is on the "east".
 
 If a line is a supporting line of the zonogon,
 then \code{boundary1} is some point in the boundary face (vertex or edge),
 and \code{boundary2} is \code{NA}.
-If a line does not intersect the zonogon, 
+If a line does not intersect the zonogon,
 both \code{boundary1} and \code{boundary2} are \code{NA}.
 
 
@@ -110,5 +110,3 @@ section( pz20, normal=c(1,1), beta=-1:5 )
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

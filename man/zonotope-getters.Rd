@@ -57,5 +57,3 @@ to the 50\% graypoint.  For the whitepoint multiply by 2.
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

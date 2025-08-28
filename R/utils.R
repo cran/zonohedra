@@ -32,7 +32,7 @@ prepareNxM  <-  function( A, M, Nmin=1 )
         #   notice hack with 2L to make log.string() print name of parent function
         #log.string( c(ERROR,2L), "Argument '%s' must be a non-empty numeric Nx%d matrix (with N>=%d). %s='%s...'",
         #                            Aname, M, Nmin, Aname, mess )
-                                    
+
         #   in the next call, note the assignment to .topcall,
         #   which makes log_level() print the name of the calling function, and *not*  "prepareNxM()".
         #   Currently, this is the only place in the package where this is done.
@@ -344,13 +344,13 @@ collapsetosimple <- function( nonloop, ground )
     #   make inverse lookup vector
     colfromgnd  = integer( max(ground) )
     colfromgnd[ ground ]    = 1:length(ground)
-    
+
     out = rep( NA_integer_, length(ground) )
-    
+
     for( i in 1:length(nonloop) )
         {
         idx = colfromgnd[ nonloop[[i]] ]
-        
+
         out[idx] = i
         }
 
@@ -854,7 +854,7 @@ updatetimer <- function( x, reset=TRUE )
 
 #   vertex  2n x m matrix with vertices of a convex polygon in the rows
 #
-#   returns 4(n-1) x m matrix with tiling of the polygon into convex quadrangles
+#   returns 4(n-1) x m matrix with tiling of the polygon into convex quadrilaterals
 #           If m=3, it is ready to pass to rgl::quad3d()
 
 makequads <- function( vertex )
@@ -868,7 +868,7 @@ makequads <- function( vertex )
         return(NULL)
         }
 
-    mat = matrix( c( 1:(n-1), 2:n, (2*n-1):(n+1), (2*n):(n+2) ), ncol=4 )
+    mat = makequadindexes(n)    # matrix( c( 1:(n-1), 2:n, (2*n-1):(n+1), (2*n):(n+2) ), ncol=4 )
 
     idx = as.integer( t(mat) )      #; print(idx)
 
@@ -877,24 +877,37 @@ makequads <- function( vertex )
     return(out)
     }
 
-    
+
+#   n   # of generators of a zonogon, n>1
+#       the vertices are indexed from 1 to 2n
+#
+#   returns (n-1) x 4 matrix with index-tiling of the zonogon into convex quadrilaterals
+#               each row generates a quadrilateral
+
+makequadindexes <- function( n )
+    {
+    cbind( 1:(n-1), 2:n, (2*n-1):(n+1), (2*n):(n+2) )
+    }
+
+
+
 #   p   a point in the n-cube, which we can think of as a transmittance spectrum
 #
 #   returns the min number of transitions between 0 and 1 necessary to achieve such a p, including interpolation
-#   it always returns an even integer 
+#   it always returns an even integer
 #
 #   this is the fast C version
-   
+
 transitioncount <- function( p )
     {
     .Call( C_transitioncount, p )
     }
 
-    
+
 #   p   a point in the n-cube, which we can think of as a transmittance spectrum
 #
 #   returns the min number of transitions between 0 and 1 necessary to achieve such a p, including interpolation
-#   it always returns an even integer 
+#   it always returns an even integer
 #
 #   this is the slow R version
 

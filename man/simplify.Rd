@@ -38,7 +38,7 @@ and multiple groups are known.
 \cr
 \code{x} can also be a list of vectors of positive integers,
 which are thought of as sets.
-All must be subsets of \code{ground}. 
+All must be subsets of \code{ground}.
 They do not have to satisfy the matroid hyperplane axioms.
 For a definition of \emph{loop} and \emph{multiple group} in this case,
 see \bold{Details}.
@@ -138,7 +138,7 @@ Matroid - Wikipedia.
 
 
 \seealso{
-\code{\link{rank}()}, 
+\code{\link{rank}()},
 \code{\link{matroid}()}
 }
 
@@ -170,5 +170,3 @@ identical( unsimplify(hypersimple), hyper )
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

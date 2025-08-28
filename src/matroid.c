@@ -195,9 +195,9 @@ allcrossproducts( SEXP sx )
 
     return( out );
     }
-    
-    
-    
+
+
+
 
 //  scrossprods     3 x N(N-1) matrix with unitized crossproduct pairs in the columns
 //  shyperplane     list with strictly increasing integer vectors, defining non-trivial hyperplanes from the ground set, length M
@@ -211,17 +211,17 @@ snapcrossprods( SEXP scrossprods, SEXP shyperplane, SEXP scrossprodsref, SEXP sg
     {
     int n   = Rf_length(sground) ;
     int m   = Rf_length(shyperplane);
-                
+
     const   int *dim    = INTEGER(Rf_getAttrib(scrossprods,R_DimSymbol));
 
     if( dim[0] != 3  ||  dim[1] != n*(n-1)/2 )   return(R_NilValue);
 
     dim    = INTEGER(Rf_getAttrib(scrossprodsref,R_DimSymbol));
-    
+
     if( dim[0] != 3  ||  dim[1] != m ) return(R_NilValue);
-    
-    
-    //  make lookup table from ground points to raw index, 1..n    
+
+
+    //  make lookup table from ground points to raw index, 1..n
     const int     *ground = INTEGER(sground);
 
     int     gmax = ground[ n-1 ];
@@ -231,13 +231,13 @@ snapcrossprods( SEXP scrossprods, SEXP shyperplane, SEXP scrossprodsref, SEXP sg
         idxfromgnd[ ground[k] ] = k+1 ;     //  1-based output
 
     double  *crossprods = REAL(scrossprods) ;
-    
+
     const   double *crossprodsref = REAL(scrossprodsref) ;
-    
+
     for( int k=0 ; k<m ; k++ )
         {
         const   double *cpref = crossprodsref + 3*k ;
-        
+
         //  find the largest coordinate of cpref[]
         int     imax = -1;
         double  absmax=0 ;
@@ -251,9 +251,9 @@ snapcrossprods( SEXP scrossprods, SEXP shyperplane, SEXP scrossprodsref, SEXP sg
                 imax    = i ;
                 }
             }
-            
+
         int signref = 0<cpref[imax] ? 1 : -1 ;
-        
+
         //  the k'th hyperplane
         SEXP        svec = VECTOR_ELT(shyperplane,k) ;
         const int   *vec = INTEGER( svec ) ;
@@ -262,17 +262,17 @@ snapcrossprods( SEXP scrossprods, SEXP shyperplane, SEXP scrossprodsref, SEXP sg
         for( int j1=0 ; j1<nvec-1 ; j1++ )
             {
             int i = idxfromgnd[ vec[j1] ] ;     // 1-based
-            
+
             for( int j2=j1+1 ; j2<nvec ; j2++ )
                 {
                 int j = idxfromgnd[ vec[j2] ] ; // 1-based
-                
+
                 int colidx  = PAIRINDEX( i, j, n ) ;    //  1-based
-                
+
                 double  *cp = crossprods + 3*(colidx-1) ; //  1-based to 0-based
-        
+
                 int sign =  0<cp[imax] ? 1 : -1 ;
-                
+
                 if( sign == signref )
                     {
                     cp[0]   = cpref[0] ;
@@ -288,20 +288,20 @@ snapcrossprods( SEXP scrossprods, SEXP shyperplane, SEXP scrossprodsref, SEXP sg
                 }
             }
         }
-        
+
     R_Free( idxfromgnd );
-    
+
     SEXP    out = PROTECT( Rf_allocVector(LGLSXP,1) );
-   
+
     *(LOGICAL(out)) = true ;
 
     UNPROTECT(1);   //  variable out
 
     return(out);
     }
-    
-    
-    
+
+
+
 //  sgenidx     integer vector of 1-based indexes into a 3xn matrix of generators - smatgen.
 //              These generators correspond to points in the hyperplane of a matroid.
 //              These generators are coplanar in plane P.  They span a zonogon facet
@@ -368,7 +368,7 @@ diametervector( SEXP sgenidx, SEXP snormal, SEXP smatgen, SEXP scrossprods )
         if( genidx[i]<1  ||  n<genidx[i] )
             {
             Rprintf( "Internal Error.  genidx[%d]=%d.\n",  i, genidx[i] );
-            UNPROTECT(1);   // variable out            
+            UNPROTECT(1);   // variable out
             return(R_NilValue);
             }
 #endif
@@ -387,7 +387,7 @@ diametervector( SEXP sgenidx, SEXP snormal, SEXP smatgen, SEXP scrossprods )
             {
             Rprintf( "Internal Error.  pairidx=%d.  genidx[0]=%d  genidx[%d]=%d.\n",
                         pairidx, genidx[0], i, genidx[i] );
-            UNPROTECT(1);   // variable out                        
+            UNPROTECT(1);   // variable out
             return(R_NilValue);
             }
 #endif
@@ -524,7 +524,7 @@ diametermatrix( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground
             {
             Rprintf( "Internal Error. hyperidx=%d  is invalid.  numhypers=%d.\n",
                         hyperidx, numhypers );
-            UNPROTECT(2);   // variables smat, sfacet0                        
+            UNPROTECT(2);   // variables smat, sfacet0
             return(R_NilValue);
             }
 
@@ -552,12 +552,12 @@ diametermatrix( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground
                 }
             }
 
-        if( absmax == 0 )   
+        if( absmax == 0 )
             {
             UNPROTECT(2);   // variables smat, sfacet0
             return(R_NilValue);
             }
-            
+
         double  signmultiplier  = (i==0) ? 0.5 : 1.0 ;
 
         //  get pointer to the i'th column of the output matrix
@@ -590,7 +590,7 @@ diametermatrix( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground
                 {
                 Rprintf( "Internal Error. i=%d  k=%d  pairidx=%d.  genidx=%d  genkidx=%d.\n",
                             i, k, pairidx, genidx, genkidx );
-                UNPROTECT(2);   // variables smat, sfacet0                            
+                UNPROTECT(2);   // variables smat, sfacet0
                 return(R_NilValue);
                 }
 #endif
@@ -611,7 +611,7 @@ diametermatrix( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground
             {
             Rprintf( "Internal Error. i=%d  distinguished point %d not found in hyperplane %d.\n",
                         i, gen, hyperidx );
-            UNPROTECT(2);   // variables smat, sfacet0                        
+            UNPROTECT(2);   // variables smat, sfacet0
             return(R_NilValue);
             }
 
@@ -628,7 +628,7 @@ diametermatrix( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground
         if( 0 < badcount )
             {
             Rprintf( "Internal Error. i=%d  pcube has %d bad values.\n", i, badcount );
-            UNPROTECT(2);   // variables smat, sfacet0            
+            UNPROTECT(2);   // variables smat, sfacet0
             return(R_NilValue);
             }
 #endif
@@ -1298,9 +1298,9 @@ pairindex( SEXP spair, SEXP sn )
         //  int idx;
         int i = pairmat[k] ;        //  column #1
         int j = pairmat[k + m] ;    //  column #2
-        
+
         idxvec[k]   = NA_INTEGER;
-        
+
         if( i==NA_INTEGER  ||  j==NA_INTEGER )  continue ;
 
         if( 1<=i  &&  i<j  &&  j<=n )
@@ -1635,8 +1635,8 @@ issuperset( SEXP ssetlist, SEXP sset )
     }
 
 
-    
-    
+
+
 //  ssetlist    a list of M integer vectors, with no dups, representing M sets
 //  sset        integer vector with no dups, representing a set
 //  sdecreasing a logical where TRUE means that the M sets are decreasing in size
@@ -1659,7 +1659,7 @@ anyissuperset( SEXP ssetlist, SEXP sset, SEXP sdecreasing )
     for( int k=0 ; k<nset ; k++ )   { setmask[ set[k] ] = 1 ; }
 
     const bool  decreasing = *(LOGICAL(sdecreasing)) ;
-    
+
     int     m = Rf_length(ssetlist) ;
 
     //  allocate output
@@ -1692,7 +1692,7 @@ anyissuperset( SEXP ssetlist, SEXP sset, SEXP sdecreasing )
             if( setmax < setj[i] ) continue ;      //  setj[i] is too big
 
             count   += setmask[ setj[i] ] ;
-            
+
             if( count == nset ) break ;     //  count cannot get any larger, so quit
             }
 
@@ -1712,9 +1712,9 @@ anyissuperset( SEXP ssetlist, SEXP sset, SEXP sdecreasing )
     }
 
 
-    
-    
-    
+
+
+
 
 
 //  shyper      a list of integer vectors, each one of them defining a nontrivial hyperplane subset, and in increasing order.  Not checked
@@ -1918,13 +1918,31 @@ duplicateR( SEXP x )
     }
 
 
+//  x       any R variable
+//
+//  returns either 1 or 2 4-byte integers equivalent to the address of x.
+//  1 or 2 depending on whether it is compiled to 32-bit or 64-bit.
+
 SEXP
 obj_addr( SEXP x )
     {
     //  struct pair  { union { SEXP s; int i[2]; } ; };     the -Wpedantic option does *NOT* like this
     //  matroid.c:1910:48: warning: ISO C99 doesn't support unnamed structs/unions [-Wpedantic]
-    
+
+#if SIZEOF_SIZE_T == 8
     typedef union { SEXP s; int i[2]; } pair ;      //  the -Wpedantic option *does* like this
+
+    pair p;
+
+    p.s  = x;
+
+    SEXP    out = PROTECT( Rf_allocVector(INTSXP,2) );
+
+    INTEGER(out)[0] = p.i[0] ;
+    INTEGER(out)[1] = p.i[1] ;
+
+#elif SIZEOF_SIZE_T == 4
+    typedef union { SEXP s; int i[1]; } pair ;      //  the -Wpedantic option *does* like this
 
     pair p;
 
@@ -1932,10 +1950,13 @@ obj_addr( SEXP x )
 
     SEXP    out = PROTECT( Rf_allocVector(INTSXP,1) );
 
-    //  INTEGER(out)[0] = (int) x;
+    INTEGER(out)[0] = p.i[0] ;
 
-    INTEGER(out)[0] = p.i[0] ;    // reinterpret_cast<int>(x);
+#else
+    #error "SIZEOF_SIZE_T is neither 8 nor 4."
+#endif
 
-    UNPROTECT(1);
+    UNPROTECT(1);   //  out
+
     return out;
     }

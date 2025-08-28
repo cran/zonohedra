@@ -3,7 +3,7 @@
 #
 #   implemented as a list with items:
 #       matroid     the matroid for it, which includes the generating matrix, etc.
-#       center      a 3-vector
+#       center      a 3-vector; the center of the zonohedron
 #       facet       a data.frame with a row for each facet-pair of the zonohedron,
 #                   but data for only one of the facets is stored in this data.frame,
 #                   and the antipodal facet is derived from this one.
@@ -18,8 +18,8 @@
 #                   sign    +1 or -1.  It's the difference between the facet normal and the crossproduct coming from the matroid hyperplane.
 #       facet0      indexes (from facet) of those facets that contain 0
 #       beltlist    the i'th entry in this list is 1/2 of the belt of the i'th generator, as a vector of facet indexes
-#       frame3x2    list of 3x2 matrices for the non-trivial facets.  Index is the same as simplify(x$matroid)$hyperplane
-#       zonogon     list of zonogons for the non-trivial facets.  frame3x2 maps the facet to the zonogon in the plane.
+#       zonogon     list of zonogons for the non-trivial facets. Indexing is the same as simplify(x$matroid)$hyperplane
+#       frame3x2    list of 3x2 matrices for non-trivial facets.  frame3x2[[i]] maps the facet plane to the zonogon[[i]] in the XY-plane.
 #       signtile    list of integer vectors, all +1 or -1, for the non-trivial facets.
 #                   It's the difference between the crossprod for the pgram and the facet normal
 #       zonoseg     list of zonosegs for the multiple groups.  Only present if there are multiple groups
@@ -294,7 +294,7 @@ zonohedron <- function( mat, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL )
 
         #center  = signvec * center      # uses recycling rule so signvec is multiplied by all columns
         #normal  = signvec * normal      # uses recycling rule so signvec is multiplied by all columns
-        
+
         .Call( C_timesEqual, center, signvec, 2L )     # multiply in place
         .Call( C_timesEqual, normal, signvec, 2L )     # multiply in place
         }
@@ -414,8 +414,8 @@ zonohedron <- function( mat, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL )
             signtile[[k]]   = as.integer( sign( facet$normal[ k, ] %*% crossprods ) )
             }
 
-        out$frame3x2    = frame3x2
         out$zonogon     = zonogon
+        out$frame3x2    = frame3x2
         out$signtile    = signtile
         }
 
@@ -1668,7 +1668,7 @@ invertboundarydata <- function( x, boundarydata, tol=5.e-14 )
 
     distance    = rep( NA_real_, m )
     pcube       = matrix( NA_real_, m, nsimp )
-    
+
     tolW    = 5.e-9
     tolE    = 5.e-5
 
@@ -1721,7 +1721,7 @@ invertboundarydata <- function( x, boundarydata, tol=5.e-14 )
                     lev = ERROR     # this will force stoppage
                     tol2 = tolE
                     }
-                    
+
                 log_level( lev, "Internal problem.  y=[%.15g,%.15g] is outside the square [-1/2,1/2]^2.  tol2=%g",
                                                     y[1], y[2], tol2 )
                 # next    # something went wrong
@@ -1851,8 +1851,8 @@ boundarypgramdata <- function( x, gndpair, cube=FALSE )
 
     gndpair = prepareNxM( gndpair, 2 )
     if( is.null(gndpair) )  return(NULL)
-    
-    dimsave     = dim(gndpair)        
+
+    dimsave     = dim(gndpair)
 
     if( ! is.integer(gndpair) )
         {
@@ -1861,7 +1861,7 @@ boundarypgramdata <- function( x, gndpair, cube=FALSE )
         gndpair = as.integer(gndpair)
         dim(gndpair) = dimsave          # now it can be assigned to the returned data.frame
         }
-        
+
 
     ground  = getmatroid(x)$ground      # ground set of original matroid
 
@@ -1883,12 +1883,12 @@ boundarypgramdata <- function( x, gndpair, cube=FALSE )
 
     #   collapse to raw indexes in the simplified matroid
     collapsetosimple    = getmatroid(x)$collapsetosimple
-    
+
     if( is.null(collapsetosimple) ) collapsetosimple = 1:length(ground)   # matroid is already simple
-    
+
     idxpair = collapsetosimple[ idxpair_org ]
-    dim( idxpair )  = dim( gndpair )        # ; print( idxpair )    
-    
+    dim( idxpair )  = dim( gndpair )        # ; print( idxpair )
+
     #   idxpair now contains raw indexes in the simplified matroid
     #   because of the collapse, there might be duplicates in the rows, even if there were not there before
 
@@ -1896,19 +1896,19 @@ boundarypgramdata <- function( x, gndpair, cube=FALSE )
     signvec = sign( idxpair[ ,2] - idxpair[ ,1] )       # signvec might contain NAs
     mask    = signvec < 0
     mask[ is.na(mask) ] = FALSE
-    if( any(mask) )     
+    if( any(mask) )
         {
         idxpair[mask, ]     = idxpair[mask, 2:1]
         idxpair_org[mask, ] = idxpair_org[mask, 2:1]
         }
-        
-        
+
+
     matsimple   = getsimplified( getmatroid(x) )
-    
+
     idxfromgroundsimple = idxfromgroundfun( matsimple$ground )      # idxfromgroundfun( matsimple$ground )
 
     m       = nrow( idxpair )
-    
+
     n       = length( ground )
     nsimp   = length( matsimple$ground )
 
@@ -1919,7 +1919,7 @@ boundarypgramdata <- function( x, gndpair, cube=FALSE )
     matrix          = getmatrix( getmatroid(x) )
 
     #   matrixsimple    = getmatrix( matsimple )
-    
+
     loopindexes     = idxfromground[ getmatroid(x)$loop ]
 
     #   NA values in pairidx lead to NA values in hyperplaneidx
@@ -1934,7 +1934,7 @@ boundarypgramdata <- function( x, gndpair, cube=FALSE )
         # cat( "------------  k=", k, '---------\n' )
 
         hyperidx    = hyperplaneidx[k]      # = matsimple$hyperplaneidx[ pairidx[k] ]
-        
+
         if( is.na(hyperidx) )   next
 
         normal  = x$facet$normal[hyperidx, ]
@@ -1944,16 +1944,16 @@ boundarypgramdata <- function( x, gndpair, cube=FALSE )
 
         #   get the raw indexes in the simplified matroid for this facet
         colidx  = idxfromgroundsimple[ matsimple$hyperplane[[ hyperidx ]] ]  #; print( colidx )
-        
+
         #print( "colidx" )
         #print( colidx )
-        
+
         #   lift the indexes to raw index in the original matrix
         colidx  = liftrawindexes( getmatroid(x), colidx )
-        
+
         #   add any loops to colidx, the pc[loop] should be exactly 0
         colidx  = c( colidx, loopindexes )
-           
+
 
         #   pc[colidx] should be 0 or nearly 0.
         #   override and force to exactly 0
@@ -1970,7 +1970,7 @@ boundarypgramdata <- function( x, gndpair, cube=FALSE )
 
                 print( "colidx" )
                 print( colidx )
-                
+
                 print( "which(pc==0)" )
                 print( which(pc==0) )
                 }
@@ -1978,7 +1978,7 @@ boundarypgramdata <- function( x, gndpair, cube=FALSE )
 
         #   scale sign from [-1,+1] to [0,1]
         pc  = (sign(pc) + 1) / 2        #;   print( pc )
-        
+
         if( 2 < length(colidx) )
             {
             #   the generators are part of a non-pgram zonogon face
@@ -1986,14 +1986,14 @@ boundarypgramdata <- function( x, gndpair, cube=FALSE )
             changeable  = logical(n)
             changeable[ colidx ]    = TRUE
             changeable[ idxpair_org[k, ] ]  = FALSE     # but do not change the 2 given indexes
-            
+
             #   set "inside" to 1, and "outside" to 0
             inside  = logical(n)
             inside[ idxpair_org[k,1]:idxpair_org[k,2] ] = TRUE
-            
+
             pc[  inside & changeable ]  = 1
             pc[ !inside & changeable ]  = 0
-            
+
             #   now only only 2 entries of pc[] are equal to 1/2, which is what we want for a parallelogram
             }
 
@@ -2005,20 +2005,20 @@ boundarypgramdata <- function( x, gndpair, cube=FALSE )
             pcube[k, ] = 1 - pc     # complement
         }
 
-        
+
     rnames  = rownames( gndpairsave )
     if( is.null(rnames) )   rnames  = 1:m
-    
+
     out = data.frame( row.names=rnames )
 
     out$gndpair         = gndpairsave
     out$hyperplaneidx   = hyperplaneidx
     out$center          = tcrossprod( pcube, matrix )   # pcube  %*%  t(matrix)      #         x$facet$center[ hyperplaneidx, , drop=FALSE]
     out$transitions     = transitions
-    
+
     if( cube )  out$pcube   = pcube     # add cube points
-    
-    
+
+
     #   fix the signs of the center
     #   out$center  = signvec * out$center  #   all columns are multiplied by signvec
 
@@ -2026,7 +2026,7 @@ boundarypgramdata <- function( x, gndpair, cube=FALSE )
         {
         #   'lift' cube points from the simplified matroid dimension to the original matroid dimension
         out$pcube   = invertcubepoints( x, pcube )
-        
+
         for( k in 1:m )
             {
             if( signvec[k] < 0 )
@@ -2155,11 +2155,11 @@ getbeltedges <- function( x, gen, full=TRUE )
     #point0  = duplicate(midpointmat)
     #.Call( C_plusEqual, point0, -0.5*edge, 1L )
     point0  = .Call( C_sumMatVec, midpointmat, -0.5*edge, 1L )
-    
+
     #point1  = duplicate(midpointmat)
     #.Call( C_plusEqual, point1,  0.5*edge, 1L )
     point1  = .Call( C_sumMatVec, midpointmat, 0.5*edge, 1L )
-    
+
 
     out = data.frame( row.names=1:nrow(midpointmat) )
     out$midpointmat = midpointmat
@@ -2247,8 +2247,8 @@ lintransform.zonohedron <- function( x, W )
 
     return( out )
     }
-    
-    
+
+
 initplot3D <- function( zono, bgcol )
     {
     center  = zono$center
@@ -2410,7 +2410,7 @@ plot.zonohedron <- function( x, type='e', pcol=NULL, ecol=NULL, ewd=3, etcol=NA,
         #xyz = duplicate( x$facet$center )
         #.Call( C_plusEqual, xyz, x$center, 1L )
         xyz = .Call( C_sumMatVec, x$facet$center, x$center, 1L )
-        
+
         rgl::points3d( xyz[ ,1],  xyz[ ,2], xyz[ ,3], col=colvec[1], size=6, point_antialias=TRUE )
 
         if( both )
@@ -2419,7 +2419,7 @@ plot.zonohedron <- function( x, type='e', pcol=NULL, ecol=NULL, ewd=3, etcol=NA,
             #xyz = duplicate( -(x$facet$center) )
             #.Call( C_plusEqual, xyz, x$center, 1L )
             xyz = .Call( C_sumMatVec, -(x$facet$center), x$center, 1L )
-        
+
             rgl::points3d( xyz[ ,1],  xyz[ ,2], xyz[ ,3], col=colvec[2], size=6, point_antialias=TRUE )
             }
         }
@@ -2530,9 +2530,333 @@ plot.zonohedron <- function( x, type='e', pcol=NULL, ecol=NULL, ewd=3, etcol=NA,
             }
         }
 
-
     return( invisible(TRUE) )
     }
+
+
+as.mesh3d.zonohedron  <-  function( x, fcolor=NULL, falpha=1, codes=FALSE, ... )
+    {
+    #timermain = createtimer()
+
+    if( is.null(fcolor) )   fcolor=c('blue','red','yellow','green', 'orange', 'purple')
+
+    matsimp = getsimplified( x$matroid )
+
+    matgen  = getmatrix(matsimp)
+    numgen  = ncol(matgen)
+
+    gndgen  = getground(matsimp)
+
+    #   make lookup table from ground to column index
+    idxfromground   = integer( gndgen[numgen] )
+    idxfromground[ gndgen ] = 1:numgen
+
+    hyper   = matsimp$hyperplane
+    lenvec  = lengths(hyper)
+
+    idx2    = which( lenvec==2 )
+    pgrams  = length(idx2)
+
+    facets      = 2L * nrow( x$facet )  # doubled, because we do the entire surface, not just half
+
+    edges       = 2L * sum( lenvec )    # doubled, because we do the entire surface, not just half
+
+    vertices    = edges - facets + 2L   # total vertices on boundary of x
+
+    #   make C++ map to hold the cube vertex points, aka the "binary codes"
+    handle  = .Call( C_makeRawMap, numgen, vertices )
+    if( is.null(handle) )   return(NULL)
+
+    on.exit( .Call( C_deleteRawMap, handle ) )      # this *does* work
+
+    #   allocate matrix to hold all the vertices on boundary of x
+    #  vertex  = matrix( NA_real_, nrow=3, ncol=vertices )
+
+    #   allocate matrix to hold the integer quad indexes, into vertex[]
+    #   quadpram is only for the pgram facets
+    quadpgram   = matrix( NA_integer_, nrow=4, ncol=2L*pgrams )
+
+    #cat( "-------------------\n" )
+    #cat( "starting &vertex:", obj_addr(vertex), "   starting quadpgram:", obj_addr(quadpgram), '\n' )
+
+
+    colorvec    = rep( fcolor[1], ncol(quadpgram) )
+
+    #   make 2x4 matrices for the 4 pgram vertices
+    edgecoeff   = matrix( c( -0.5,-0.5, -0.5,0.5, 0.5,0.5, 0.5,-0.5), 2, 4 )    # 2x4 matrix of coefficients, relative to the facet center
+
+    #   make matrix for the 4 pgram vertices
+    raw4        = as.raw( 0 < edgecoeff )           # + goes to raw 01, and - goes to raw 00
+    dim(raw4)   = dim(edgecoeff)                    # 2x4
+
+    # idx = integer(4)    # indexes for a single quad
+
+    #timermain   = updatetimer( timermain )
+    #timeprep    = timermain$elapsed
+
+
+    #   process the parallelograms
+
+    #timeindex   = 0
+
+    vidxmax = 0     # max vertex index so far
+
+    log_level( TRACE, "Processing %d parallelogram facets, and creating %d quads...", 2L*pgrams, ncol(quadpgram) )
+
+    for( j in 1:pgrams )
+        {
+        i   = idx2[j]   # index into both hyper *and* facet
+
+        # center      = x$facet$center[i, ]       #  center of the facet
+
+        pgramgen    = idxfromground[ hyper[[i]] ]         #   the 2 column indexes for the pgram generators
+
+        # edge        = matgen[  , pgramgen ]     # 3x2 matrix = the 2 edge generators of the pgram
+
+        normal      = x$facet$normal[i, ]       # outward pointing unit normal of facet i
+
+        sign        = x$facet$sign[i]
+
+        #   make raw matrix of 0s and 1s, from which we will make 4 cube vertices
+        #   the columns of pcuberaw are replicated
+        pcuberaw    = array( as.raw( 0 < (normal %*% matgen) ), dim=c(numgen,4) )
+
+        #   the 2 values pcuberaw[ pgramgen, ] are indeterminate,
+        #   because they are very close to 0, but not exactly because there is floating point truncation
+        #   but we now fill in these indeterminates, by assigning these indexes in all 4 columns, i.e. the 4 vertices of the pgram
+
+        pcuberaw[ pgramgen, ]   = raw4
+
+        #thetime = microbenchmark::get_nanotime()
+
+        idx = .Call( C_getIndexRaw, handle, pcuberaw, FALSE )   # idx has length 4
+
+        if( is.null(idx) )  return(NULL)
+
+        #timeindex   = timeindex + microbenchmark::get_nanotime() - thetime
+
+        if( any( vertices < idx ) )
+            {
+            log_level( FATAL, "Internal error.  idx = %d,%d,%d,%d > %d = number of vertices.",
+                            idx[1], idx[2], idx[3], idx[4], vertices )
+            return( NULL )
+            }
+
+        if( 0 < sign )  idx =  rev(idx)     # reverse order
+
+        quadpgram[ , j] = idx
+
+
+
+        #   repeat, but do the antipodal facets
+
+        #thetime =  microbenchmark::get_nanotime()
+
+        idx_anti    = .Call( C_getIndexRaw, handle, pcuberaw, TRUE )    # TRUE means take complement
+
+        if( is.null(idx_anti) )  return(NULL)
+
+        #timeindex   = timeindex + microbenchmark::get_nanotime() - thetime
+
+        if( any( vertices < idx_anti ) )
+            {
+            log_level( FATAL, "Internal error.  idx_anti = %d,%d,%d,%d > %d = number of vertices.",
+                            idx_anti[1], idx_anti[2], idx_anti[3], idx_anti[4], vertices )
+            return( NULL )
+            }
+
+        if( sign < 0 )  idx_anti = rev(idx_anti)     # reverse order
+
+        quadpgram[ , j+pgrams]  = idx_anti
+
+        #  cat( "j=", j, "  sign=", sign,  "   idx=", idx, "\n" )
+
+        vidxmax = max( vidxmax, idx, idx_anti )
+        }
+
+    log_level( TRACE, "... added %d of %d vertices.", vidxmax, vertices )
+
+    #cat( "ending   &vertex:", obj_addr(vertex), "   ending   quadpgram:", obj_addr(quadpgram), '\n' )
+
+    #cat( "getindex:  ", 1.e-9 * timeindex, " sec\n" )
+
+
+    #timermain   = updatetimer( timermain )
+    #timepgrams  = timermain$elapsed
+
+
+    #   process the non-parallelograms, with 3 or more generators
+    zonogons    = length(x$zonogon)
+
+    quads   = 2L * ifelse( 0 < zonogons, sum( lenvec[1:zonogons] ) - zonogons, 0L )
+
+    quad    = matrix( NA_integer_, nrow=4, ncol=quads )
+
+    quadcount   = 0L
+
+    # idx = integer(4)    # indexes for a single quad
+
+    log_level( TRACE, "Processing %d non-trivial zonogon facets, and creating %d quads ...", 2L*zonogons, quads )
+
+    for( j in seq_len(zonogons) )
+        {
+        #cat( "--------------  zonogon ", j, " of ", zonogons, '  -----------\n' )
+
+        zonoj   = x$zonogon[[j]]
+
+        # center  = x$facet$center[j, ]       #  center of the facet
+
+        # sign        = x$facet$sign[j]
+
+
+        #   let n be the number of generators of this facet.  n >= 3
+        #   the number of vertices in this facet is 2*n
+        n   = ncol( zonoj$matroid$matrix )
+
+        if( n != length(hyper[[j]]) )
+            {
+            log_level( FATAL, "n = %d  !=  %d = length(hyper[[%d]]).", n, length(hyper[[j]]), j )
+            return(NULL)
+            }
+
+        normal      = x$facet$normal[j, ]       # outward pointing unit normal of facet i
+
+        zonojgen    = idxfromground[ hyper[[j]] ]   #   the n column indexes in matgen[,] for the generators of zonoj
+
+        # edge        = matgen[  , zonojgen ]     # 3xN matrix = the N edge generators of the zonogon
+
+        #   make numgen x 2n raw matrix of 0s and 1s, from which we will make the vertices of the facet
+        pcuberaw    = array( as.raw( 0 < (normal %*% matgen) ), dim=c(numgen,2L*n) )    # columns are replicated  2*n times
+
+        #   change entries in the generator rows - zonojgen - which will make all the columns of pcuberaw distinct
+        pcuberaw[ zonojgen, ] = t( zonoj$pcube )      #  n x 2n
+
+
+        #   get the indexes of the 2n vertices in the facet
+        idx = .Call( C_getIndexRaw, handle, pcuberaw, FALSE )   # FALSE means do not do the antipodal facet
+
+        #   idx should have length 2n
+        if( length(idx) != 2L*n )
+            {
+            log_level( FATAL, "Internal error.  length(idx)=%d, but expected %d.", length(idx), 2L*n );
+            return(NULL)
+            }
+
+        #   convert 0-1 raw to +/- 0.5 floating-point
+        #edgecoeff       = as.double( pcube ) - 0.5
+        #dim(edgecoeff)  = dim( pcube )   #  N x 2N,
+
+        #   tile this zonogon with N-1 quads
+        quadidx = makequadindexes( n )     # (N-1) x 4
+
+
+        for( i in 1:nrow(quadidx) )
+            {
+            #   add column to quad[]
+            quadcount   = quadcount + 1L
+
+            if( ncol(quad) < quadcount )
+                {
+                log_level( FATAL, "Internal error.  quad index = %d > %d = allocated number of quads.",
+                                quadcount, ncol(quad) )
+                return( NULL )
+                }
+
+            quad[ , quadcount]  = idx[ quadidx[i, ] ]      # do not reverse here
+            }
+
+
+        #   repeat, but this time do the antipodal quads
+
+        #   get the indexes of the 2n vertices in the antipodal facet
+        idx_anti    = .Call( C_getIndexRaw, handle, pcuberaw, TRUE )   # TRUE means do the antipodal facet
+
+        for( i in 1:nrow(quadidx) )
+            {
+            #   add column to quad[]
+            quadcount   = quadcount + 1L
+
+            if( ncol(quad) < quadcount )
+                {
+                log_level( FATAL, "Internal error.  quad index = %d > %d = allocated number of quads.",
+                                quadcount, ncol(quad) )
+                return( NULL )
+                }
+
+            quad[ , quadcount]  = rev( idx_anti[ quadidx[i, ] ] )      # reverse order for antipodals
+            }
+
+        vidxmax = max( vidxmax, idx, idx_anti )
+
+        #   and finally, append the colors for these quads
+        k   = min( n-1, length(fcolor) )
+
+        colorvec    = c( colorvec, rep(fcolor[k],2*nrow(quadidx)) ) # 2 because we also make the antipodal facet
+        }
+
+    log_level( TRACE, "Added %d of %d vertices, and %d quads.", vidxmax, vertices, quadcount )
+
+    if( vidxmax != vertices )
+        {
+        log_level( FATAL, "Internal error.  Created %d vertices, but expected to create %d.",
+                                vidxmax, vertices )
+        return(NULL)
+        }
+
+    if( quadcount != ncol(quad) )
+        {
+        log_level( FATAL, "Internal error.  Created %d quads, but expected to create %d.",
+                                quadcount, ncol(quad) )
+        return(NULL)
+        }
+
+    #timermain   = updatetimer( timermain )
+    #timezonos   = timermain$elapsed
+
+
+
+    #  .Call( C_deleteRawMap, handle )  handled OK in on.exit()
+
+    #   vertex[] is now centered.  translate all vertices by x$center in place
+    # .Call( C_plusEqual, vertex, x$center, 2L )
+
+    #   the map, pointed to by handle, is now full of binary codes
+    #   compute all of vertices from these codes, no multiplication is required, only addition
+    vertex  = .Call( C_computeVertices, handle, matgen )
+
+
+    out = list()
+
+    out$vb          = rbind(vertex,1)                       #   for vb, add a row of 1s to make homogeneous coords
+    out$ib          = cbind(quadpgram,quad)                 #   for ib, cbind the pgram and the non-pgram quads
+    out$material    = list( color=colorvec, alpha=falpha )
+    out$meshColor   = 'faces'
+
+    if( codes ) out$codes   = .Call( C_getCodes, handle )
+
+    class(out)  = c( "mesh3d", "shape3d" )
+
+
+    if( FALSE )
+        {
+        timermain   = updatetimer( timermain )
+        timefinish  = timermain$elapsed
+
+        timetotal   = timermain$total
+
+        cat( "preparation:  ", timeprep, " sec\n" )
+        cat( "pgrams        ", timepgrams, " sec\n" )
+        cat( "zonogons:     ", timezonos, " sec\n" )
+        cat( "finish        ", timefinish, " sec\n" )
+        cat( "total:        ", timetotal, " sec\n" )
+        }
+
+
+
+    return( out )
+    }
+
+
 
 
 plotpolygon <- function( x, normal=NULL, points=TRUE, labels=TRUE )
@@ -2564,12 +2888,12 @@ plotpolygon <- function( x, normal=NULL, points=TRUE, labels=TRUE )
             log_level( ERROR, "Argument normal is invalid." )
             return(FALSE)
             }
-        
+
         normalmat = matrix( normal, nrow=1 )
         }
-        
+
     genmat  = getmatrix( getsimplified(x$matroid) )  # 3 x N
-        
+
     #   try all rows in normalmat
     found   = FALSE
     for( i in 1:nrow(normalmat) )

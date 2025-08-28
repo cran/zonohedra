@@ -105,6 +105,7 @@ export(
   zonohedron,
   polarzonohedron,
 # canonicalboundary.zonohedron,
+  as.mesh3d.zonohedron,             # as.mesh3d() is imported from package 'rgl'
   getmetrics.zonohedron,
   invertboundary.zonohedron,
   lintransform.zonohedron,
@@ -219,6 +220,7 @@ S3method(section,zonogon)
 
 
 #   zonohedron
+S3method(as.mesh3d,zonohedron)          # as.mesh3d() is imported from package 'rgl'
 # S3method(canonicalboundary,zonohedron)
 S3method(getmetrics,zonohedron)
 S3method(invertboundary,zonohedron)
@@ -242,5 +244,5 @@ importFrom( stats, runif )
 importFrom( grDevices, rainbow )
 importFrom( graphics, abline, arrows, grid, points, polygon,
             segments, strheight, text, title )
-
+importFrom( rgl, as.mesh3d )
 

@@ -46,7 +46,7 @@ The 2-transition surface must be strictly starshaped.
 if \code{TRUE}, then include metrics on the non-deficient (coincident)
 parallelograms, with 2 transitions.
 This is always the first row of the returned data frame.
-\cr 
+\cr
 if \code{FALSE}, then data on the non-deficient parallelograms
 is not included, and the returned data frame only has data
 on the deficient parallelograms, with more than 2 transitions.
@@ -110,5 +110,3 @@ and the boundary of the zonohedron are equal.
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

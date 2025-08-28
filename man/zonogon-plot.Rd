@@ -11,7 +11,7 @@ Plot a \bold{zonogon} object, with many options.
 }
 
 \usage{
-\method{plot}{zonogon}( x, orientation=TRUE, normals=FALSE, elabels=FALSE, 
+\method{plot}{zonogon}( x, orientation=TRUE, normals=FALSE, elabels=FALSE,
                             tiling=FALSE,  tlabels=FALSE,
                             trans2=FALSE, trans2type='both', ... )
 }
@@ -41,7 +41,7 @@ if \code{TRUE} then draw the standard tiling of the zonogon by parallelograms
 
 \item{tlabels}{
 if \code{TRUE} then label each parallelogram in the tiling with
-its generators.  
+its generators.
 If \code{tiling} is \code{FALSE} then this is ignored.
 }
 
@@ -90,5 +90,3 @@ The function returns \code{TRUE}; or \code{FALSE} in case of error.
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

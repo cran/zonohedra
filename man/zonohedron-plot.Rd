@@ -111,7 +111,7 @@ The function returns \code{TRUE}; or \code{FALSE} in case of error.
 
 \note{
 The package \pkg{rgl} is required for 3D plots.
-A large black point is drawn at 0, 
+A large black point is drawn at 0,
 a 50\% gray point at the center,
 and a large white point at the "white point" (which is 2*center).
 
@@ -129,5 +129,3 @@ A line from the black point to the white point is also drawn.
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

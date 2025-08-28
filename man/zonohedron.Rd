@@ -34,7 +34,7 @@ The M columns are the generators of the zonohedron.
 \item{e0}{
 threshold for a column of \code{mat} to be considered 0,
 in the \eqn{L^\infty} norm.
-Since the default is \code{e0=0}, 
+Since the default is \code{e0=0},
 by default a column must be exactly 0 to be considered 0.
 }
 
@@ -142,5 +142,3 @@ New York Institute of Technology
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

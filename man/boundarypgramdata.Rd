@@ -122,5 +122,3 @@ boundarypgramdata( zono, c(570,608,  608,570, 400,450,  650,700,  650,720, 700,7
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

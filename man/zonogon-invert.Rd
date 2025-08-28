@@ -91,7 +91,7 @@ These 2 coordinates in \code{pcube} are not 0 or 1 in general.
 \item{hyperidx}{the index of the parallelogram that contains \code{z}}
 
 If a point \code{z} cannot be inverted, the other columns are
-all \code{NA}, and a warning message is printed.  
+all \code{NA}, and a warning message is printed.
 
 If the row names of \code{z} are unique,
 they are copied to the row names of the output.
@@ -150,5 +150,3 @@ invert( pz20, z )
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

@@ -108,5 +108,3 @@ In case of global error, the function returns \code{NULL}.
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

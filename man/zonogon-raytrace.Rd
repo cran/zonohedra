@@ -134,5 +134,3 @@ raytrace( pz20, c(0,0), dir )
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-%\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-

@@ -35,7 +35,7 @@ These generators come from the xyz CIE color matching functions of 1931,
 from 360 to 830 nm with 1 nm step.
 From 699 to 830 nm, the angles between the generators only differ by a few microradians,
 and it apparent that the designers tapered all 3 functions identically in that nm range.
-For an illustration of this in the chromaticity domain, see Burns, Figure 10.
+For an illustration of this in the chromaticity domain, see \cite{Burns}, Figure 10.
 When the zonohedron is constructed from these 132 generators, with the default options,
 all these generators a 'collapsed' into a single one.
 In the original matroid these 132 \emph{points} form a \emph{multiple group},
@@ -94,4 +94,3 @@ colorimetry.genlist
 }
 
 \keyword{datasets}
-\keyword{eyes}

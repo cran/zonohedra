@@ -146,5 +146,3 @@ For best results, the matrix should be given with maximum precision.
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{adaptation}% use one of  RShowDoc("KEYWORDS")
-
