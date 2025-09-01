@@ -646,7 +646,7 @@ tocircle <- function( u, tol=5.e-16 )
     }
 
 
-#   u, v    unit vectors of dimension n
+#   u, v    unit vectors of dimension n.  Unit length is not verified.
 #
 #   returns nxn rotation matrix that takes u to v, and fixes all vectors ortho to u and v
 #
@@ -658,7 +658,12 @@ rotationshortest <- function( u, v )
     if( length(v) != n )    return(NULL)
 
     uv  = u + v
-    if( all(uv == 0) )  return(NULL)
+    if( all(uv == 0) )
+        {
+        if( n == 2 )    return( -diag(2) )  # antipodal u and v are OK when n==2
+
+        return(NULL)    # not OK
+        }
 
     out = diag(n)  -  (uv %o% uv)/(1 + sum(u*v))  +  2*(v %o% u)
 
@@ -1079,6 +1084,68 @@ intfromchar <- function( charvec )
         }
 
     return( out )
+    }
+
+
+unitize <- function( x, tol=5.e-14 )
+    {
+    r2  = sum( x^2 )
+    if( r2 == 0 )    return( x )
+
+    r   = sqrt(r2)
+
+    if( r <= tol )
+        {
+        log_level( WARN, "length of x = %g <= %g", r, tol )
+        }
+
+    return( x / r )
+    }
+
+#   u       unit 3-vector
+#   normal  n x 3 matrix with unit normal vectors in the rows
+#
+#   returns a list with members
+#       uptweak         vector close to u, and probably u itself, that is not orthogonal to any of the normals
+#       normal_upweak   matrix product of uptweak and normal, all of these have absolute value > tol
+
+genericdirection <- function( u, normal, tol=5.e-12 )
+    {
+    test    = normal %*% u
+
+    if( all( tol < abs(test) ) )
+        {
+        # this is good enough
+        out = list( uptweak=u, normal_uptweak=test )
+        return( out )
+        }
+
+    #   find 2 unit vectors orthogonal to u
+    xy  = goodframe3x3( u )[ ,1:2]
+
+    #   perturb u a little in orthogonal directions
+    count   = 12
+    rad = 1.e-6
+    
+    for( k in 1:count )
+        {
+        theta   = 2*pi * k/(count+1)
+
+        uptweak = u  +  rad * ( xy %*% c(cos(theta),sin(theta)) )
+
+        test    = normal %*% uptweak
+
+        if( all( tol < abs(test) ) )
+            {
+            # this is good enough
+            log_level( TRACE, "tweaked u=(%g,%g,%g)  to  (%g,%g,%g).  trials=%d",
+                                    u[1],u[2],u[3],   uptweak[1],uptweak[2],uptweak[3], k )
+            out = list( uptweak=uptweak, normal_uptweak=test )
+            return( out )
+            }
+        }
+
+    return(NULL)
     }
 
 

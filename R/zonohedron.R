@@ -17,7 +17,8 @@
 #                   beta    equation of the slab is  -beta <= <x,normal> <= beta.  We always have beta>0.
 #                   sign    +1 or -1.  It's the difference between the facet normal and the crossproduct coming from the matroid hyperplane.
 #       facet0      indexes (from facet) of those facets that contain 0
-#       beltlist    the i'th entry in this list is 1/2 of the belt of the i'th generator, as a vector of facet indexes
+#       beltlist    the i'th entry in this list is half of the belt of the i'th generator, as a vector of facet indexes
+#                   the rest of the belt can be computed by adding the antipodal facets in the same order
 #       zonogon     list of zonogons for the non-trivial facets. Indexing is the same as simplify(x$matroid)$hyperplane
 #       frame3x2    list of 3x2 matrices for non-trivial facets.  frame3x2[[i]] maps the facet plane to the zonogon[[i]] in the XY-plane.
 #       signtile    list of integer vectors, all +1 or -1, for the non-trivial facets.
@@ -92,6 +93,13 @@ zonohedron <- function( mat, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL )
     if( is.null(beltmat) ) return(NULL)
 
 
+    #   beltmat is numgen x (numgen-1), where numgen = # of simplified generators
+    #   The i'th row of the matrix contains the indexes of the hyperplanes that contain the i'th point in sground = the i'th belt of the zonohedron
+    #   The indexes are in increasing order, and do NOT match the order in the belt around the zonohedron.
+    #   This is purely a matroid thing.
+    #   The order will be determined later, using the facet normals.
+    #   If there are fewer than numgen-1 hyperplanes, the row is 0-terminated.
+
     #   facet0 is the vector of hyperplane/facet indexes that meet 0, for the simplified generators
     facet0  = integer(0)
 
@@ -113,7 +121,7 @@ zonohedron <- function( mat, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL )
     #   start with a logical mask and convert to vector later, using which()
     #edge0   = logical(numgen)
 
-    #   beltlist[[i]] holds the 'zone' of the i'th generator, as a vector of hyperplane indexes
+    #   beltlist[[i]] holds half of the 'zone' of the i'th generator, as a vector of hyperplane indexes
     beltlist    = vector( numgen, mode='list' )
 
     for( i in 1:numgen )
@@ -127,18 +135,20 @@ zonohedron <- function( mat, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL )
         hyperidx    = hyperidx[ 0<hyperidx ]    # trim trailing 0s
         #cat( "------------------  gen=", i, "   hyperidx=", hyperidx, '\n' )
 
+        #   m is half the length of the i'th belt
         m   = length(hyperidx)
 
         hyperplanes[i]  = m
 
 
         #   get normals to the facet-pairs that have i'th generator as an edge
-        #   all these normals are orthogonal to gen, and so lie on a great circle
+        #   all these normals are orthogonal to the vector gen, and so lie on a great circle
         normalfacet = getnormal( matsimple, hyperidx ) #; print(normalfacet)
 
         normalfacet = t(normalfacet)
 
         #   make a scratch data.frame suitable for ordering these points on the great circle
+        #   df is only valid for the i'th generator
         df  = data.frame( hyperidx=rep(hyperidx,2), sign=c(rep(1L,m),rep(-1L,m)) )
 
         #   make the facet normal for the complete belt, including both facets in a pair
@@ -160,11 +170,18 @@ zonohedron <- function( mat, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL )
         #   unitize the generator
         unit    = gen / sqrt( sum(gen^2) )
 
+        #   all unit normals in df$normal are orthogonal to the vector gen, and so lie on a great circle
         #   put the true facet normals in order around the great circle
         perm    = orderoncircle( df$normal, unit )     #; print(perm) ; print( df[perm, ] )
 
-        #   reorder and only keep the first m normals, every hyperplane will be represented exactly once
+        #   reorder and only keep the first m normals, every hyperplane of matsimple will be represented exactly once
         df  = df[ perm[1:m], ]
+
+        #   the unit vectors df$normal should now be in order on a great circle, and contained in a semicircle
+        #cat( "df$normal =\n" )
+        #print( df$normal )
+
+
 
         #   record the sorted hyperplane indexes for later use
         beltlist[[i]]   = df$hyperidx
@@ -195,13 +212,25 @@ zonohedron <- function( mat, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL )
         timerbelt       = updatetimer(timerbelt)
         timecenter1[i]  = timerbelt$elapsed
 
-
+        #   since the facets in df$hyperidx have been put in sorted order in the belt, they are adjacent to each other.
+        #   We can compute the facet centers quickly in the next function, by 'walking' from one facet to the next one.
+        #   The center and normal of a facet are crucial for identifing the "chosen" facet of the antipodal pair.
+        #   The center and normal must be consistent with each other, and the signs of both might be changed below.
         res = getbeltdata( matsimple, df$hyperidx, pcube, gndgen[i], df$normal )
         if( is.null(res) )  return(NULL)
 
+        #   recall that m = length(hyperidx)
+
+        # radmat is a 3 x m matrix with vector radii in the columns
+        # the vector radius for a facet is the offset from the midpoint of the previous edge to the facet center.
+        # equivalently, the offset from the facet center to midpoint of the next (antipodal) edge.
         radmat      = res[[1]]
 
+        # 3 x m matrix with facet centers in the columns
+        # the facets are genuinely adjacent
         centermat   = res[[2]]
+
+        #   res[[3]] is logical m-vector with i'th value TRUE meaning that the point 0 is in the i'th facet
 
         #print( res[[3]] )  # res[[2]]  is a logical mask
         if( any( res[[3]] ) )
@@ -212,21 +241,23 @@ zonohedron <- function( mat, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL )
 
         if( FALSE )
             {
-            #   verify that radmat has the right direction, using facet normal
+            #   run some comparison tests
             for( k in 1:m )
                 {
-                #   get the k'th hyperplane in this belt
-                # hyper       = hyperplane[[ df$hyperidx[k] ]]
-
-                #   the "diameter vector" of this facet is a signed linear combination of the "other" generators
-                #D[ ,k]  = df$sign[k] * getdiameter( matsimple, df$hyperidx[k], gndgen[i] )
-
-                #   do a sign test
+                #   verify that radius vectors have the right direction, using facet normals
                 d2  = sum( crossproduct(radmat[ ,k], gen) * df$normal[k, ] )
 
                 if( d2 <= 0 )
                     {
-                    log_level( FATAL, "Internal sign error. k=%d.  d2=%g <= 0.", k, d2 )
+                    log_level( FATAL, "Internal sign error.  Comparing vector radius and facet normal. k=%d.  d2=%g <= 0.", k, d2 )
+                    return(NULL)
+                    }
+
+                beta    = sum( df$normal[k, ] * centermat[ ,k] )
+
+                if( beta <= 0 )
+                    {
+                    log_level( FATAL, "Internal sign error.  Comparing facet normal and facet center. k=%d.  beta=%g <= 0.", k, beta )
                     return(NULL)
                     }
                 }
@@ -236,13 +267,14 @@ zonohedron <- function( mat, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL )
         timebeltdata[i] = timerbelt$elapsed
 
 
-        #   load centermat into center.
+        #   load centermat[] (for this generator) into center[] (for all facets).
         #   since each facet is contained in 2 or more belts,
-        #   centers will be assigned 2 or more times.
-        #   The array delta[] records the tiny differences.  It is modified in place.
-        #   the vector df$sign is replicated to all 3 columns
-        #center[ df$hyperidx, ] =  df$sign * t(centermat)
+        #   A facet center will be assigned 2 or more times.
+        #   The array delta[] records the tiny differences for checking later.  delta is modified in place.
+        #   the vector df$sign is replicated to all 3 columns of t(centermat)
+
         res = .Call( C_multicopy, center, delta, df$sign * t(centermat), df$hyperidx )
+
         if( is.null(res) )
             {
             log_level( FATAL, "Internal Error.  C_multicopy() fail.  i=%d.", i )
@@ -274,35 +306,95 @@ zonohedron <- function( mat, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL )
         return(NULL)
         }
     deltarel    = delta / centernorm    #; cat( "deltarel=", deltarel, '\n' )
+
+    log_level( DEBUG, "maximum facet center disagreement: %g.", max(deltarel) )
+
     tol = 5.e-12
     mask    = tol < deltarel
     if( any(mask) )
         {
-        log_level( WARN, "%d facet centers have disagreement > %g.", sum(mask), tol )
+        log_level( ERROR, "%d facet centers have disagreement deltarel > %g.   max deltarel = %g", sum(mask), tol, max(deltarel) )
+        return(NULL)
         }
 
-    normal  = t( getnormal( matsimple, NULL ) )     # get ALL the normal vectors
+    #   in the next line, NULL means to get the normal vectors, for *ALL* the hyperplanes in matsimple
+    #   normal is now numhypers x 3
+    normal  = t( getnormal( matsimple, NULL ) )
 
-    if( TRUE  &&  any( out$center!=0 ) )
+
+    #   modify center and normal so the *chosen* facet of the antipodal pair
+    #   is in the *bottom* half of the boundary, closer to 0 (uncentered zono)
+    #   beta[] remains unchanged
+
+    up = unitize( out$center )
+
+    if( all( up==0 ) )  up  = c(0,0,1)  # take z-axis
+
+    #   We cannot let allow 'up' to orthogonal to any normal
+    #   tweak if necessary
+    res = genericdirection( up, normal )
+    if( is.null(res) )
         {
-        #   modify center and normal so the *chosen* facet of the pair is closer to 0 (uncentered)
-        #   beta[] remains unchanged
-        #   signvec = -as.numeric( sign( center %*% out$center ) )
-        signvec = -sign( normal %*% out$center )
-
-        signvec[ signvec==0 ]   = 1    # change any 0s to 1s,  should be extremely rare
-
-        #center  = signvec * center      # uses recycling rule so signvec is multiplied by all columns
-        #normal  = signvec * normal      # uses recycling rule so signvec is multiplied by all columns
-
-        .Call( C_timesEqual, center, signvec, 2L )     # multiply in place
-        .Call( C_timesEqual, normal, signvec, 2L )     # multiply in place
+        log_level( ERROR, "Cannot find a generic 'up direction' for defining the bottom half of boundary.  up=(%g,%g,%g).",
+                                up[1], up[2], up[3] )
+        return(NULL)
         }
-    else
+
+    up  = res$uptweak
+
+    #   signvec = sign( normal %*% (-up) )  # note that -up ~=~ down, so facets facing up are the ones reversed
+
+    signvec = -sign( res$normal_uptweak ) # note that -up ~=~ down, so facets facing up are the ones reversed
+
+    #   test that all are non-zero.  genericdirection() was designed to do this, but verify anyway.
+    mask0   = (signvec==0)
+    if( any(mask0) )
         {
-        #   do not modify center and normal
-        signvec = rep( 1L, nrow(center) )
+        log_level( FATAL, "Internal Error:  %d of %d signs are 0.  up=(%g,%g,%g)",
+                                sum(mask0), length(mask0), up[1], up[2], up[3] )
+        return(NULL)
         }
+
+
+    #center  = signvec * center      # uses recycling rule so signvec is multiplied by all columns
+    #normal  = signvec * normal      # uses recycling rule so signvec is multiplied by all columns
+
+    #   change the signs of both center and normal.  beta[] remains unchanged.
+    .Call( C_timesEqual, center, signvec, 2L )     # multiply in place for speed
+    .Call( C_timesEqual, normal, signvec, 2L )     # multiply in place for speed
+
+    if( TRUE )
+        {
+        #   Unfortunately, since we have just changed some of the "chosen" facets,
+        #   each beltlist[[ ]] must now be reordered.
+        #   We want each beltlist[[ i ]] to have the *chosen* facets in correct order on the belt
+        #   so the first and last facets will touch the boundary of the bottom half.
+        #   TODO:  find a more efficient way to do this, using all the data we already have, without starting all over again.
+
+        #time_start  = gettime()
+
+        for( i in 1:length(beltlist) )
+            {
+            #   the computed cross product xprod cannot be zero.
+            #   If it were 0, then up would be a multiple of matgen[ ,i]
+            #   which is orthogonal to all the facet normals on the i'th belt.
+            #   But up is *not* orthogonal to any normal.
+            xprod   = crossproduct( up, matgen[ ,i] )
+
+            #   get the facet normals along the i'th belt, for generator i
+            normal_gen  = normal[ beltlist[[i]], ]      # m x 3
+
+            test    = normal_gen %*% xprod
+
+            perm    = order( test )
+
+            beltlist[[i]]   = beltlist[[i]] [ perm ]
+            }
+
+        #time_elapsed = gettime() - time_start
+        #cat( "reorder all belts: ", time_elapsed, ' sec\n' )
+        }
+
 
 
     #   build the facet data.frame and add to output list
@@ -314,6 +406,14 @@ zonohedron <- function( mat, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL )
 
     out$facet   = facet
 
+    log_level( DEBUG, "min(beta) = %g.", min(facet$beta) )
+
+    #   check that facet$beta > 0
+    if( any( facet$beta <= 0 ) )
+        {
+        log_level( FATAL, "Internal Error.  %d of %d beta values are <=0.", sum(facet$beta<=0), length(facet$beta) )
+        return(NULL)
+        }
 
     #   build the facet0 data.frame and (possibly) modify it for the original generators
     facet0  = sort( unique(facet0) )   # unique(facet0)
@@ -363,7 +463,7 @@ zonohedron <- function( mat, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL )
     timermain   = updatetimer(timermain)
     timefacets  = timermain$elapsed
 
-    #   for each non-trivial facet  (non-parallelogram) compute a zonogon
+    #   for each non-trivial facet  (non-parallelogram) compute a zonogon and them to the returned list
     lenvec      = lengths( hyperplane )
     idxnontriv  = which( 2 < lenvec )
     hypersnt    = length(idxnontriv)
@@ -460,6 +560,10 @@ zonohedron <- function( mat, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL )
     return( out )
     }
 
+
+
+
+
 #   n       a positive integer, so the step size on the circle is 2*pi/n
 #   m       number of points to compute, starting at 1
 #   height  height (of "white point") when m==n
@@ -496,7 +600,7 @@ polarzonohedron <- function( n, m=n, height=pi, ground=NULL )
 #           the order of the column generators does not affect the returned zonohedron
 
 #   returns zonohedron with matroid simple and uniform, these are verified.
-#           As customary, only half of the facets are returned, and the antipodal ones are comitted.
+#           As customary, only half of the facets are returned, and the antipodal ones are omitted.
 #           Only the "lower" facets are returned, these project down to a regular tiling of the zonogon defined by mat.
 #           These "lower" facets are the ones visible from *below*, on the xy-plane.
 #           out$facet is modified so all the facets have normals with negative Z-component
@@ -2132,6 +2236,8 @@ is_salient.zonohedron <- function( x )
 #   returns a dataframe with 2 columns
 #       *) point0   m x 2 matrix of edge start points
 #       *) point1   m x 2 matrix of edge stop points
+#
+#   currently, this function is only used for plotting
 
 getbeltedges <- function( x, gen, full=TRUE )
     {

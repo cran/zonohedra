@@ -300,7 +300,7 @@ classic zonohedra.
 
 <br><br>
 
-\Appendix
+<!-- \Appendix  only for PDF  -->
 
 
 <br><br>

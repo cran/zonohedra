@@ -224,8 +224,11 @@ matroid.matrix <- function( x, e0=0, e1=1.e-6, e2=1.e-10, ground=NULL, ... )
     time2       = gettime()
     timenthp    = time2 - time1
 
+    #   this logging message is a little confusing, when the matrix is square the caller might be liftedzonohedron() from zonogon()
+    log_level( TRACE, "In %dx%d matrix, found %d non-trivial hyperplanes.", nrow(x), ncol(x), hypersnt )
 
-    log_level( INFO, "In %dx%d matrix, found %d non-trivial hyperplanes.", nrow(x), ncol(x), hypersnt )
+    #  log_level( TRACE, "   Found %d non-trivial hyperplanes.", hypersnt, .topcall=sys.call(-2L) )
+
 
     if( 0 < hypersnt )
         {

@@ -1,8 +1,10 @@
 
 
-#include <cstddef>   /* for size_t */
+#include <cstddef>          //  for size_t
+#include <vector>           //  added this #include after compilation errors on r-release-macos-x86_64  AND   r-oldrel-macos-x86_64
 #include <functional>
 #include <map>
+
 //  #include <unordered_map>        //  not any faster
 
 //  flVecMap        is short for "fixed-length vector map"
@@ -22,8 +24,11 @@ private:
 
 public:
 
+#ifdef  DO_TIMES_EXECUTION
     nanotime_t      mTimeInsertion ;        //  nanoseconds, a 64-bit unsigned integer
     nanotime_t      mTimeVertices ;         //  nanoseconds, a 64-bit unsigned integer
+#endif
+
 
     this_maptype    mMap ;  //  the map
 
@@ -34,8 +39,11 @@ public:
         {
         mN  = N ;
 
+#ifdef  DO_TIMES_EXECUTION
         mTimeInsertion  = 0 ;
         mTimeVertices   = 0 ;
+#endif
+        
         //  if( 0 < count )   mMap.reserve( 10*count );  // reserve() is defined for std::unordered_map, but not std::map
         }
 

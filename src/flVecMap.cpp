@@ -1,15 +1,26 @@
 
 #include <stdint.h>         // for uint64_t  and  uint8_t
-#include <R.h>
-#include <Rinternals.h>
+
 //  #include "R_ext/Print.h"
 
 //  #include "config.h"         // this file is created by configure.win or configure
 
-typedef uint64_t nanotime_t;
-
 
 //  #define  DO_TIMES_EXECUTION
+
+#ifdef  DO_TIMES_EXECUTION
+typedef uint64_t nanotime_t;
+#endif
+
+
+#include "flVecMap.h"           //  #includes the STL files
+
+
+//  moved these 2 *after* the STL #includes.  After compilation errors on fedora-clang.  One of these 2 has  #define length
+#include <R.h>
+#include <Rinternals.h>
+
+
 
 #ifdef  DO_TIMES_EXECUTION
 
@@ -30,11 +41,7 @@ typedef uint64_t nanotime_t;
 #endif
 
 
-//  #include <climits>  /* for CHAR_BIT */
-//  #include <cstdint>   /* for uint_fast32_t etc */
-//  #include <cstddef>  /* for size_t */
 
-#include "flVecMap.h"
 
 
 

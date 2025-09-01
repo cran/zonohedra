@@ -1,4 +1,8 @@
 
+### Version 0.6-0 [Sep 1, 2025]
+
+* fixed some C++ compilation problems on 3 Flavors
+
 
 ### Version 0.5-0 [Aug 28, 2025]
 

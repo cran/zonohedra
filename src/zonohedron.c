@@ -70,16 +70,19 @@ largestcoord( const double *vec, int n )
 //  sground     an integer n-vector in increasing order equal to the ground set of the matroid
 //
 //  snormal     an m x 3 matrix of normal vectors.  Each row is normal to the corresponding hyperplane
-//              and is outward point for the facet, and serves to orient the facet
+//              and is outward pointing for the facet, and serves to orient the facet
 //
 //  smatgen     3xn matrix of generators of the zonohedron
 //
 //  scrossprods n(n-1)/2 matrix as returned from allcrossproducts(), possibly with normalization
 //
 //  returns a list with items:
-//      *)  3 x m matrix with facet centers in the columns
 //      *)  3 x m matrix with vector radii in the columns
+//      *)  3 x m matrix with facet centers in the columns
 //      *)  logical m-vector with i'th value TRUE meaning that the point 0 is in the i'th facet
+//
+//  the vector radius for a facet is the offset from the midpoint of the previous edge to the facet center.
+//  equivalently, the offset from the facet center to midpoint of the next (antipodal) edge.
 
 SEXP
 beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP snormal, SEXP smatgen, SEXP scrossprods )
@@ -172,7 +175,7 @@ beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP
             {
             Rprintf( "Internal Error. hyperidx=%d  is invalid.  numhypers=%d.\n",
                         hyperidx, numhypers );
-            UNPROTECT(3);   // variables sradmat, scentermat, sfacet0                        
+            UNPROTECT(3);   // variables sradmat, scentermat, sfacet0
             return(R_NilValue);
             }
 
@@ -203,7 +206,7 @@ beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP
         if( absmax == 0 )
             {
             Rprintf( "Internal Error. hyperidx=%d  normal vector = 0 is invalid.\n", hyperidx );
-            UNPROTECT(3);   // variables sradmat, scentermat, sfacet0            
+            UNPROTECT(3);   // variables sradmat, scentermat, sfacet0
             return(R_NilValue);
             }
 
@@ -243,7 +246,7 @@ beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP
                 {
                 Rprintf( "Internal Error. i=%d  k=%d  pairidx=%d.  genidx=%d  genkidx=%d.\n",
                             i, k, pairidx, genidx, genkidx );
-                UNPROTECT(3);   // variables sradmat, scentermat, sfacet0                            
+                UNPROTECT(3);   // variables sradmat, scentermat, sfacet0
                 return(R_NilValue);
                 }
 #endif
@@ -266,7 +269,7 @@ beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP
             {
             Rprintf( "Internal Error. i=%d  distinguished point %d not found in hyperplane %d.\n",
                         i, gen, hyperidx );
-            UNPROTECT(3);   // variables sradmat, scentermat, sfacet0                        
+            UNPROTECT(3);   // variables sradmat, scentermat, sfacet0
             return(R_NilValue);
             }
 
@@ -315,7 +318,7 @@ beltdata( SEXP shyper, SEXP shypersub, SEXP scube, SEXP sgen, SEXP sground, SEXP
         if( 0 < badcount )
             {
             Rprintf( "Internal Error. i=%d  pcube has %d bad values.\n", i, badcount );
-            UNPROTECT(3);   // variables sradmat, scentermat, sfacet0            
+            UNPROTECT(3);   // variables sradmat, scentermat, sfacet0
             return(R_NilValue);
             }
 #endif
@@ -550,7 +553,7 @@ sectionzonohedron( SEXP shyper, SEXP sfacetcenter, SEXP sfacetnormal, SEXP scent
         if( jmax < 0 )
             {
             Rprintf( "Internal Error. k=%d  normal facet vector = 0 is invalid.\n", k );
-            UNPROTECT(1);   // variable out         
+            UNPROTECT(1);   // variable out
             return(R_NilValue);
             }
 
@@ -740,18 +743,18 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
             {
             Rprintf( "Internal Error. hyperidx=%d  is invalid.  numhypers=%d.\n",
                         hyperidx, numhypers );
-            UNPROTECT(1);   // variable out                        
+            UNPROTECT(1);   // variable out
             return(R_NilValue);
             }
-            
+
         SEXP        svec = VECTOR_ELT(shyper,hyperidx-1) ;   //  convert from 1-based to 0-based
-        
-        //Rprintf( "i=%d   TYPEOF(shyper,%d)=%d   nhyp=%d.\n", i, hyperidx-1, TYPEOF(svec), Rf_length(svec) );          
+
+        //Rprintf( "i=%d   TYPEOF(shyper,%d)=%d   nhyp=%d.\n", i, hyperidx-1, TYPEOF(svec), Rf_length(svec) );
         //continue ;
-        
+
         const int   *vec = INTEGER( svec ) ;
         int         nhyp = Rf_length( svec );   //  nhyp is the number of points in the hyperplane
-        
+
         //  get the i'th normal, taken from the hyperidx'th row of normalmat[]
         double  normal[3] ;
         normal[0]   = normalmat[hyperidx-1] ;
@@ -763,7 +766,7 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
         if( jmax < 0 )
             {
             Rprintf( "Internal Error. i=%d  normal facet vector = 0 is invalid.\n", i );
-            UNPROTECT(1);   // variable out            
+            UNPROTECT(1);   // variable out
             return(R_NilValue);
             }
 
@@ -796,7 +799,7 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
                 {
                 Rprintf( "Internal Error. i=%d  k=%d  pairidx=%d.  genidx=%d  genkidx=%d.\n",
                             i, k, pairidx, genidx, genkidx );
-                UNPROTECT(1);   // variable out                            
+                UNPROTECT(1);   // variable out
                 return(R_NilValue);
                 }
 #endif
@@ -816,7 +819,7 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
             {
             Rprintf( "Internal Error. i=%d  distinguished point %d not found in hyperplane %d.\n",
                         i, gen, hyperidx );
-            UNPROTECT(1);   // variable out                        
+            UNPROTECT(1);   // variable out
             return(R_NilValue);
             }
 
@@ -825,8 +828,8 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
         center[0]   = centermat[hyperidx-1] ;
         center[1]   = centermat[hyperidx-1  +  numhypers];
         center[2]   = centermat[hyperidx-1  +  numhypers*2];
-        
-        //  midpoint is center + radius        
+
+        //  midpoint is center + radius
         midpointmat[i]         = center[0] + radius[0] ;
         midpointmat[i + m]     = center[1] + radius[1] ;
         midpointmat[i + m*2]   = center[2] + radius[2] ;
@@ -845,7 +848,7 @@ beltmidpoints( SEXP shyper, SEXP shypersub, SEXP sgen, SEXP scenter, SEXP snorma
 //  with sdestmat and sdiff the same for each call, and modified in-place.
 //  ssrcmat and sdestidx are different for each call, and read-only.
 //  Each row of sdesmat is only written once,
-//  and sdiff records the differences in case of *attempted* overwrites. 
+//  and sdiff records the differences in case of *attempted* overwrites.
 
 //  sdestmat    N x D matrix of doubles, which is thought of as N vectors of dimension D.
 //              This is the primary destination, and for the 1st call it must be initialized to NA_real_

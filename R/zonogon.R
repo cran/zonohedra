@@ -25,7 +25,7 @@
 
 #   zonogon constructor
 #
-#   mat     a numeric matrix with 1 row
+#   mat     a numeric matrix with 2 rows
 #   e0      threshold for a column vector to be considered 0
 #   e1      threshold for codirectionality
 #   ground  ground set, an integer vector in increasing order and length(ground) = ncol(x)
